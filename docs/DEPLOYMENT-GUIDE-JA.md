@@ -27,7 +27,9 @@
 | ソース資産 | 空Workspace方式なら公式PBIX / 任意のXLSX。昇格方式ならソースWorkspace / 定義 / 対応関係 / 依存項目の所有者 |
 | 本人別テスト主体 | 閲覧 / 入力 / 承認 / RLSを許可範囲に応じて確認する別ユーザー。管理者での表示を本人別検証に流用しない |
 
-対象Workspaceは**配備直前に一覧をページングして空であることを確認**します。アイテムが1つでもある, 別テナント / ID / 容量が見える, または全ページを取得できない場合は停止し, 人に照合を依頼します。既存アイテムを自動削除して空にしてはいけません。
+**初回構築**では, 対象Workspaceの全アイテムを配備直前にページングして空であることを確認します。1つでも既存アイテムがある, 別テナント / ID / 容量が見える, または全ページを取得できない場合は停止し, 人に照合を依頼します。既存アイテムを削除して空にしてはいけません。
+
+**中断した実行の再開**は利用者が明示した場合に限ります。組織承認済みの非公開な前回実行記録があり, 同じテナント / Workspace / 容量 / 所有者と作成済みitem IDを照合できること, Workspace全ページの状態が記録の想定ID / 種別 / バインディングと一致し, 無関係なアイテムや差分がないことを確認してください。記録がない / 信頼できない, ID不一致, 想定外のアイテム / 差分, またはページ取得未完了なら停止します。全件が一致する場合は記録上の作成済みIDを再利用し, 完了済みのインポート / 作成を繰り返しません。初回PBIX Importは`nameConflict=Abort`で衝突時に停止します。既存Workspaceを黙って再開扱いにしたり, 削除して空にしたりしません。
 
 ## A / 空Workspaceからの初回構築
 
@@ -48,7 +50,7 @@
 
 Planの[Git統合 / Deployment Pipeline](https://learn.microsoft.com/en-us/fabric/iq/plan/resources/cicd-planning)を使います。ソースWorkspace, 検証済みのサポート対象Plan定義, セマンティックモデル, Fabric SQLアプリケーションデータベースの依存関係が必要です。ターゲットWorkspaceが空でも, ソースの定義や依存項目の代わりにはなりません。
 
-1. ターゲットとソースの全アイテムを列挙し, `sourceItemId`, アイテム種別, 依存先, 所有者, 環境別設定を対照します。サポート対象外アイテム, 不明な差分, 環境違いの接続先があれば停止します。
+1. ターゲットとソースの全アイテムを列挙し, `sourceItemId`, アイテム種別, 依存先, 所有者, 環境別設定を対照します。更新 / 再配備ではレビュー済みのsource-target対応と所有対象だけを対象にし, 承認を得てから実行します。サポート対象外アイテム, 不明な差分, 環境違いの接続先があれば停止します。
 2. 対象のセマンティックモデルとFabric SQLアプリケーションDBを, 先にまたはPlanと同じ昇格でターゲットに用意します。プライマリPlanの接続先モデルが移行先のIDに対応することを確認します。
 3. Variable Libraryで, 移行先ごとの **semantic-model Item Reference** / **writeback Database / Connection Reference** を登録し, 適用するactive value setをPlanの配備より前に選びます。PlanがソースWorkspaceの接続や書き戻しDBを参照していないことを, ターゲット側で読み返して確認します。
 4. `__fabric_plan_sys`はPlanで入力 / コメント / 書き戻し / アクセス等のメタデータに使うシステムリソースです。初回配備の際に一度デプロイし, 以後の更新ごとに繰り返しデプロイしません。
@@ -93,7 +95,7 @@ Content-Type: application/json
 ## 制限と運用上の注意
 
 - [Planning CI/CD](https://learn.microsoft.com/en-us/fabric/iq/plan/resources/cicd-planning)に記載された**現行のサポート対象**だけを使います。古いPlanning Plan参照は, 2026年8月以前のものを新しい運用に載せる前にGit上の正規化 / コミットが必要となる場合があります。
-- Planningの上限としてPlan当たり最大25 sheets / 50 visualsが案内されています。Data Inputが100を超えるPipeline配備は失敗し得ます。実際の対象数と[最新の既知の制限](https://learn.microsoft.com/en-us/fabric/iq/plan/overview-limitations)を確認します。WorkspaceレベルのPrivate Link非対応, 個別item / identity権限も別途確認します。
+- Planningの上限としてPlan当たり最大25 sheets / 50 visualsが案内されています。[Data Inputが100件あるPlanのPipeline配備には失敗する既知の制限があります](https://learn.microsoft.com/en-us/fabric/iq/plan/overview-limitations)。実際の対象数と最新の既知の制限を確認します。WorkspaceレベルのPrivate Link非対応, 個別item / identity権限も別途確認します。
 - 現行のPlanning CI/CDではサービスプリンシパルを使ったアプリケーションデータベースの作成もサポートされています。これを一般のREST Create Item操作へ拡張解釈せず, Pipeline / アイテム / identityごとの公式サポート範囲と必要権限を確認します。
 - 既知の制約やAPIの対応範囲は変わります。Create ItemにPlanのItemTypeがあること, または他のFabricアイテム向けにdefinition APIがあることだけを根拠に, 未公開のPlan固有RESTエンドポイントやJSONを作りません。
 - 別のモデル / writeback DBへのバインド, 権限 / 承認者の割当, Capacity / SQL / OneLakeの課金, import / deploymentのいずれも事前確認します。アイテムが作成されたことはアクセス制御の確認ではありません。

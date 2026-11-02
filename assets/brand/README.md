@@ -11,6 +11,7 @@ Microsoft製品を説明する教材 / ドキュメントとして使用しま�
 | ファイル | 表す製品 / アイテム | 取得日 | 配布元 / 適用条件 |
 |---|---|---|---|
 | [fabric_48_color.svg](fabric_48_color.svg) | Microsoft Fabric製品アイコン / 公式ロゴ図形 | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
+| [report_48_item.svg](report_48_item.svg) | Fabricワークスペースのレポートアイテム | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
 | [planning_48_item.svg](planning_48_item.svg) | Fabric Planアイテム | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
 | [sql_database_48_item.svg](sql_database_48_item.svg) | Fabric SQLデータベース | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
 | [semantic_model_48_item.svg](semantic_model_48_item.svg) | Fabricセマンティックモデル | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |

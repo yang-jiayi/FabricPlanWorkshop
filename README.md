@@ -2,7 +2,7 @@
 
 <img src="assets/brand/fabric_48_color.svg" width="80" height="80" alt="Microsoft Fabric 公式製品アイコン">
 
-# Microsoft Fabric Planning<br>ワークショップ 日本語版
+# Microsoft Fabric Plan Workshop
 
 **分散したExcelの予算から, 実績とつながる計画へ。**
 
@@ -49,7 +49,61 @@ Excel中心の予算管理を見直したいFP&A / 財務 / 経営企画の担�
 </tr>
 </table>
 
-**読み進める:** [はじめ方](#はじめ方) / [ラボ一覧](#ラボ一覧) / [シナリオ](#シナリオ) / [開催と利用上の注意](#開催と利用上の注意) / [原典とライセンス](#原典とライセンス) / [English summary](#english-summary)
+**読み進める:** [目的](#workshopの目的) / [アーキテクチャ](#アーキテクチャ) / [はじめ方](#はじめ方) / [ラボ一覧](#ラボ一覧) / [配備とAIプロンプト](#配備とaiエージェント向けプロンプト) / [注意点](#開催と利用上の注意) / [原典とライセンス](#原典とライセンス) / [English summary](#english-summary)
+
+## Workshopの目的
+
+架空のHarborlight Provisions Co.を題材に, Excelに分散した年間計画をFabric Planningで組み立て, 前提と結果を参加者が説明できるようになることが目的です。日本のお客様10〜20名向けの導入検討ワークショップとして, 製品デモだけでなく, 自社で試す業務 / データ / 関係者 / PoCの成功条件を整理します。
+
+受講後は, 1) 全社目標を配賦し入力 / レビュー / 承認をつなぐ, 2) 実績 / 計画 / 見通しの違いと更新経路を説明する, 3) SQL書き戻しをログと実データで照合する, 4) 費用 / 容量 / 権限を確認し自社の検証範囲を決めることを目指します。サンプルの操作だけで, 性能, 費用削減, 会計上の正しさ, 本番適合を実証したことにはなりません。
+
+## アーキテクチャ
+
+<table>
+<tbody>
+<tr>
+<td>
+<img src="assets/brand/report_48_item.svg" width="36" height="36" alt="Power BI レポートの公式アイコン"><br>
+<strong>1 / ソースのインポート</strong><br>
+<code>Northwind_FMCG.pbix</code>をインポートすると, 既存レポートとセマンティックモデルの両方が作成されます。レポートは既存業績の確認用, 計画アイテムはセマンティックモデルへ接続します。
+</td>
+<td>
+<img src="assets/brand/semantic_model_48_item.svg" width="36" height="36" alt="Fabric セマンティックモデルの公式アイコン"><br>
+<strong>2 / 必須の計画ルート</strong><br>
+<img src="assets/brand/planning_48_item.svg" width="30" height="30" alt="Fabric Plan アイテムの公式アイコン"> 主Planは1つのセマンティックモデルに接続し, Lab01〜06のシート / IntelligenceとLab08の容量・ガバナンス検討を進めます。接続先は後から付け替えず, モデル名も変更しません。
+</td>
+</tr>
+<tr>
+<td>
+<img src="assets/brand/sql_database_48_item.svg" width="36" height="36" alt="Fabric SQL データベースの公式アイコン"><br>
+<strong>3 / 書き戻しと後続分析</strong><br>
+Lab04は見通しを別のFabric SQLテーブルへ書き戻します。標準のSQL書き戻しで, 元のセマンティックモデルやレポートが自動更新されるわけではありません。後続モデルで使う場合は, 公式手順に沿ったテーブル追加 / 接続 / 更新を明示的に構成します。
+</td>
+<td>
+<img src="assets/brand/planning_48_item.svg" width="30" height="30" alt="任意演習で使用する別のFabric Plan アイテムの公式アイコン">
+<img src="assets/brand/sql_database_48_item.svg" width="30" height="30" alt="PowerTable演習用Fabric SQLデータベースの公式アイコン"><br>
+<strong>4 / 任意のLab07</strong><br>
+PowerTableは主Plan内のシートではなく, 専用の別PlanとSQLデータベースを使います。Microsoft公式の資産台帳XLSXを参照データに使う独立演習です。
+</td>
+</tr>
+</tbody>
+</table>
+
+**参照とコピーは異なります。** From Sheetsで参照した計画系列は参照元の変更を受け取ります。一方, Lab03の編集可能なコピーは元シートと自動同期しません。Intelligence上でも, From Sheetsの入力値とセマンティックモデル由来の実績を区別して設定します。[既存の構成図](assets/diagrams/lab-flow.md) / [データ構成ガイド](data/README.md)
+
+```mermaid
+flowchart LR
+    PBIX["Northwind_FMCG.pbix"] -->|インポート| REPORT["既存レポート"]
+    PBIX -->|インポート| MODEL["セマンティックモデル"]
+    MODEL -->|接続| PLAN["主Plan<br/>Lab01–06 / 08"]
+    PLAN --> SHEETS["計画シート / Intelligence"]
+    PLAN -.->|書き戻し| SQL["Fabric SQL"]
+    SQL -.->|利用には明示的な接続が必要| DOWNSTREAM["後続分析"]
+    XLSX["任意の資産台帳XLSX"] -.-> POWER_TABLE["別Plan / PowerTable"]
+    POWER_TABLE -.-> SEPARATE_DB["専用Fabric SQL DB"]
+```
+
+**破線は独立経路です。** PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続を示していません。PowerTableは別Planと別DBに分かれています。
 
 ## はじめ方
 
@@ -114,6 +168,46 @@ flowchart TD
 | [**08 / 容量とガバナンス**](labs/08-sizing-and-governance.md) | 課金ロール, 容量試算, RLS, 機能の制約 | 15分 |
 
 [構成とデータの流れ](assets/diagrams/lab-flow.md)も参照できます。
+
+## 配備とAIエージェント向けプロンプト
+
+このリポジトリは**手順 / 画像 / サンプルデータへのリンクを含む教材**です。Fabric Gitと同期するPlan定義, PBIX本体, データベース定義, 一括デプロイ用テンプレートは格納していません。`git clone`やGit統合だけでラボ全体がFabricに作成されるわけではありません。
+
+配備作業をAIツールに補助させる場合は, GitHub Copilot / OpenAI Codex / Claude Codeのリポジトリ作業セッションへ, 下のプロンプトを貼り付けてください。最初の実行は**変更を適用しない事前調査とdry-run**に限定し, テナント / ワークスペース / 容量 / 課金 / 権限を承認してから, 人が許可した範囲だけを進めます。[配備ガイドとLab00〜08の完了条件](docs/DEPLOYMENT-GUIDE-JA.md)
+
+```text
+あなたはMicrosoft Fabricワークショップの配備を補助するAIです。下の入力欄を利用者が埋めたうえで、最初にこのリポジトリのREADME.md、docs/DEPLOYMENT-GUIDE-JA.md、assets/diagrams/lab-flow.md、data/README.mdと各Labを読み、リポジトリに存在する定義と存在しない定義を区別してください。この教材リポジトリ自体をFabric Gitに接続すればLabが自動作成されると仮定してはいけません。
+
+入力:
+- 対象Tenant ID: <tenant-id>
+- 対象の空Workspace ID: <workspace-id>
+- Capacity ID / SKU / Region: <capacity-id / sku / region>
+- 実行モード: <full-workshop-demo または learner-start>
+- Lab07 PowerTable: <trueが全Labの既定 / false>
+- 課金範囲の承認者と上限: <役割 / 明示した上限>
+- 実行する本人の認証済みIDと方式: <本人委任 / サービスプリンシパル名。秘密情報は記載しない>
+- ソースWorkspaceまたは承認済みFabric定義の所在: <あれば指定 / なければなし>
+
+必ず次の順で進める:
+1. 最初は読み取り専用で、現在のサインイン主体、テナント、対象Workspace、容量、全ページを取得したWorkspaceアイテム一覧を突き合わせる。Workspaceが空でない、テナント / ID / 容量が一致しない、ページ取得が未完了、必要権限が確認できない場合は停止して説明する。
+2. 次に、空Workspaceからの初回構築か、検証済みソースWorkspaceからのCI/CD昇格かを判定する。前者にはMicrosoft公式 Northwind_FMCG.pbix / 必要なLab07用XLSXと、Planを構成する本人操作が必要。後者にもソースWorkspace / 公式にサポートされたPlan定義 / 依存するモデルとSQLが必要。どちらも無い場合は「自動配備可能」と言わず、不足と手作業箇所を示す。
+3. API、依存関係、アイテム単位の必要権限、認証対象、料金、期待する作成物、既存アイテムとの競合、手作業が必要な箇所、Lab00〜08の受入条件を記したdry-run案を提示する。プランのシート / 数式 / シナリオ / PowerTable設定に未文書化のAPIやJSONを作って使わない。
+4. dry-runの後は停止する。Workspace権限の変更、ロール / 承認者割り当て、容量消費が発生する操作、請求開始につながる操作、データ変更、上書き / 削除、外部送信は、対象と結果を示して利用者の具体的な承認を得るまで実行しない。ユーザー名義でのロール付与や承認の代行をしない。
+5. 承認後だけ、公式に文書化されたAPIまたは管理画面を使う。再実行時は自分が作成したIDを照合し、無関係な項目を上書き / 削除しない。202 Acceptedは完了ではない。APIが返すLocation / Retry-Afterと操作状態を使い、有限回で確認する。失敗時にWorkspaceを削除してやり直さない。
+6. 各Labのオブジェクトと実際の挙動を受入表で確認する。認可テストは許可された別ユーザーごとに実行し、管理者アカウントの表示だけで本人別検証済みとしない。期待する初期値を上書きせず、承認・書き戻し・削除の演習を勝手に実行しない。未確認項目は手動対応として残す。
+7. 非同期操作IDは組織が承認したプライベートな運用記録に保存し、公開内容には値を記載しない。最後に実際の結果、未完了 / 手動対応、証拠の保存先を報告する。トークン、パスワード、テナント固有情報、参加者データをGit、公開チャット、公開ログ、スクリーンショットへ保存しない。認証やMFAは公式の本人向けフローを使い、回避しない。Fabricに接続できていない場合は、配備成功と主張しない。
+```
+
+### 実行順序と方式
+
+1. 利用者または管理者が, 対象テナントで演習専用の空Workspaceと容量を準備します。上記のプレースホルダーを実値でAIセッションに渡す場合も, credentials / tokensは貼り付けません。
+2. AIにはまずリポジトリを調べさせ, 既存Workspaceの全アイテムをページングして読み取り, 依存関係とdry-run計画を出させます。空でない / IDが違う / 認証主体が違う場合は停止します。
+3. **空Workspaceからの初回構築:** `Northwind_FMCG.pbix`をMicrosoft公式ソースから取得してインポートし, 作成されたレポートとモデルを確認します。Plan固有のシート, 数式, シナリオ, PowerTableは, 現行のサポートが確認できた管理画面 / 定義インポートを人が承認して構成します。存在しない自動化テンプレートを補ってはいけません。
+4. **再現可能な環境昇格:** 検証済みで機密情報を除いたソースWorkspaceまたは公式サポートされたFabric定義を用意します。依存するモデル / SQLを先にまたは一緒に展開し, 環境固有のVariable Library参照を適用した後にPlanを展開します。詳細は[配備ガイド](docs/DEPLOYMENT-GUIDE-JA.md)を参照します。
+5. どちらの方式でもLab00〜08の受入表を完了するまで, 「全Workshop配備済み」と扱いません。サンプル初期値を保ち, 費用 / 権限 / データ保存先 / 認可テストを別々に確認します。
+
+> [!WARNING]
+> Fabric Planningの操作は課金セッションを開始する場合があります。アイテム作成, 書き戻し, ロール付与, 承認割り当ては, 対象と費用範囲を明示し, 事前承認を得てから行ってください。失敗時に無関係なアイテムやWorkspaceを自動削除しないでください。
 
 ## シナリオ
 

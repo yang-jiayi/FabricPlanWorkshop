@@ -35,7 +35,7 @@
 ### 1週間前：管理者と環境を確認する
 
 - [モジュール00](../labs/00-prerequisites.md)に沿って、容量、テナント設定、モデルの Read / Build、Plan アイテムの共有、書き戻しの権限を確認します。
-- モジュール09を別枠で実施する場合は、有料F2以上またはFabric有効化済みP1以上の容量、Data Agent / Tenant AIの設定、クロスジオ処理の方針、Ontology Previewの提供状況を管理者と確認します。Lab04由来のForecastとモデル値を突合したSnapshotを事前準備し、検証できない書き戻し履歴を「最新」と推測しません。
+- モジュール09を別枠で実施する場合は、有料F2以上またはFabric有効化済みP1以上の容量、Data Agent / Tenant AIの設定、クロスジオ処理の方針、Ontology Previewの提供状況を管理者と確認します。Lab04由来のForecastとモデル値を突合したSnapshotを事前準備し、検証できない書き戻し履歴を「最新」と推測しません。CSVを専用Lakehouse Filesへ置き、Workspace Identityを使ってWarehouseへCOPYする場合の権限と費用も事前承認します。
 - B2B ゲストを使う場合は、実際に使う参加者IDでサインインから入力まで試します。「全員社内アカウントでの確認」をゲスト参加の動作確認に代用しません。
 - 作成担当は演習用ワークスペースで Member / Admin を基本とし、参加者は必要な操作ができる権限に限定します。課金ロールはワークスペースの役割名とは別で、操作により変わります。
 - 公式資料には、メタデータを SQL に保存する説明と、新しい Plan では OneLake に保存する説明が併存しています。新規作成時に何ができるかを実環境で確認し、旧画面の手順を全員へ要求しません。
@@ -77,9 +77,9 @@
 
 ## 発展編：モジュール09（追加45〜60分）
 
-モジュール09は**既存の180分本編に含めない別枠**です。モジュール04で使ったProduct × 月のGross RevenueとForecastを同一Scenario / Plan versionで照合し、検証済みの比較Snapshotを専用Warehouseへ格納します。Ontology PreviewでProduct / Period / Revenue Observationの意味とバインディングを設定し、Fabric Data Agentから読み取り専用で質問します。データ準備時間は45〜60分の目安に含みません。
+モジュール09は**既存の180分本編に含めない別枠**です。モジュール04で使ったProduct × 月のGross RevenueとForecastを同一Scenario / Plan versionで照合し、検証済みの比較SnapshotをUTF-8 CSVで専用Lakehouse Filesに一時配置し、Warehouseの明示型StageへCOPYします。件数 / キー / 値を検査したうえで、Ontology PreviewにProduct / Period / Revenue Observationの意味とバインディングを設定し、Fabric Data Agentから読み取り専用で質問します。データ準備時間は45〜60分の目安に含みません。**Lab09の一連の操作と固有の画面キャプチャは未実行 / 未収録**のため、開催前の講師リハーサルと証拠取得が必要です。
 
-開始条件は、有料F2以上またはFabric有効化済みP1以上、管理者が承認したTenant AI / クロスジオ設定、Ontology Previewの利用可否、専用Warehouseの課金承認、Planとモデルへの読取権限です。Long with Changesの完全な現行状態を証明できない場合は開始せず、承認済みの全件Snapshotを用意します。NorthwindのOpen period値を確定実績と呼ばず、Agentの回答をWarehouseの全精度値と独立照合してください。AgentはPlanを変更,承認,書き戻しできません。
+開始条件は、有料F2以上またはFabric有効化済みP1以上、管理者が承認したTenant AI / クロスジオ設定、Ontology Previewの利用可否、専用Warehouse / Lakehouse Filesの課金承認、必要なWorkspace Identity権限、Planとモデルへの読取権限です。Long with Changesの完全な現行状態を証明できない場合は開始せず、承認済みの全件Snapshotを用意します。NorthwindのOpen period値を確定実績と呼ばず、Agentの回答をWarehouseの全精度値と独立照合してください。AgentはPlanを変更,承認,書き戻しできません。
 
 手順,データ契約,検算と安全な終了は[モジュール09](../labs/09-variance-analyst.md)を使います。参加者向けに実施する場合も、テナント固有情報やデータ行を公開画面 / 録画へ含めず、本人別の権限確認を管理者アカウントの結果で代用しません。
 

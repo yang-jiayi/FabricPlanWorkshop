@@ -1,7 +1,10 @@
 # モジュール09：Plan Variance Analyst（計画差異アナリスト）
 
 **所要時間の目安：** 45〜60分（Lab09用データの準備時間を除く）<br>
-**このモジュールで作成するもの：** Lab04の売上実績 / 見通しを照合した比較スナップショット, Product / Period / Revenue Observationを結ぶOntology（Preview）, そのOntologyだけを参照する読み取り専用Fabric Data Agent。
+**このモジュールで作成するもの：** Lab04の売上実績 / 見通しを照合した比較スナップショット, 一時Lakehouse FilesからWarehouseへ取り込む専用データ領域, Product / Period / Revenue Observationを結ぶOntology（Preview）, そのOntologyだけを参照する読み取り専用Fabric Data Agent。
+
+> [!IMPORTANT]
+> **ライブ実行とLab09画面キャプチャは未完了です。** この手順はMicrosoft公式資料に基づく実装ガイドで, 実際のFabricテナントで一連のLakehouse upload / Warehouse取込 / Ontology binding / Data Agent回答まで通した検証ではありません。Lab09固有のFabric画面キャプチャは未収録です。画面, テナント設定, Previewの提供状況は実施時に確認し, 手順どおりの実行ができない場合は成功扱いにせず講師 / 管理者へ相談してください。
 
 ---
 
@@ -19,6 +22,7 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
 |---|---|
 | 比較範囲 | Lab04のGross Revenue / ForecastをProduct Category / Sub Category × 月, 同一Scenario / Plan version / USDで照合する。Region別 / Gross Profit別のPlan値を想定しない |
 | 比較Snapshot | 1行は1つの`SnapshotId × Scenario × Plan version × ProductKey × PeriodKey`。欠損 / 重複キーがなく, 元数値の精度を保つ。Closed / Openを区別し, Open periodのサンプルモデル値は確定実績と呼ばない |
+| CSV取込 | 両方の全エクスポートの一意キー集合をFull Outerで照合し, 正のExpectedRowsを非公開記録。UTF-8 CSVをLakehouse Filesへ承認済み経路でアップロードし, 明示型StageへOneLake COPY後の全件数を照合する |
 | 履歴と保存 | 選択したPlan状態を全件照合し, Long with Changes履歴を加算したり, `TOP 1` / 最大timestampで現行値と推測したりしない。Warehouseの一意キー / 件数 / 差異算式を独立検証する |
 | Ontology | Product / Period / Revenue Observationのキーと関係を定義し, 全EntityのProperty bindingsが専用Warehouseを指す。必要ならOntologyを手動Refreshし, Previewに表示されるデータ版を確認する |
 | Data Agent | 比較用OntologyのみをSourceに使う読み取り専用Agent。質問にSnapshotId / Scenario / Plan versionを含め, 回答の値 / 期間状態をWarehouseの全精度値と照合する。日本語の質問も実際に試し, 適用可能な言語品質を確認する |
@@ -37,7 +41,7 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
 ### データと費用の前提条件
 
 - Lab04の*Forecast* SQL書き戻し, 元モデルの*Gross Revenue*へのアクセス, CSVを安全に扱う承認済み端末 / 場所が必要です。実データは持ち込まず, MicrosoftのNorthwindサンプルだけを使います。
-- 比較用Warehouseは新しい演習アイテムとして作成します。Capacity / Warehouse / OneLake / Data Agentの消費やCSV保管場所を確認してから作成します。共有中のForecastや元モデルを置き換えません。
+- 比較用WarehouseとCSVを一時保管する専用Lakehouseは新しい演習アイテムとして作成します。Capacity / Warehouse / OneLake / Data Agentの消費を確認してから作成します。共有中のForecastや元モデルを置き換えません。
 - 手順は画面に出ている値を確認して進めます。想定した列 / キーが見つからない, Scenario / versionが判別できない, 同じキーに複数の現在値がある, 全ページを確認できない場合は停止し, 推測で補完しません。
 
 > [!WARNING]
@@ -86,43 +90,121 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
 
 2. Planと同じ対象月 / Category / Sub Categoryを含むことを確認します。レポートの **More options → Export data** からサマリー済みデータをCSVで出力します。画面が許可しない,列が省略される,エクスポート制限に達する場合は管理者に確認し, 基になるデータや別のメジャーを推測で出力しません。
 3. SQLのForecast宛先から, パート1で確認した列を使って同じScenario / Measure / Year / Month / Productの行を読み出します。キーが完全に確認できた**全精度**の値をCSVへ出力します。出力列にない書き戻しIDや履歴列を付け足しません。必要なログIDは別の出典メモに残します。
-4. Excel等の承認済みローカルツールで2つの抽出を`ProductKey + PeriodKey`により突合し, [比較スナップショットの列テンプレート](../data/lab09-variance-snapshot-template.csv)の形へ整えます。マッチしないキー, 重複キー,片側だけの値,通貨違いがあれば修正可能な根拠が得られるまでロードを停止します。
+4. 承認済みのExcelで **Data → Get Data → From Text/CSV** から2つの全件CSVをPower Queryへ読み込み, `ProductKey` / `PeriodKey`はText, 金額は精度を落とさない10進数として設定します。各クエリを`ProductKey + PeriodKey`で **Group By → Count Rows** し, 件数が1以外のキーがあれば停止します。**Merge Queries as New**で同じ2キーを選び, Join kindを**Full Outer (all rows from both)**にします。Forecast側のキーを展開し, いずれかの側のキーがnullの行がないことを確認します。両方の全件エクスポートの一意キー件数が一致し, Full Outer結合の欠損が0件, 結合後の行数も双方の一意キー件数と一致することを確認します。結果を[比較スナップショットの列テンプレート](../data/lab09-variance-snapshot-template.csv)に合わせ, `ExpectedRows`（結合済み件数 > 0）, 両エクスポートの総行数 / 一意キー件数, SnapshotId / Scenario / PlanVersionを組織承認済みの**非公開な検算記録**へ残します。未一致,重複,欠損,通貨違いは根拠を特定して直すまでロードしません。Excelの自動型変換でProductKey / PeriodKeyが変わらないよう文字列として扱い, 金額は全精度の10進値を保持します。
 5. 1行につき一つの`SnapshotId × ScenarioName × PlanVersion × ProductKey × PeriodKey`にします。`SourceWritebackRunIds`には現在値を構成する対象ログIDを識別できるよう記録します。全行で同一の単独Writeback IDが確認できないなら, その事実を隠さず複数IDまたは集約状態として残します。
-6. Warehouseへロードする前に, CurrencyCodeが`USD`, Measure名が正確に`Gross Revenue` / `Forecast`,行の一意性,全精度の数値,対象期間状態を検査します。Open periodは`OpenSampleReference`とし, Closed periodは`ClosedLinkedActual`等の明示的ラベルを付けます。データのない値を0で埋めません。
-
-> [!NOTE]
-> 例としてLab04ではProductが21の末端Sub Categoryを持ちます。全てが選択月に存在する場合は1か月で21行が期待値です。実際の行数はサンプルの版 / フィルターにより確かめ, 21行に合わせるために欠損を補完しないでください。
+6. Warehouseへロードする前に, CurrencyCodeが`USD`, Measure名が正確に`Gross Revenue` / `Forecast`,行の一意性,全精度の数値,対象期間状態を検査します。Closed / Openの各月の実際の状態を確認し, `ClosedLinkedActual`または`OpenSampleReference`のどちらかを記録します。データのない値を0で埋めず, 固定の商品数や行数に合わせて欠損を補完しません。
 
 ## パート3：専用Warehouseに比較スナップショットを作る
 
-1. 事前承認した演習Workspaceに, 専用のWarehouse（例：`HPC_Lab09_Analysis`）を作ります。Capacity / Warehouse / OneLakeの課金を確認し, 本番DBやLab04の書き戻し先を使いません。
-2. CSVをFabric Warehouseに取り込み, `dbo.Lab09Stage`という新しいテーブル名を割り当てます。Fabricの **Copy job** または環境で承認済みのWarehouse取込手順を使い, フィールド名 / 型 / 文字コードをプレビューしてから確定します。入力元を選べない場合は管理者に確認し, 書き戻しSQLの認証情報をCSVや教材へ埋め込みません。
-3. Stageの列を照合し, 読取クエリで対象SnapshotIdの件数,重複,欠損を検査します。次のSQLは**この新しい演習Warehouseだけ**で使い, 既存テーブルへ実行しません。先に同名の成果物がないことを確認し,既存データを消す`DROP`, `TRUNCATE`, `DELETE`で再実行を通しません。
+1. 事前承認した演習Workspaceに, 比較用Warehouse（例：`HPC_Lab09_Analysis`）と一時ファイル保管用Lakehouse（例：`HPC_Lab09_Staging`）を新規作成します。Capacity / Warehouse / OneLakeの課金と, 必要ならWorkspace IdentityをLakehouse側へ追加する権限変更を管理者と確認します。CSVの内容と保管先を組織ポリシーで承認し, 公開リンク / 個人用共有領域 / 実データは使いません。
+2. Lab09 CSVをUTF-8で保存し, 15列の順序とヘッダーが[テンプレート](../data/lab09-variance-snapshot-template.csv)と完全一致することを確認します。金額は10進数文字列を10桁以内の小数精度で保持し, Excelの数値丸め / 指数表記 / ロケール変換を行いません。`ExpectedRows`と双方のソース件数 / 一意キー件数はCSVへ加えず, 組織承認済みの非公開検算記録へ保存します。
+3. FabricでLakehouseを開き, **Files** に今回の取込専用の新しい子フォルダー（例：`Lab09/run-<safe-id>`）を作成します。フォルダーの **... → Upload → Upload files** を選び, CSVをローカル端末からアップロードします。フォルダーに今回のファイルが1つだけあること, ファイル名と内容がSnapshotのものと一致することをUIで確認します。これはLakehouseを一時置場にする経路です。詳しくは[公式CSVアップロード手順](https://learn.microsoft.com/en-us/fabric/data-engineering/get-started-csv-upload)を参照してください。
+4. WarehouseのSQL query editorで新規の `dbo.Lab09Stage` を**明示的な型**で作成します。同名テーブルが既にある場合は上書き / 再利用せず停止します。再試行用の別名を選ぶ場合は, 後続SQLのStage参照もすべてその新しい名前へ置き換えます。数値はfloatへ推論させません。
 
    ```sql
-   -- 新しいLab09専用Warehouseでのみ実行する。
-   SELECT SnapshotId, ScenarioName, PlanVersion, ProductKey, PeriodKey, COUNT(*) AS RowCount
-   FROM dbo.Lab09Stage
-   GROUP BY SnapshotId, ScenarioName, PlanVersion, ProductKey, PeriodKey
-   HAVING COUNT(*) <> 1;
+   CREATE TABLE dbo.Lab09Stage
+   (
+       SnapshotId varchar(128) NULL,
+       ScenarioName varchar(256) NULL,
+       PlanVersion varchar(128) NULL,
+       SourceWritebackRunIds varchar(2000) NULL,
+       ProductKey varchar(256) NULL,
+       Category varchar(256) NULL,
+       SubCategory varchar(256) NULL,
+       PeriodKey char(7) NULL,
+       PeriodStart date NULL,
+       PlanPeriodStatus varchar(32) NULL,
+       CurrencyCode char(3) NULL,
+       ModelMeasureName varchar(128) NULL,
+       ModelGrossRevenue decimal(28, 10) NULL,
+       PlanMeasureName varchar(128) NULL,
+       PlanForecast decimal(28, 10) NULL
+   );
+   ```
 
-   SELECT COUNT(*) AS MissingRequiredValues
-   FROM dbo.Lab09Stage
-   WHERE SnapshotId IS NULL
-      OR ScenarioName IS NULL
-      OR PlanVersion IS NULL
-      OR ProductKey IS NULL
-      OR PeriodKey IS NULL
-      OR PeriodStart IS NULL
-      OR PlanPeriodStatus IS NULL
-      OR CurrencyCode IS NULL
-      OR CurrencyCode <> 'USD'
-      OR ModelMeasureName IS NULL
-      OR PlanMeasureName IS NULL
-      OR ModelGrossRevenue IS NULL
-      OR PlanForecast IS NULL;
+5. 管理者が事前に承認した構成でWorkspace IdentityがソースLakehouseのWorkspaceへContributorとして追加され, 実行者にWarehouseの必要なSQL権限があることを確認します。このIdentity設定 / 権限付与自体は本ラボのSQLで自動作成せず, 組織の承認手順に従います。Warehouse SQL query editorで次の`COPY INTO`を実行し, パス中のWorkspace / Lakehouse Item ID / run folder / ファイル名だけを実際のUI値に置き換えます。ソースはOneLake Lakehouse FilesのURLで, ローカルパスや公開ストレージURLではありません。
 
-   SELECT ProductKey, COUNT(*) AS ConflictingProductRows
+   ```sql
+   COPY INTO dbo.Lab09Stage
+   (
+       SnapshotId, ScenarioName, PlanVersion, SourceWritebackRunIds,
+       ProductKey, Category, SubCategory, PeriodKey, PeriodStart,
+       PlanPeriodStatus, CurrencyCode, ModelMeasureName, ModelGrossRevenue,
+       PlanMeasureName, PlanForecast
+   )
+   FROM 'https://onelake.dfs.fabric.microsoft.com/<workspace-id>/<lakehouse-item-id>/Files/Lab09/<safe-id>/<snapshot-file>.csv'
+   WITH
+   (
+       FILE_TYPE = 'CSV',
+       FIRSTROW = 2,
+       ENCODING = 'UTF8',
+       FIELDTERMINATOR = ',',
+       FIELDQUOTE = '"',
+       CREDENTIAL = (IDENTITY = 'Workspace Identity')
+   );
+   ```
+
+   `COPY INTO`は[WarehouseのOneLakeソース取込](https://learn.microsoft.com/en-us/fabric/data-warehouse/ingest-data)で文書化された経路です。ヘッダーを飛ばし, CSVのカンマ区切り / 二重引用符を解釈します。Workspace IdentityやソースWorkspace権限を組織で許可できない場合は, 認証を迂回したり非公開データを外部へ移したりせず, 管理者が承認した同等のOneLake経路が整うまで停止します。
+6. アップロード完了と`COPY INTO`のSQL実行完了を確認後, `COUNT_BIG(*)`でStageのロード件数を読み返します。ロード件数が非公開検算記録の`ExpectedRows`と一致しない, 0件, COPYのエラー / rejectがある場合は先へ進まず, 原因を直して新しい空のStage名でやり直します。既存データの`DROP`, `TRUNCATE`, `DELETE`で再実行を通しません。新しいStage名へ切り替える場合は, 続くすべてのSQLの参照名も合わせます。
+7. 対象Snapshot / Scenario / PlanVersionに限定した次の検査を実行します。**全て0件かつ正の期待件数との一致が必要**です。`<...>`をCSV内の値に置き換え, 文字列値はSQL文字列中でシングルクォートを二重化するかパラメーターを使用します。検査用SQLは**この新しいLab09専用Warehouseだけ**で実行します。
+
+   ```sql
+   -- SQL検査はこの新しいLab09専用Warehouseだけで実行する。
+   SELECT
+       CAST('<expected-row-count>' AS bigint) AS ExpectedRows,
+       CASE WHEN CAST('<expected-row-count>' AS bigint) <= 0
+            THEN 1 ELSE 0 END AS InvalidExpectedRows,
+       COUNT_BIG(*) AS AllStageRows,
+       COALESCE(SUM(CASE WHEN SnapshotId = '<snapshot-id>'
+                          AND ScenarioName = '<scenario-name>'
+                          AND PlanVersion = '<plan-version>'
+                         THEN 1 ELSE 0 END), 0) AS SelectedRows
+   FROM dbo.Lab09Stage;
+
+   SELECT ProductKey, PeriodKey, COUNT_BIG(*) AS DuplicateRows
+   FROM dbo.Lab09Stage
+   WHERE SnapshotId = '<snapshot-id>'
+     AND ScenarioName = '<scenario-name>'
+     AND PlanVersion = '<plan-version>'
+   GROUP BY ProductKey, PeriodKey
+   HAVING COUNT_BIG(*) <> 1;
+
+   SELECT COUNT_BIG(*) AS InvalidSelectedRows
+   FROM dbo.Lab09Stage
+   WHERE SnapshotId = '<snapshot-id>'
+     AND ScenarioName = '<scenario-name>'
+     AND PlanVersion = '<plan-version>'
+     AND (
+         NULLIF(LTRIM(RTRIM(SnapshotId)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(ScenarioName)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(PlanVersion)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(SourceWritebackRunIds)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(ProductKey)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(Category)), '') IS NULL
+         OR NULLIF(LTRIM(RTRIM(SubCategory)), '') IS NULL
+         OR CHARINDEX('|', SnapshotId) > 0
+         OR CHARINDEX('|', ScenarioName) > 0
+         OR CHARINDEX('|', PlanVersion) > 0
+         OR CHARINDEX('|', ProductKey) > 0
+         OR NULLIF(LTRIM(RTRIM(PeriodKey)), '') IS NULL
+         OR PeriodKey NOT LIKE '[12][0-9][0-9][0-9]-[01][0-9]'
+         OR RIGHT(PeriodKey, 2) NOT BETWEEN '01' AND '12'
+         OR PeriodStart IS NULL
+         OR PeriodKey <> CONVERT(char(7), PeriodStart, 126)
+         OR DAY(PeriodStart) <> 1
+         OR PlanPeriodStatus IS NULL
+         OR PlanPeriodStatus NOT IN ('ClosedLinkedActual', 'OpenSampleReference')
+         OR CurrencyCode IS NULL
+         OR CurrencyCode <> 'USD'
+         OR ModelMeasureName IS NULL
+         OR ModelMeasureName <> 'Gross Revenue'
+         OR PlanMeasureName IS NULL
+         OR PlanMeasureName <> 'Forecast'
+         OR ModelGrossRevenue IS NULL
+         OR PlanForecast IS NULL
+     );
+
+   SELECT ProductKey, COUNT_BIG(*) AS ConflictingProductRows
    FROM (
        SELECT DISTINCT ProductKey, Category, SubCategory
        FROM dbo.Lab09Stage
@@ -131,9 +213,9 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
          AND PlanVersion = '<plan-version>'
    ) AS ProductRows
    GROUP BY ProductKey
-   HAVING COUNT(*) <> 1;
+   HAVING COUNT_BIG(*) <> 1;
 
-   SELECT PeriodKey, COUNT(*) AS ConflictingPeriodRows
+   SELECT PeriodKey, COUNT_BIG(*) AS ConflictingPeriodRows
    FROM (
        SELECT DISTINCT PeriodKey, PeriodStart, PlanPeriodStatus
        FROM dbo.Lab09Stage
@@ -142,10 +224,12 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
          AND PlanVersion = '<plan-version>'
    ) AS PeriodRows
    GROUP BY PeriodKey
-   HAVING COUNT(*) <> 1;
+   HAVING COUNT_BIG(*) <> 1;
    ```
 
-4. 選択したSnapshotId / ScenarioName / PlanVersionに限定して, Warehouseで次の読み取り用テーブルを作ります。[`CREATE TABLE AS SELECT`（CTAS）](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-table)が対象Warehouseで利用可能であることを現行資料で確認します。テーブルが既にある場合は同じ名前へ上書きせず, 別の識別名にするか中断します。
+   `InvalidExpectedRows = 0`であり, `AllStageRows`と`SelectedRows`がどちらも非公開検算記録の正の`ExpectedRows`と一致し, 残りの検査結果がすべて0行 / 0件の場合だけ続けます。ExpectedRowsが0 / 未記入, Stageが空 / ヘッダーのみ, またはSnapshotIdを間違えた場合は不合格です。CSVを作る前のFull Outer照合により, 両方の元エクスポートの全キーが一致していた記録も確認します。
+
+8. 選択したSnapshotId / ScenarioName / PlanVersionに限定して, Warehouseで次の読み取り用テーブルを作ります。[`CREATE TABLE AS SELECT`（CTAS）](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-table)が対象Warehouseで利用可能であることを現行資料で確認します。テーブルが既にある場合は同じ名前へ上書きせず, 別の識別名にするか中断します。
 
    ```sql
    CREATE TABLE dbo.Lab09Product AS
@@ -177,10 +261,10 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
        CAST(
            CASE WHEN ModelGrossRevenue = 0 THEN NULL
                 ELSE (
-                    CAST(PlanForecast AS decimal(18, 10))
-                    - CAST(ModelGrossRevenue AS decimal(18, 10))
-                ) / NULLIF(CAST(ModelGrossRevenue AS decimal(18, 10)), 0)
-           END AS decimal(38, 20)
+                    CAST(PlanForecast AS decimal(28, 10))
+                    - CAST(ModelGrossRevenue AS decimal(28, 10))
+                ) / NULLIF(CAST(ModelGrossRevenue AS decimal(28, 10)), 0)
+           END AS decimal(38, 9)
        ) AS VarianceRate
    FROM dbo.Lab09Stage
    WHERE SnapshotId = '<snapshot-id>'
@@ -188,9 +272,9 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
      AND PlanVersion = '<plan-version>';
    ```
 
-   `<...>`はCSVに記録した識別値へ置き換えます。入力値のシングルクォートはSQL文字列内で二重化し, 可能ならパラメーターを使います。ここでは取込元の数値を小数点以下10桁まで保てることを前提に金額を`decimal(28,10)`へ変換します。比率計算は`decimal(18,10)`の範囲（絶対値が100,000,000未満）を前提にします。Warehouseの列型 / 精度と原値を確認し, 10桁を超える精度が必要, 取込で丸められた, または値の範囲が型に収まらない場合は, 型と式を精度を失わない形に調整するまで進みません。クエリ実行は読み取り / 作成の影響と課金を伴うため承認後に限ります。算術の照合は丸め前の値で行い, 表示時に限って小数桁を整えます。
+   `<...>`はCSVに記録した識別値へ置き換えます。入力値のシングルクォートはSQL文字列内で二重化し, 可能ならパラメーターを使います。ここでは金額を`decimal(28,10)`で保持します。Warehouseの型 / 精度と原値を確認し, 10桁を超える小数精度や型範囲を超える値がある場合は, 精度を失わない適切な型へ調整するまで停止します。`VarianceRate`はWarehouseの10進除算結果を`decimal(38,9)`で保存します。金額の元精度は10桁で保ち, 比率を表示するときは保存した9桁の値を使います。クエリ実行は読み取り / 作成の影響と課金を伴うため承認後に限ります。
 
-5. Warehouseで次の検査を行います。すべて0件,一意キー件数一致,総数一致にならなければOntologyへ進みません。
+9. Warehouseで次の検査を行います。`StageRows`と`ObservationRows`が同じ正の件数で, 不一致 / 重複 / 孤立キーが0件でなければOntologyへ進みません。
 
    ```sql
    SELECT ObservationKey, COUNT(*) AS RowCount
@@ -198,25 +282,70 @@ Harborlightの担当者として, **Product Category / Sub Category × 月**の�
    GROUP BY ObservationKey
    HAVING COUNT(*) <> 1;
 
-   SELECT COUNT(*) AS InvalidVarianceRows
+   SELECT COUNT_BIG(*) AS InvalidVarianceRows
    FROM dbo.Lab09RevenueObservation
-   WHERE VarianceAmount <> CAST(
+   WHERE VarianceAmount IS NULL
+      OR VarianceAmount <> CAST(
              CAST(PlanForecast AS decimal(28, 10))
              - CAST(ModelGrossRevenue AS decimal(28, 10))
              AS decimal(29, 10)
          )
       OR (ModelGrossRevenue = 0 AND VarianceRate IS NOT NULL)
       OR (ModelGrossRevenue <> 0
-          AND VarianceRate <> CAST(
+          AND (VarianceRate IS NULL OR VarianceRate <> CAST(
                   (
-                      CAST(PlanForecast AS decimal(18, 10))
-                      - CAST(ModelGrossRevenue AS decimal(18, 10))
-                  ) / NULLIF(CAST(ModelGrossRevenue AS decimal(18, 10)), 0)
-                  AS decimal(38, 20)
-              ));
+                      CAST(PlanForecast AS decimal(28, 10))
+                      - CAST(ModelGrossRevenue AS decimal(28, 10))
+                  ) / NULLIF(CAST(ModelGrossRevenue AS decimal(28, 10)), 0)
+                  AS decimal(38, 9)
+              )));
+
+   SELECT
+       (SELECT COUNT_BIG(*) FROM dbo.Lab09Stage
+        WHERE SnapshotId = '<snapshot-id>'
+          AND ScenarioName = '<scenario-name>'
+          AND PlanVersion = '<plan-version>') AS StageRows,
+       (SELECT COUNT_BIG(*) FROM dbo.Lab09RevenueObservation) AS ObservationRows;
+
+   SELECT COUNT_BIG(*) AS MissingObservations
+   FROM dbo.Lab09Stage AS s
+   WHERE s.SnapshotId = '<snapshot-id>'
+     AND s.ScenarioName = '<scenario-name>'
+     AND s.PlanVersion = '<plan-version>'
+     AND NOT EXISTS (
+         SELECT 1 FROM dbo.Lab09RevenueObservation AS o
+         WHERE o.SnapshotId = s.SnapshotId
+           AND o.ScenarioName = s.ScenarioName
+           AND o.PlanVersion = s.PlanVersion
+           AND o.ProductKey = s.ProductKey
+           AND o.PeriodKey = s.PeriodKey
+     );
+
+   SELECT COUNT_BIG(*) AS ExtraObservations
+   FROM dbo.Lab09RevenueObservation AS o
+   WHERE NOT EXISTS (
+       SELECT 1 FROM dbo.Lab09Stage AS s
+       WHERE s.SnapshotId = o.SnapshotId
+         AND s.ScenarioName = o.ScenarioName
+         AND s.PlanVersion = o.PlanVersion
+         AND s.ProductKey = o.ProductKey
+         AND s.PeriodKey = o.PeriodKey
+   );
+
+   SELECT COUNT_BIG(*) AS OrphanProductKeys
+   FROM dbo.Lab09RevenueObservation AS o
+   WHERE NOT EXISTS (
+       SELECT 1 FROM dbo.Lab09Product AS p WHERE p.ProductKey = o.ProductKey
+   );
+
+   SELECT COUNT_BIG(*) AS OrphanPeriodKeys
+   FROM dbo.Lab09RevenueObservation AS o
+   WHERE NOT EXISTS (
+       SELECT 1 FROM dbo.Lab09Period AS p WHERE p.PeriodKey = o.PeriodKey
+   );
    ```
 
-   Data Agentに質問する値を1行選び, `ModelGrossRevenue`, `PlanForecast`, `VarianceAmount`, `VarianceRate`を手計算または同じWarehouseのSELECTで再確認します。為替換算,年計 / 月次の混在,履歴行の合算は行いません。
+   `InvalidVarianceRows`, `MissingObservations`, `ExtraObservations`, `OrphanProductKeys`, `OrphanPeriodKeys`が0であることを確認します。さらにSnapshot全件について両エクスポートの元件数 / 一意キー件数 / Full Outer欠損0件というローカル照合記録を確認します。Data Agentに質問する1行を独立したWarehouse SELECTと電卓で検算し, 差異率がNULLになる0分母も含めて確認します。式を同じSQLで再計算するだけを正確性の根拠にせず, 元出力値 / 行範囲 / 数値を独立に照合します。為替換算,年計 / 月次の混在,履歴行の合算は行いません。
 
 ## パート4：Ontologyで製品 / 期間 / 差異の意味を定義する
 
@@ -229,9 +358,9 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
    |---|---|---|
    | `Product` | `ProductKey` | `Category`, `SubCategory`。Lab04のモデルに存在する階層 |
    | `Period` | `PeriodKey` | `PeriodStart`, `PlanPeriodStatus`。例は月単位で, Year / Monthを一意に識別 |
-   | `Revenue Observation` | `ObservationKey` | `SnapshotId`, `ScenarioName`, `PlanVersion`, `SourceWritebackRunIds`, `CurrencyCode`, `ModelGrossRevenue`, `PlanForecast`, `VarianceAmount`, `VarianceRate` |
+   | `Revenue Observation` | `ObservationKey` | `ProductKey`, `PeriodKey`（Relationship用外部キー）, `SnapshotId`, `ScenarioName`, `PlanVersion`, `SourceWritebackRunIds`, `CurrencyCode`, `ModelGrossRevenue`, `PlanForecast`, `VarianceAmount`, `VarianceRate` |
 
-3. 各Entity Typeを **View Entity Type details → Configure → Manage property bindings → Add binding and properties** から設定します。OneLake catalogで専用Warehouseの `Lab09Product`, `Lab09Period`, `Lab09RevenueObservation` をそれぞれ選び, Propertyを同名列へバインドします。`ProductKey`, `PeriodKey`, `ObservationKey`をEntity type keyとして指定できる型であることを確認します。キーが重複 / NULLなら先にWarehouseを修正します。
+3. 各Entity Typeを **View Entity Type details → Configure → Manage property bindings → Add binding and properties** から設定します。OneLake catalogで専用Warehouseの `Lab09Product`, `Lab09Period`, `Lab09RevenueObservation` をそれぞれ選び, Propertyを同名列へバインドします。`ProductKey`, `PeriodKey`, `ObservationKey`をEntity type keyとして指定できる型であることを確認します。`Revenue Observation`には両方のForeign Key Property（`ProductKey`, `PeriodKey`）も同名列へバインドします。キーが重複 / NULLなら先にWarehouseを修正します。
 4. Home configuration canvasの **Add relationship** で関係を作ります。
 
    | Relationship | Origin → Target | 対応列 |
@@ -239,7 +368,7 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
    | `Product has Revenue Observations` | `Product` → `Revenue Observation` | `ProductKey` → `ProductKey` |
    | `Period contains Revenue Observations` | `Period` → `Revenue Observation` | `PeriodKey` → `PeriodKey` |
 
-   Relationship detailsでWarehouseの同じキー列を対応付けて保存し, 実データ上で全観測が対応するProductとPeriodへ結び付くことを確認します。UIがソース間の関係を保存できない場合, バインディングを成功と記録せず, Warehouse側でサポートされる関係データに正規化してから再試行します。
+   公式手順のRelationship detailsで **Use mapping table? = Off** を選びます。`Product`をOriginにした関係ではOrigin property `ProductKey`からTarget entity `Revenue Observation` property `ProductKey`へ, `Period`をOriginにした関係ではOrigin `PeriodKey`からTarget `Revenue Observation` `PeriodKey`へ直接結び付けます。ObservationのEntity keyは`ObservationKey`のままです。両Entityのsource bindingと値の型が一致することを確認して保存し, 実データで全Observationが各Product / Periodへ結び付くことを検証します。操作は[公式Relationship type手順](https://learn.microsoft.com/en-us/fabric/iq/ontology/how-to-create-relationship-types)の4〜8に従います。
 
 5. Ontologyの **Overview → Rules** で, Product / Period / Revenue Observationへ関連付けた`Revenue variance interpretation`ルールを作成します。Rule definitionには次を明記します。
 
@@ -257,11 +386,16 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
 
    ```text
    このAgentはHPC_Lab09_VarianceOntologyだけを使う読み取り専用の分析Agentです。
-   回答前にSnapshotId, ScenarioName, PlanVersion, PeriodKey, PlanPeriodStatus,
-   CurrencyCodeを特定し, 質問に指定がない場合は不足情報を質問してください。
-   一つのSnapshotId / Scenario / PlanVersion / Period / Product粒度に絞り,
-   複数SnapshotやScenarioを合算しないでください。
+   通常はSnapshotId, ScenarioName, PlanVersion, 一つのPeriodKey, CurrencyCodeを
+   特定して回答してください。複数月を明示して尋ねられた場合だけ、
+   指定されたPeriodKeyのリストを漏れなく確認し、PeriodKeyとPlanPeriodStatusごとに
+   行数と金額合計を分けて示してください。未知の期間、指定外の期間、別Snapshot /
+   Scenario / PlanVersionを混ぜず、範囲が曖昧なら回答前に質問してください。
    VarianceAmountはPlanForecast - ModelGrossRevenueです。
+   複数行のVarianceRateを合算または単純平均しないでください。
+   複数行の合計比率を求められた場合は
+   (SUM(PlanForecast) - SUM(ModelGrossRevenue)) / NULLIF(SUM(ModelGrossRevenue), 0)
+   とし、Warehouseの同じキー範囲のSQL結果と照合してください。
    ModelGrossRevenueが0の場合はVarianceRateを算出しないでください。
    OpenSampleReferenceはNorthwindサンプル上の比較値で, 確定実績とは呼びません。
    Closed period, Open periodを明示し, 結果に使ったSnapshotIdと条件を記します。
@@ -283,7 +417,7 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
 3. **1行の算術照合**
    > Product `<product-key>`について同じSnapshot / Scenario / Plan version / PeriodのModelGrossRevenue, PlanForecast, VarianceAmount, VarianceRateを示し, `PlanForecast - ModelGrossRevenue`を検算してください。
 4. **Closed / Openの差**
-   > 選択SnapshotでClosedLinkedActualとOpenSampleReferenceを分け, 各区分の行数と合計を示してください。OpenSampleReferenceを実績と呼ばないでください。
+   > 選択SnapshotのPeriodKey `<period-key-1>`, `<period-key-2>`, `<period-key-3>`だけを比較してください。各PeriodKeyとClosedLinkedActual / OpenSampleReferenceごとに行数, ModelGrossRevenue合計, PlanForecast合計, VarianceAmount合計を分けて示し, 全指定期間の合計比率はForecast合計とGross Revenue合計から計算してください。VarianceRate行を単純平均 / 合算せず, OpenSampleReferenceを実績と呼ばないでください。
 5. **日本語での検証**
    > Snapshot `<snapshot-id>`, Scenario `<scenario>`, Plan version `<plan-version>`, Period `<period-key>`を指定し, `Product <product-key>` のGross Revenue, Forecast, 差異を全精度で示してください。Open期間なら確定実績と呼ばないでください。
 
@@ -293,6 +427,8 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
 
 | 症状 | 対応 |
 |---|---|
+| CSVがLakehouse Filesにない / COPYに失敗 | 作成Workspace / Lakehouse ID / Filesパス, UTF-8 / ヘッダー / CSV引用符, Workspace Identityの承認済みソースアクセス, Stageの型とCOPY結果を確認。件数一致までOntologyへ進まず, 既存データの削除でやり直さない |
+| Stageが空 / 件数が期待と違う | 正の`ExpectedRows`,アップロードしたファイルの内容 / Snapshot ID, COPYの実行結果と`COUNT_BIG(*)`を照合。想定外の行があるStageを再利用しない |
 | Data Agent作成項目がない / Testが使えない | 有料F2 / P1, capacity-level Copilot, Tenant settings,クロスジオ条件,Preview提供地域,設定反映時間を管理者と確認。Planningの試用容量だけで動くと仮定しない |
 | Ontologyが作成できない / Sourceが選べない | Preview設定,Create Fabric items設定,利用者権限,Warehouse sourceの一覧を確認。REST API / JSONで補わない |
 | Semantic model exportとForecastでキーが合わない | 元のDate / Product field, ForecastのScenario / Measure, period statusを確認。文字列表示だけを結合キーにせず, 欠損を0で埋めない |
@@ -301,7 +437,7 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
 | Agent回答が違う / 根拠を示さない | Publishせず, AgentのSteps / Query, 選択したEntity / property,条件とWarehouse結果を比較。原因分析や一般化した助言を事実として採用しない |
 | 日本語の質問で意図しない列 / 条件が使われる | 英語の正式プロパティ名をUIで確認し, 同一Snapshot / Scenario / Period条件で再テストする。日本語で正しい数値が得られない場合は制約を明記し, 利用可能と見なさない |
 
-終了時に, 利用者が作成したLab09用CSV, Copy job, Warehouse, Ontology, Data Agentの名前とOwner, Snapshot / Scenario / Plan version,検査結果,未確認事項を承認済みのプライベート運用記録に残します。公開リポジトリにはテナントID,実行ID,資格情報,データ行を追加しません。削除が必要な場合は, この演習で新規作成した個別アイテムだけを特定し, Owner / 利用者 / retention / billingへの影響を確認して明示承認を得てから行います。Capacity停止やWorkspace全削除を自動cleanupに使いません。
+終了時に, 利用者が作成したLab09用CSV, Lakehouse Filesのステージファイル, Lakehouse, Warehouse Stage / 比較テーブル, Ontology, Data Agentの名前とOwner, Snapshot / Scenario / Plan version,検査結果,未確認事項を承認済みのプライベート運用記録に残します。公開リポジトリにはテナントID,実行ID,資格情報,データ行を追加しません。ステージCSVの削除やLakehouse / Warehouse等のアイテム削除が必要な場合は, この演習で新規作成した個別対象だけを特定し, Owner / 利用者 / retention / billingへの影響を確認して明示承認を得てから行います。Workspace Identityや権限の解除も管理者の別途承認が必要です。Capacity停止やWorkspace全削除を自動cleanupに使いません。
 
 ## 公式資料
 
@@ -314,6 +450,9 @@ Ontologyは定義とデータバインディングを持つ意味付けレイヤ
 - [Ontology Relationshipの作成](https://learn.microsoft.com/en-us/fabric/iq/ontology/how-to-create-relationship-types)
 - [Ontology Business Ruleの作成](https://learn.microsoft.com/en-us/fabric/iq/ontology/how-to-use-rules)
 - [Fabric Warehouseを作成](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse)
+- [ローカルCSVをLakehouse Filesへアップロード](https://learn.microsoft.com/en-us/fabric/data-engineering/get-started-csv-upload)
+- [WarehouseでOneLake / Azure Storageからデータを取込む（COPY INTO）](https://learn.microsoft.com/en-us/fabric/data-warehouse/ingest-data)
+- [Warehouseでサポートされる保存データ型](https://learn.microsoft.com/en-us/fabric/data-warehouse/data-types)
 - [Warehouseでデータを取込む](https://learn.microsoft.com/en-us/fabric/data-warehouse/tutorial-ingest-data)
 - [Warehouse SQL Query Editor](https://learn.microsoft.com/en-us/fabric/data-warehouse/sql-query-editor)
 - [Warehouseで使えるT-SQL構文](https://learn.microsoft.com/en-us/fabric/data-warehouse/tsql-surface-area)

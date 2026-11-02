@@ -105,9 +105,13 @@
 
 ### モジュール09の比較データ（発展編）
 
+Lab09は文書化した操作手順であり、実テナントでの一連の実行とLab09固有のFabric画面キャプチャは未完了です。ライブの検証結果として扱わず、実施前に現在のUI / Previewと組織ポリシーを確認してください。
+
 モジュール09は、モデルの *Measures Table[Gross Revenue]* とモジュール04のPlan内 *Forecast* を同じProduct / 月の粒度で照合します。モデルのGross RevenueはDAXメジャーなので、実在するProduct / Dateフィールドを使ってレポートから同じ期間の集計値を出力し、Planの書き戻し値と対応付けます。地域別やGross ProfitのPlan値を、このサンプルに含まれるものとして扱いません。
 
 書き戻しテーブルはLong with Changesの履歴形式です。スキーマとログから同一Scenario / Plan versionの現在値,全ページ / 行の完全性が確認できない場合、時刻が新しい行だけを採ったり履歴を合計したりせず、承認済みの全件Snapshotを用意できるまで停止します。比較用データの列契約は[Lab09 Snapshotテンプレート](lab09-variance-snapshot-template.csv)を参照してください。これはヘッダーだけのテンプレートで、実データを含みません。
+
+完成CSVは組織承認済みの一時Lakehouse Filesへ手動アップロードし、Warehouseの`COPY INTO`で明示的な10進数型のStageへ取り込みます。LakehouseとWarehouseはLab09専用の新規アイテムです。ソースWorkspaceへのWorkspace Identityアクセスを管理者が許可できない場合は、認証を迂回せず停止します。取込と全件 / キー検査の手順は[Lab09](../labs/09-variance-analyst.md)に記載しています。SQL書き戻し履歴、参加者データ、テナント情報を公開場所へアップロードしないでください。
 
 ### P&L Rows
 

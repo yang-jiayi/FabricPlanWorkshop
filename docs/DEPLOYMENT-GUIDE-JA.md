@@ -22,7 +22,7 @@
 |---|---|
 | Tenant ID / Workspace ID / Capacity ID | 承認された演習テナントの値。WorkspaceのTenantと容量のSKU / Regionが想定通りであること |
 | モード | `full-workshop-demo` または `learner-start`。Lab07は全ラボ構成の既定で含める |
-| Lab09発展編 | `full-workshop-demo` / `learner-start`のいずれも既定では無効。利用者が明示的に有効化し, 有料容量 / Tenant AI設定 / Ontology Preview / 検証済みSnapshot / 専用Warehouseがそろう場合だけ追加 |
+| Lab09発展編 | `full-workshop-demo` / `learner-start`のいずれも既定では無効。利用者が明示的に有効化し, 有料容量 / Tenant AI設定 / Ontology Preview / 検証済みSnapshot / 専用Warehouse / 一時Lakehouse Filesがそろう場合だけ追加 |
 | 実行主体 | 委任された本人または組織が承認したサービスプリンシパル。役割と対象スコープを確認し, secretsをソース / チャット / ログへ記録しない |
 | 課金承認 | 課金セッションが始まる操作, Capacity / SQL / OneLakeの想定範囲, 承認者。数値の保証としてでなく上限と試算根拠を用意 |
 | ソース資産 | 空Workspace方式なら公式PBIX / 任意のXLSX。昇格方式ならソースWorkspace / 定義 / 対応関係 / 依存項目の所有者 |
@@ -92,7 +92,7 @@ Content-Type: application/json
 | **06 / Intelligence Canvas** | 主PlanのIntelligence sheet / canvas, モデル系列, From Sheets参照, 必要な埋め込みシート | 実績と入力値がどの系列から来るかを識別し, 許可された試験入力を戻しても元モデルの値と混同しない。参照 / コピーの設定を確認 |
 | **07 / PowerTable (任意)** | 主Planとは別のPowerTable専用Plan, 専用SQL DB, 公式XLSX, Forms / approval / access controls / automations | XLSXの必要なテーブル, フォーム項目, 自動化の対象 / キー, ポリシーを確認。申請 / 承認 / RLSは各許可ユーザー本人で確認し, 初期データを保全 |
 | **08 / SizingとGovernance** | 容量試算, 課金ロール, モデルRLS, Lab07を含むならData Input上限 / 役割設計 | 実機の容量 / 認可テストと想定を区別する。権限のないユーザーを推測で一般化しない。地域, テナント, UIごとの制限 / 未確認事項に担当者を割り当て |
-| **09 / Plan Variance Analyst (任意発展編)** | 有効化された場合のみ,専用Warehouse / 検証済みSnapshot / Product・Period・Revenue ObservationのOntologyバインディング / Ontologyだけをソースにする読み取り専用Data Agent | 有料F2以上またはFabric有効化済みP1以上, Tenant AI / クロスジオ方針, Ontology Preview提供状況を事前確認。Gross RevenueとForecastを同じProduct × 月 / Scenario / Plan versionで照合し, Long with Changes履歴を恣意的に現在値へ読み替えない。Snapshotのキー / 件数 / 数値とOntologyバインディングを検証し, Agent回答をWarehouse全精度値と照合。未実施なら未実施と報告 |
+| **09 / Plan Variance Analyst (任意発展編)** | 有効化された場合のみ, UTF-8 CSVの一時Lakehouse Files, 明示型Stageを持つ専用Warehouse / 検証済みSnapshot / Product・Period・Revenue ObservationのOntologyバインディング / Ontologyだけをソースにする読み取り専用Data Agent | 有料F2以上またはFabric有効化済みP1以上, Tenant AI / クロスジオ方針, Ontology Preview提供状況, Workspace Identityの承認済み読取経路を事前確認。Gross RevenueとForecastを同じProduct × 月 / Scenario / Plan versionで照合し, Long with Changes履歴を恣意的に現在値へ読み替えない。元CSVのFull Outer key coverage / positive expected count, typed Stage件数と一意キー / 列 / 月状態, Observation件数 / 欠落・余剰 / orphanを検証し, Agent回答をWarehouse値と照合。未実施なら未実施と報告 |
 
 ## 制限と運用上の注意
 
@@ -104,6 +104,7 @@ Content-Type: application/json
 - 更新するたび, 全ページのアイテム差分と所有IDを照合します。既存アイテムに競合したら停止し, 上書き / 名前変更 / 削除で隠しません。失敗時は今回作成したIDだけを一覧化し, クリーンアップも個別に明示承認を得ます。Workspace全体を失敗時に削除しません。
 - 配備ログ, 証拠画像, 共有画面からトークン / 資格情報 / Tenant URL / 顧客データを除き, publicリポジトリや公開プロンプトへ保存しません。Fabricが未接続なら成功を主張しません。
 - 容量停止 / 一時停止, Plan / DB /アイテムの削除でセッション課金が消えると想定しません。計画 / SQL / OneLakeの費用を分け, 実テナントのBilling / Capacity Metricsと管理者の条件で確認します。
+- Lab09の一時Lakehouse / Files / Warehouse Stageは新しい演習資産です。保管したCSVは組織承認済みのアクセス範囲に限定し, 検証後に削除する場合も対象ファイル / アイテムを個別に確認し, 事前承認なしにWorkspace Identityや権限を変更しません。
 
 ## 公式資料
 

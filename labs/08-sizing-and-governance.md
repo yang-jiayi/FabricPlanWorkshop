@@ -365,6 +365,8 @@ Infobridgeを使えば、Harborlightの3人の地域財務責任者がそれぞ�
 
 ## 次のステップ
 
+- **[モジュール09：Plan Variance Analyst（計画差異アナリスト）](09-variance-analyst.md)**：モジュール04のGross Revenue / ForecastをProduct × 月で照合し, Ontology Previewと読み取り専用Fabric Data Agentを使う発展編（45〜60分）。追加容量,テナント設定,検証済みデータが必要です。
+
 - **[Infobridgeによるconnected planning](https://learn.microsoft.com/fabric/iq/plan/infobridge-concept-connected-planning)**：この演習では概要のみを扱った、複数地域の計画統合
 - **[キューブによる統合](https://learn.microsoft.com/fabric/iq/plan/planning-concept-cube)**：ディメンションをまたいで、販売計画、原価計画、収益性シートを同期する仕組み
 - **[承認ワークフロー](https://learn.microsoft.com/fabric/iq/plan/planning-concept-approval-workflow)**：申請,レビューの業務サイクルの正式な運用
@@ -372,7 +374,7 @@ Infobridgeを使えば、Harborlightの3人の地域財務責任者がそれぞ�
 
 ---
 
-**← 前へ：** [モジュール07：PowerTable](07-powertable.md) · [README](../README.md)
+**← 前へ：** [モジュール07：PowerTable](07-powertable.md) · [次へ：モジュール09：Plan Variance Analyst](09-variance-analyst.md) · [README](../README.md)
 
 ---
 

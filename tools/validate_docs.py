@@ -45,7 +45,7 @@ for path in documents:
         elif not destination.exists():
             errors.append(f'{relative}: missing link destination: {target}')
 
-for number in range(9):
+for number in range(10):
     matches = list((ROOT / 'labs').glob(f'{number:02d}-*.md'))
     if len(matches) != 1:
         errors.append(f'module {number:02d}: expected one document, found {len(matches)}')
@@ -62,4 +62,4 @@ if errors:
     print('\n'.join(errors))
     raise SystemExit(1)
 print(f'PASS: {len(documents)} Markdown files, {links_checked} relative links, '
-      '9 modules, fences, details, and MIT attribution.')
+      '10 modules, fences, details, and MIT attribution.')

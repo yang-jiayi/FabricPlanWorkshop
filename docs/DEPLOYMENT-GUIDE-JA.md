@@ -22,6 +22,7 @@
 |---|---|
 | Tenant ID / Workspace ID / Capacity ID | 承認された演習テナントの値。WorkspaceのTenantと容量のSKU / Regionが想定通りであること |
 | モード | `full-workshop-demo` または `learner-start`。Lab07は全ラボ構成の既定で含める |
+| Lab09発展編 | `full-workshop-demo` / `learner-start`のいずれも既定では無効。利用者が明示的に有効化し, 有料容量 / Tenant AI設定 / Ontology Preview / 検証済みSnapshot / 専用Warehouseがそろう場合だけ追加 |
 | 実行主体 | 委任された本人または組織が承認したサービスプリンシパル。役割と対象スコープを確認し, secretsをソース / チャット / ログへ記録しない |
 | 課金承認 | 課金セッションが始まる操作, Capacity / SQL / OneLakeの想定範囲, 承認者。数値の保証としてでなく上限と試算根拠を用意 |
 | ソース資産 | 空Workspace方式なら公式PBIX / 任意のXLSX。昇格方式ならソースWorkspace / 定義 / 対応関係 / 依存項目の所有者 |
@@ -39,12 +40,12 @@
 4. **更新資格情報の問題を隠さない:** PBIXのImport後に`Refresh failed due to missing data source credentials`が表示された場合, 成功として握りつぶさず記録し, 更新履歴とモデル / レポートに必要なデータが実際にあるかを管理者が切り分けます。資格情報を推測しません。Power BI APIの認証対象はFabric REST APIと別なので, 資格情報やアクセストークンを表示 / ログ出力しません。
 5. **依存アイテムを承認後に構成:** Lab01〜06 / 08のPlanは対応するセマンティックモデルへ接続します。モデルの名前 / Workspace名を変えません。SQL Database作成などは該当するMicrosoft公式手順と権限が確認できた範囲で実行し, 結果を再読み取りします。権限変更は対象と必要性を提示し, 利用者の明示承認がある場合だけ行います。
 6. **Plan固有の構成を行う:** Microsoft RESTのCreate Itemの`ItemType`一覧にPlanがあることだけでは, Planning sheet / 数式 / シナリオ / PowerTableのAPIスキーマが文書化済みとはみなしません。現行の[Plan CI/CD手順](https://learn.microsoft.com/en-us/fabric/iq/plan/resources/cicd-planning)または製品UIに手順が存在し, 対象バージョン / アイテムでサポートされることを確認します。確認できない場合は作成者がUIで構成し, AIは手順と確認項目の案内に留まります。
-7. **受入表を完了:** 下記のLab00〜08の条件を, 実際のWorkspace / モデル / データ / 権限で確認します。空のPlanや空シートを作っただけで「Workshopを配備」と報告しません。
+7. **受入表を完了:** 下記のLab00〜08の条件を, 実際のWorkspace / モデル / データ / 権限で確認します。Lab09を明示的に有効化した場合は追加の受入表も完了します。空のPlanや空シートを作っただけで「Workshopを配備」と報告しません。
 
 ### 初回構築でのモード
 
-- **`full-workshop-demo` (既定):** 必須のLab00〜06 / 08に加えて, 別Planと別SQL Databaseを使う任意Lab07の構成も含めます。全Labの実体 / 接続 / 設定 / 必要なアクセス確認が完了するまで全体の完了を宣言しません。
-- **`learner-start`:** 受講者がLab01から開始できる, Lab00の権限 / 容量確認と承認済みのサンプルPBIX / report / modelのみ準備する部分構成です。未作成のPlan / シート / SQL / PowerTableを明記し, 完全なWorkshop配備と表現しません。Lab07は指定がない限り含めません。
+- **`full-workshop-demo` (既定):** 必須のLab00〜06 / 08に加えて, 別Planと別SQL Databaseを使う任意Lab07の構成も含めます。Lab09は発展編で既定では含めず, 有効化された場合は別の追加容量 / Tenant AI / Preview / Snapshot / Warehouse条件を満たす必要があります。指定された全モジュールの実体 / 接続 / 設定 / 必要なアクセス確認が完了するまで全体の完了を宣言しません。
+- **`learner-start`:** 受講者がLab01から開始できる, Lab00の権限 / 容量確認と承認済みのサンプルPBIX / report / modelのみ準備する部分構成です。未作成のPlan / シート / SQL / PowerTableを明記し, 完全なWorkshop配備と表現しません。Lab07とLab09は明示指定がない限り含めません。
 
 ## B / 検証済みソース環境からの昇格
 
@@ -76,7 +77,7 @@ Content-Type: application/json
 6. 移行後, ターゲットのモデルを更新 / 確認し, ターゲットPlanを開いてシート / 設定 / バインディングを検証します。書き戻し先テーブル名が初期に生成IDになる場合は, 公式手順に沿って期待する名前と宛先を確認 / 必要なら変更します。オート書き戻しを有効化する前に, 承認した対象へ手動書き戻しを1回行い保存の基準を確立します。
 7. ソース側の書き戻し実行ログはターゲットへ移行しません。過去の承認や実行履歴が新環境に引き継がれたと主張せず, 必要な受入 / 運用記録を新規に作ります。運用中のPlan / セマンティックモデル / Workspaceを名前変更しないでください。
 
-## Lab00〜08の受入表
+## Lab00〜09の受入表（Lab09は任意発展編）
 
 この表は**受入条件の枠**です。配備の成功結果を前もって断定しません。実行者は各行の結果を承認済みのプライベート運用記録へ書き, 未確認 / 手動対応はそのまま残します。既定の期待値, 初期予算, 既存データ, 元レポートを変更しません。
 
@@ -91,6 +92,7 @@ Content-Type: application/json
 | **06 / Intelligence Canvas** | 主PlanのIntelligence sheet / canvas, モデル系列, From Sheets参照, 必要な埋め込みシート | 実績と入力値がどの系列から来るかを識別し, 許可された試験入力を戻しても元モデルの値と混同しない。参照 / コピーの設定を確認 |
 | **07 / PowerTable (任意)** | 主Planとは別のPowerTable専用Plan, 専用SQL DB, 公式XLSX, Forms / approval / access controls / automations | XLSXの必要なテーブル, フォーム項目, 自動化の対象 / キー, ポリシーを確認。申請 / 承認 / RLSは各許可ユーザー本人で確認し, 初期データを保全 |
 | **08 / SizingとGovernance** | 容量試算, 課金ロール, モデルRLS, Lab07を含むならData Input上限 / 役割設計 | 実機の容量 / 認可テストと想定を区別する。権限のないユーザーを推測で一般化しない。地域, テナント, UIごとの制限 / 未確認事項に担当者を割り当て |
+| **09 / Plan Variance Analyst (任意発展編)** | 有効化された場合のみ,専用Warehouse / 検証済みSnapshot / Product・Period・Revenue ObservationのOntologyバインディング / Ontologyだけをソースにする読み取り専用Data Agent | 有料F2以上またはFabric有効化済みP1以上, Tenant AI / クロスジオ方針, Ontology Preview提供状況を事前確認。Gross RevenueとForecastを同じProduct × 月 / Scenario / Plan versionで照合し, Long with Changes履歴を恣意的に現在値へ読み替えない。Snapshotのキー / 件数 / 数値とOntologyバインディングを検証し, Agent回答をWarehouse全精度値と照合。未実施なら未実施と報告 |
 
 ## 制限と運用上の注意
 

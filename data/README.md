@@ -8,7 +8,7 @@
 
 | ファイル | サイズ | 使用するモジュール |
 |---|---|---|
-| [`Northwind_FMCG.pbix`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind_FMCG.pbix) | 9.3 MB | モジュール01〜06 |
+| [`Northwind_FMCG.pbix`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind_FMCG.pbix) | 9.3 MB | モジュール01〜06,09 |
 | [`Northwind-FMCG-assets-powertable-tutorial.xlsx`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind-FMCG-assets-powertable-tutorial.xlsx) | 36 KB | モジュール07（任意） |
 
 `fabric-samples` は大きなリポジトリです。必要な `.pbix` ファイルをGitHubから直接ダウンロードすれば、リポジトリ全体をクローンする必要はありません。
@@ -39,13 +39,13 @@
 
 | テーブル | 種類 | 主な内容 | 使用するモジュール |
 |---|---|---|---|
-| **Measures Table** | メジャー | *Gross Revenue*、*2025 Gross Revenue*、*COGS*、*2025 COGS* | モジュール01,03,04,06 |
+| **Measures Table** | メジャー | *Gross Revenue*、*2025 Gross Revenue*、*COGS*、*2025 COGS* | モジュール01,03,04,06,09 |
 | **Date** | ディメンション | *Date Hierarchy*、*Date Key*、*Half Year*、*Month*、*Month Name*、*Month Short*、*Quarter*、*Year*、*Year Month*、*Year Quarter* | 各モジュールで使用 |
 | **Fact Transactions** | ファクト | 地域別,製品別の売上実績と原価実績 | Measures Table の基になるデータ |
 | **Geography** | ディメンション | *Region*、*Sub Region*、*City* | モジュール01,03,05 |
 | **P&L Measures** | ファクト | 販売数量、平均販売価格、売上原価の構成要素、営業費用などのドライバー。**テーブル内に独自の Region Hierarchy と Date Hierarchy を持ちます** | モジュール05のメジャーモデル |
 | **P&L Rows** | ファクト | 損益項目を行として保持。*Account* 列と *Value* 列があります | モジュール05の行モデル |
-| **Product** | ディメンション | *Category*、*Sub Category* | モジュール01,03,04,06 |
+| **Product** | ディメンション | *Category*、*Sub Category* | モジュール01,03,04,06,09 |
 
 日付を扱うディメンションや階層は、テーブルによって使い分けます。特に **P&L Measures** では、下記のとおり、テーブル内の階層を使う点に注意してください。
 
@@ -102,6 +102,12 @@
 > P&L Measures を使うシートで、Geography の行や Date の列を設定すると、各セルに同じ総計値が繰り返し表示されると報告されています。この場合もエラーは表示されません。モジュール01,03,04,06では、Geography、Date、Product に関連付けられた Measures Table を使います。この違いが特に問題になるのは、モジュール05です。実環境で同じ症状が出た場合は、まず使用する階層とモデルのリレーションシップを確認してください。
 
 [モジュール05](../labs/05-pl-models-and-scenarios.md)では、これらのドライバーをメジャーモデルで組み合わせ、損益計算書を構成します。
+
+### モジュール09の比較データ（発展編）
+
+モジュール09は、モデルの *Measures Table[Gross Revenue]* とモジュール04のPlan内 *Forecast* を同じProduct / 月の粒度で照合します。モデルのGross RevenueはDAXメジャーなので、実在するProduct / Dateフィールドを使ってレポートから同じ期間の集計値を出力し、Planの書き戻し値と対応付けます。地域別やGross ProfitのPlan値を、このサンプルに含まれるものとして扱いません。
+
+書き戻しテーブルはLong with Changesの履歴形式です。スキーマとログから同一Scenario / Plan versionの現在値,全ページ / 行の完全性が確認できない場合、時刻が新しい行だけを採ったり履歴を合計したりせず、承認済みの全件Snapshotを用意できるまで停止します。比較用データの列契約は[Lab09 Snapshotテンプレート](lab09-variance-snapshot-template.csv)を参照してください。これはヘッダーだけのテンプレートで、実データを含みません。
 
 ### P&L Rows
 

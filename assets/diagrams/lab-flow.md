@@ -27,7 +27,14 @@ flowchart TB
         ADB[("fabric_plan_training")]
     end
 
-    DS["後続での利用<br/>Power BI,セマンティックモデル,データエージェント"]
+    subgraph ADV["モジュール09：発展編（別途準備）"]
+        SNAP["Gross Revenue / Forecast<br/>検証済みProduct × 月Snapshot"]
+        WH[("専用Warehouse<br/>Product / Period / Observation")]
+        ONT["Ontology Preview"]
+        AGENT["Fabric Data Agent<br/>Ontology経由 / 読み取り専用"]
+    end
+
+    DS["後続分析<br/>接続を明示的に構成"]
 
     PBIX -->|セマンティックモデルへの接続| PI
     XLSX --> PTS
@@ -41,6 +48,11 @@ flowchart TB
     FC -->|書き戻し| SQL
     PTS --> ADB
     SQL --> DS
+    PBIX -->|Gross Revenueを同じ粒度で抽出| SNAP
+    SQL -->|履歴を検証 / 同一状態を照合| SNAP
+    SNAP -->|専用Warehouseへ取込| WH
+    WH -->|キー / 関係 / 数値をバインド| ONT
+    ONT -->|読み取り専用の意味付け| AGENT
 
     classDef src fill:#e8f0fe,stroke:#4285f4,color:#111
     classDef sheet fill:#fff4e5,stroke:#f59e0b,color:#111
@@ -49,7 +61,7 @@ flowchart TB
     class PBIX,XLSX src
     class PI,GP,FC,PL,IS,PTS sheet
     class SQL,ADB out
-    class DS ds
+    class SNAP,WH,ONT,AGENT ds
 ```
 
 ## 図の読み方
@@ -73,17 +85,19 @@ flowchart LR
     M03 --> M04["04<br/>見通し"]
     M04 --> M05["05<br/>P&amp;L"]
     M05 --> M06["06<br/>キャンバス"]
-    M06 --> M08["08<br/>サイジング"]
+    M06 --> M08["08<br/>サイジング"] --> M09["09<br/>Variance Analyst<br/><i>発展編</i>"]
     M01 -.-> M07["07<br/>PowerTable<br/><i>任意</i>"]
     M07 -.-> M08
 
     classDef core fill:#fff4e5,stroke:#f59e0b,color:#111
     classDef opt fill:#f1f3f4,stroke:#9aa0a6,color:#111,stroke-dasharray: 4 4
     class M00,M01,M02,M03,M04,M05,M06,M08 core
-    class M07 opt
+    class M07,M09 opt
 ```
 
 モジュール02〜06は順番に進めます。モジュール03はモジュール02の値を編集可能なコピーへ取り込み、Optimizerの変更は元の販売計画を自動更新しません。モジュール06の基本ルートではモジュール02の販売計画とモデル実績を可視化します。モジュール04のForecastを比較する場合は、Forecastシートをキャンバスへ追加で埋め込み、From Sheetsの参照を設定します。モジュール07は独立しているため、環境構築が終われば任意のタイミングで実施でき、省略しても構いません。
+
+**モジュール09はモジュール08の後に行う任意の発展編です。** モジュール04のGross Revenue / ForecastをProduct × 月で照合し, 専用Warehouseの検証済みSnapshotをOntologyへバインドします。Data AgentはOntologyを介した読み取り専用の質問に限り, Forecastや元モデルを更新しません。追加の容量 / Tenant AI設定 / Preview機能 / データ準備が必要です。[詳細手順](../../labs/09-variance-analyst.md) / [構成図](lab09-variance-analyst.md)
 
 ### 参考資料
 

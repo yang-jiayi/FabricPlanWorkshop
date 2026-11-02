@@ -1,0 +1,20 @@
+# Sample data - download from microsoft/fabric-samples, do not commit
+*.pbix
+*.xlsx
+!data/sample/.gitkeep
+
+# Research corpus - mirrored Microsoft Learn docs, not ours to redistribute
+research/learn-docs/
+research/tutorials-stripped.md
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+
+# Local Python bytecode
+__pycache__/

@@ -1,0 +1,67 @@
+name: Document integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-docs:
+    name: Static document integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      # Standard library only: no pip install, secrets, or Fabric connection.
+      - name: Run document tooling tests
+        run: |
+          python -m unittest discover -s tools -p 'test_*.py'
+      - name: Validate documents
+        run: python tools/validate_docs.py
+      - name: Check public hygiene
+        run: python tools/check_public_hygiene.py
+      - name: Verify broken links fail validation
+        shell: python
+        run: |
+          import pathlib
+          import subprocess
+          import sys
+          import tempfile
+
+          root = pathlib.Path.cwd()
+          with tempfile.NamedTemporaryFile(
+              mode="w", suffix=".md", prefix="ci-link-probe-",
+              dir=root, encoding="utf-8", delete=False
+          ) as handle:
+              probe = pathlib.Path(handle.name)
+              target = probe.name + ".missing"
+              handle.write(f"[CI failure probe]({target})\n")
+          try:
+              result = subprocess.run(
+                  [sys.executable, "tools/validate_docs.py"],
+                  text=True, capture_output=True, check=False
+              )
+              expected = f"{probe.name}: missing link destination: {target}"
+              if result.returncode != 1 or expected not in result.stdout:
+                  print(result.stdout)
+                  print(result.stderr, file=sys.stderr)
+                  raise SystemExit("FAIL: broken link was not detected as expected")
+              print("PASS: intentional broken link detected with exit code 1")
+          finally:
+              probe.unlink()
+      - name: Confirm clean document state
+        run: |
+          python tools/validate_docs.py
+          python tools/check_public_hygiene.py
+      # A green check confirms static integrity only. Fabric tenant operations,
+      # concurrent users, SQL writeback, RLS, and billing need separate live tests.

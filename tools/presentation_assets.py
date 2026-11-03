@@ -79,4 +79,6 @@ def data_uri(path):
         '.svg': 'image/svg+xml', '.png': 'image/png', '.csv': 'text/csv;charset=utf-8',
         '.jpg': 'image/jpeg', '.webp': 'image/webp',
     }[path.suffix.lower()]
-    return f'data:{mime};base64,' + base64.b64encode(path.read_bytes()).decode('ascii')
+    raw = (path.read_text(encoding='utf-8').encode('utf-8')
+           if path.suffix.lower() == '.csv' else path.read_bytes())
+    return f'data:{mime};base64,' + base64.b64encode(raw).decode('ascii')

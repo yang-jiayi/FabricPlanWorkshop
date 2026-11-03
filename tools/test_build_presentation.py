@@ -139,6 +139,14 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertTrue(any(target.startswith('data:text/csv') for target in self.tree.links))
         self.assertFalse(any(target.startswith('../') for target in self.tree.links))
 
+    def test_csv_payloads_do_not_depend_on_checkout_line_endings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.csv'
+            path.write_bytes(b'PeriodKey,Value\r\n202601,12.34\r\n')
+            windows = presentation.data_uri(path)
+            path.write_bytes(b'PeriodKey,Value\n202601,12.34\n')
+            self.assertEqual(presentation.data_uri(path), windows)
+
     def test_exclusions_reject_malformed_markers(self):
         with self.assertRaisesRegex(ValueError, 'Unbalanced'):
             presentation.exclude_unconfirmed('<!-- presentation-exclude-start: TEST -->\nsecret')

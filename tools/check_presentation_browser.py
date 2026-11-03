@@ -141,7 +141,7 @@ def run(output, axe):
             page.locator('.slide:visible a[download*="sample.csv"]').first.click()
         download = downloaded.value
         check('csv_download_contents', Path(download.path()).read_bytes() ==
-              (ROOT / 'data/lab09-variance-snapshot-sample.csv').read_bytes())
+              (ROOT / 'data/lab09-variance-snapshot-sample.csv').read_text(encoding='utf-8').encode('utf-8'))
 
         page.evaluate("location.hash='welcome'")
         page.wait_for_timeout(150)

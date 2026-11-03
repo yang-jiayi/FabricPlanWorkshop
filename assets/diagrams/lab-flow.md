@@ -28,11 +28,13 @@ flowchart TB
     end
 
     subgraph ADV["モジュール09：発展編（別途準備）"]
-        SNAP["Gross Revenue / Forecast<br/>検証済みProduct × 月Snapshot"]
+        SNAP["Gross Revenue / Forecast<br/>Product × 月Snapshot"]
         STAGE["一時Lakehouse Files<br/>UTF-8 CSV"]
-        WH[("専用Warehouse<br/>Product / Period / Observation")]
+        WH[("専用Warehouse<br/>Decimal検算用")]
+        DELTA["Lakehouse managed Delta<br/>Product / Period / Observation"]
         ONT["Ontology Preview"]
         AGENT["Fabric Data Agent<br/>Ontology経由 / 読み取り専用"]
+        CHECK["回答とSQL値の<br/>独立照合"]
     end
 
     DS["後続分析<br/>接続を明示的に構成"]
@@ -53,8 +55,11 @@ flowchart TB
     SQL -->|履歴を検証 / 同一状態を照合| SNAP
     SNAP -->|承認済みCSVを手動Upload| STAGE
     STAGE -->|OneLake COPY INTO| WH
-    WH -->|キー / 関係 / 数値をバインド| ONT
+    STAGE -->|Spark SQLでDelta作成| DELTA
+    DELTA -->|キー / 関係 / 意味をバインド| ONT
     ONT -->|読み取り専用の意味付け| AGENT
+    WH --> CHECK
+    AGENT -.-> CHECK
 
     classDef src fill:#e8f0fe,stroke:#4285f4,color:#111
     classDef sheet fill:#fff4e5,stroke:#f59e0b,color:#111
@@ -63,7 +68,7 @@ flowchart TB
     class PBIX,XLSX src
     class PI,GP,FC,PL,IS,PTS sheet
     class SQL,ADB out
-    class SNAP,WH,ONT,AGENT ds
+    class SNAP,WH,DELTA,ONT,AGENT,CHECK ds
 ```
 
 ## 図の読み方
@@ -99,7 +104,7 @@ flowchart LR
 
 モジュール02〜06は順番に進めます。モジュール03はモジュール02の値を編集可能なコピーへ取り込み、Optimizerの変更は元の販売計画を自動更新しません。モジュール06の基本ルートではモジュール02の販売計画とモデル実績を可視化します。モジュール04のForecastを比較する場合は、Forecastシートをキャンバスへ追加で埋め込み、From Sheetsの参照を設定します。モジュール07は独立しているため、環境構築が終われば任意のタイミングで実施でき、省略しても構いません。
 
-**モジュール09はモジュール08の後に行う任意の発展編です。** モジュール04のGross Revenue / ForecastをProduct × 月で照合し, UTF-8 CSVを一時Lakehouse Filesへ配置後, OneLake経由で専用WarehouseへCOPYします。検証済みSnapshotをOntologyへバインドし, Data AgentはOntologyを介した読み取り専用の質問に限り, Forecastや元モデルを更新しません。追加の容量 / Tenant AI設定 / Preview機能 / Workspace Identity権限 / データ準備が必要です。[詳細手順](../../labs/09-variance-analyst.md) / [構成図](lab09-variance-analyst.md)
+**モジュール09はモジュール08の後に行う任意の発展編です。** UTF-8 CSVを一時Lakehouse Filesへ配置後, WarehouseへCOPYしてDecimal値を独立検算し, Spark SQLでLakehouse managed Delta tablesを作成します。Ontology / GraphはDelta tablesへバインドし, Data AgentはOntology経由の読み取り専用質問に限り, Forecastや元モデルを更新しません。実機確認は合成CSVのPart 3〜5のみで, 実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。追加の容量 / Tenant AI設定 / Preview機能 / 認証 / データ準備が必要です。[詳細手順](../../labs/09-variance-analyst.md) / [構成図](lab09-variance-analyst.md)
 
 ### 参考資料
 

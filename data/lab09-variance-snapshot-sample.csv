@@ -1,0 +1,19 @@
+SnapshotId,ScenarioName,PlanVersion,SourceWritebackRunIds,ProductKey,Category,SubCategory,PeriodKey,PeriodStart,PlanPeriodStatus,CurrencyCode,ModelMeasureName,ModelGrossRevenue,PlanMeasureName,PlanForecast
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-COFFEE,Beverages,Coffee,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,412350.75,Forecast,412350.75
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-TEA,Beverages,Tea,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,198420.5,Forecast,198420.5
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-CHIPS,Snacks,Chips,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,301775.25,Forecast,301775.25
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-NUTS,Snacks,Nuts,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,154210.8,Forecast,154210.8
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-CLEAN,Household,Cleaning,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,223640.4,Forecast,223640.4
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-PAPER,Household,Paper Goods,2026-01,2026-01-01,ClosedLinkedActual,USD,Gross Revenue,189300.1,Forecast,189300.1
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-COFFEE,Beverages,Coffee,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,398120.35,Forecast,421000.0
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-TEA,Beverages,Tea,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,187955.2,Forecast,181430.125
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-CHIPS,Snacks,Chips,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,295410.6,Forecast,310250.33333
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-NUTS,Snacks,Nuts,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,160080.45,Forecast,158900.9
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-CLEAN,Household,Cleaning,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,218775.9,Forecast,230100.0
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-PAPER,Household,Paper Goods,2026-02,2026-02-01,OpenSampleReference,USD,Gross Revenue,176640.75,Forecast,179310.5
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-COFFEE,Beverages,Coffee,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,431905.1,Forecast,445500.5
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,BEV-TEA,Beverages,Tea,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,205330.45,Forecast,214780.2
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-CHIPS,Snacks,Chips,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,318700.0,Forecast,305250.75
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,SNK-NUTS,Snacks,Nuts,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,0.0,Forecast,12500.0
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-CLEAN,Household,Cleaning,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,229415.6,Forecast,236000.0
+LAB09-SAMPLE-001,Base,FY26-Workshop-v1,sample-run-001,HOM-PAPER,Household,Paper Goods,2026-03,2026-03-01,OpenSampleReference,USD,Gross Revenue,181090.25,Forecast,183225.125

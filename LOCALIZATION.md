@@ -14,7 +14,7 @@
 - 製品用語を整理し、Plan アイテム,計画シート,予測,見通しなどを区別する用語方針を定めました。
 - Microsoft Learn の説明と照合し、接続,権限,課金,書き戻し,サンプルデータに関する説明を補足,更新しました。テナントや提供地域,機能の状態によって異なる可能性がある項目は、環境ごとの確認事項として示しています。
 - 原版の一部の例や説明を、サンプルデータと対応する値,手順に合わせて見直しました。各Labに示す期待値と注意事項は、対象の手順に沿って確認してください。
-- 日本語版の発展編としてLab09「Plan Variance Analyst」を追加しました。Lab04のGross Revenue / ForecastをProduct × 月で照合し, 専用Warehouseの検証済みSnapshot, Ontology Preview, 読み取り専用Fabric Data Agentを扱います。これは原典の翻訳ではなく,日本語版で追加した内容です。
+- 日本語版の発展編としてLab09「Plan Variance Analyst」を追加しました。Lab04のGross Revenue / ForecastをProduct × 月で照合し, WarehouseでのDecimal検算, Lakehouse Delta binding, Ontology Preview / Graph, 読み取り専用Fabric Data Agentを扱います。追加した画面手順の実機確認は合成CSVによるPart 3〜5に限られ, 実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。これは原典の翻訳ではなく,日本語版で追加した内容です。
 
 ## 用語,表記
 

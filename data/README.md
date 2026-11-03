@@ -1,6 +1,6 @@
 # サンプルデータ
 
-この演習で使うデータは、すべてMicrosoftが提供する公式サンプルです。データ生成、APIキー、Pythonの準備は必要ありません。
+Lab01〜08の主なデータはMicrosoft公式のNorthwind FMCGサンプルです。Lab09には、この教材用に作成した**合成の比較データ**もあります。合成CSVはMicrosoft公式データではなく、実Plan / writebackから抽出した実績でもありません。
 
 ## ダウンロード
 
@@ -10,6 +10,7 @@
 |---|---|---|
 | [`Northwind_FMCG.pbix`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind_FMCG.pbix) | 9.3 MB | モジュール01〜06,09 |
 | [`Northwind-FMCG-assets-powertable-tutorial.xlsx`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind-FMCG-assets-powertable-tutorial.xlsx) | 36 KB | モジュール07（任意） |
+| [`lab09-variance-snapshot-sample.csv`](lab09-variance-snapshot-sample.csv) | 18行 / 15列 | Lab09のPart 3〜5（合成データによる実機手順の再現） |
 
 `fabric-samples` は大きなリポジトリです。必要な `.pbix` ファイルをGitHubから直接ダウンロードすれば、リポジトリ全体をクローンする必要はありません。
 
@@ -105,13 +106,15 @@
 
 ### モジュール09の比較データ（発展編）
 
-Lab09は文書化した操作手順であり、実テナントでの一連の実行とLab09固有のFabric画面キャプチャは未完了です。ライブの検証結果として扱わず、実施前に現在のUI / Previewと組織ポリシーを確認してください。
+Lab09の実機確認は、**同梱の合成CSVを使ったPart 3〜5に限定**されています。Warehouseへのコピーと検算、Lakehouse Deltaテーブル、OntologyとData Agentの一部の操作を確認しました。Part 1〜2の実Plan / writeback抽出を含むEnd-to-End確認ではありません。サンプル経路のUI確認を、顧客データや実Planの検証結果として扱わないでください。
 
-モジュール09は、モデルの *Measures Table[Gross Revenue]* とモジュール04のPlan内 *Forecast* を同じProduct / 月の粒度で照合します。モデルのGross RevenueはDAXメジャーなので、実在するProduct / Dateフィールドを使ってレポートから同じ期間の集計値を出力し、Planの書き戻し値と対応付けます。地域別やGross ProfitのPlan値を、このサンプルに含まれるものとして扱いません。
+[`lab09-variance-snapshot-sample.csv`](lab09-variance-snapshot-sample.csv)はこの教材用の合成データです。SnapshotIdは`LAB09-SAMPLE-001`、Scenarioは`Base`、PlanVersionは`FY26-Workshop-v1`で、3期間 / 6製品の18行を含みます。これらの値は実Planや現実のFY26実績を表しません。WarehouseのDecimal列で数値を検算し、Ontology / Graphで使うLakehouse Delta側では金額と比率をDoubleとして扱います。
 
-書き戻しテーブルはLong with Changesの履歴形式です。スキーマとログから同一Scenario / Plan versionの現在値,全ページ / 行の完全性が確認できない場合、時刻が新しい行だけを採ったり履歴を合計したりせず、承認済みの全件Snapshotを用意できるまで停止します。比較用データの列契約は[Lab09 Snapshotテンプレート](lab09-variance-snapshot-template.csv)を参照してください。これはヘッダーだけのテンプレートで、実データを含みません。
+実Planルートでは、モデルの*Measures Table[Gross Revenue]*とLab04のPlan内*Forecast*を同じProduct / 月の粒度で照合します。Gross RevenueはDAXメジャーなので、実在するProduct / Dateフィールドから同じ期間の値を出し、Planの保存済みForecastと対応付けます。地域別やGross ProfitのPlan値をこのデータに含まれるものとして扱いません。実Plan / writeback抽出の一連の操作は未検証です。
 
-完成CSVは組織承認済みの一時Lakehouse Filesへ手動アップロードし、Warehouseの`COPY INTO`で明示的な10進数型のStageへ取り込みます。LakehouseとWarehouseはLab09専用の新規アイテムです。ソースWorkspaceへのWorkspace Identityアクセスを管理者が許可できない場合は、認証を迂回せず停止します。取込と全件 / キー検査の手順は[Lab09](../labs/09-variance-analyst.md)に記載しています。SQL書き戻し履歴、参加者データ、テナント情報を公開場所へアップロードしないでください。
+Long with Changesの履歴を合計したり、`TOP 1`や最大timestampだけで現在値を選んだりしません。完全な選択状態、行数、全キー集合を確認できなければ停止します。比較CSVの列契約は[Lab09 Snapshotテンプレート](lab09-variance-snapshot-template.csv)を参照してください。こちらはヘッダーだけで、実値は含みません。
+
+Lab09では合成CSVをLakehouse Filesへ置き、Warehouse `COPY INTO`を資格情報句なしのEntraパススルーで実証しました。Workspace Identityは必須ではありません。利用可能な認証経路は実行者の権限 / 組織ポリシーで確認してください。取込、全件 / キー検査、Lakehouse Delta作成、Ontology bindingの手順は[Lab09](../labs/09-variance-analyst.md)に記載しています。実Planの書き戻し履歴、顧客データ、テナント情報を公開場所へアップロードしないでください。
 
 ### P&L Rows
 

@@ -91,9 +91,9 @@ PowerTableは主Plan内のシートではなく, 専用の別PlanとSQLデータ
 </table>
 
 <img src="assets/brand/semantic_model_48_item.svg" width="26" height="26" alt="Gross Revenue の出所となるFabric セマンティックモデル"> <img src="assets/brand/planning_48_item.svg" width="26" height="26" alt="Forecast の出所となるFabric Plan"> <img src="assets/brand/data_warehouse_48_item.svg" width="26" height="26" alt="比較Snapshotを保管するFabric Warehouse"> <img src="assets/brand/data_agent_48_item.svg" width="26" height="26" alt="Ontologyを使って読み取り専用で回答するFabric Data Agent">
-**5 / 日本語版独自の発展編Lab09:** Lab04のGross Revenue / Forecastを同じProduct × 月の粒度で照合し, CSVを一時Lakehouse Filesから専用Warehouseへ取り込みます。検証済みSnapshotをProduct / Period / ObservationのOntologyへバインドし, Fabric Data AgentがOntologyを介して読み取り専用で回答します。Plan / 元モデルへの自動書き戻しではありません。[Lab09](labs/09-variance-analyst.md) / [構成図](assets/diagrams/lab09-variance-analyst.md)
+**5 / 日本語版独自の発展編Lab09:** Lab04のGross Revenue / Forecastを同じProduct × 月の粒度で照合し, 一時Lakehouse FilesからWarehouseへCOPYして数値を検算します。Ontology / GraphにはWarehouseではなくLakehouseの管理Deltaテーブルをバインドし, Fabric Data AgentがOntologyを通じて読み取り専用で回答します。Plan / 元モデルへの自動書き戻しではありません。[Lab09](labs/09-variance-analyst.md) / [合成サンプルCSV](data/lab09-variance-snapshot-sample.csv) / [構成図](assets/diagrams/lab09-variance-analyst.md)
 
-> **検証状況:** Lab09の一連の操作はFabricテナントで未実行で, Lab09固有の実画面キャプチャは未収録です。[手順](labs/09-variance-analyst.md)は公式資料に基づくガイドであり, 実行済みの証拠ではありません。
+> **検証状況:** Part 3〜5は同梱の合成CSVを使ってFabricで操作し, Warehouse検算, Lakehouse Delta, Ontology / Graph, Data Agentの一部の質問を確認しました。Part 1〜2の実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。Q4 / Q4aは`SQLCandidatesFailedFilterError`となり, 原因未特定です。実機での確認範囲 / 未確認事項は[Lab09](labs/09-variance-analyst.md)を参照してください。
 
 **参照とコピーは異なります。** From Sheetsで参照した計画系列は参照元の変更を受け取ります。一方, Lab03の編集可能なコピーは元シートと自動同期しません。Intelligence上でも, From Sheetsの入力値とセマンティックモデル由来の実績を区別して設定します。[既存の構成図](assets/diagrams/lab-flow.md) / [データ構成ガイド](data/README.md)
 
@@ -105,17 +105,20 @@ flowchart LR
     PLAN --> SHEETS["計画シート / Intelligence"]
     PLAN -.->|書き戻し| SQL["Fabric SQL"]
     SQL -.->|利用には明示的な接続が必要| DOWNSTREAM["後続分析"]
-    MODEL -->|元のGross Revenueを同粒度で抽出| SNAP["Lab09 検証済み比較Snapshot"]
+    MODEL -->|元のGross Revenueを同粒度で抽出| SNAP["Lab09 比較Snapshot"]
     SQL -->|履歴 / Scenario / versionを照合| SNAP
     SNAP -->|UTF-8 CSVをアップロード| STAGING["一時Lakehouse Files"]
-    STAGING -->|OneLake COPY INTO| WAREHOUSE["専用Warehouse<br/>検証 / 比較"]
-    WAREHOUSE -->|バインド| ONTOLOGY["Ontology<br/>Product / Period / Observation"]
+    STAGING -->|OneLake COPY INTO| WAREHOUSE["専用Warehouse<br/>Decimal検算"]
+    STAGING -->|Spark SQLでDelta作成| DELTA["Lakehouse managed Delta<br/>Product / Period / Observation"]
+    DELTA -->|バインド / Graph投影| ONTOLOGY["Ontology Preview"]
     ONTOLOGY -->|読み取り専用| AGENT["Fabric Data Agent"]
+    WAREHOUSE -->|SQLで数値を検算| CHECK["回答と元値を独立照合"]
+    AGENT -.-> CHECK
     XLSX["任意の資産台帳XLSX"] -.-> POWER_TABLE["別Plan / PowerTable"]
     POWER_TABLE -.-> SEPARATE_DB["専用Fabric SQL DB"]
 ```
 
-**破線は独立経路です。** PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続を示していません。PowerTableは別Planと別DBに分かれています。
+**破線は独立した検算です。** Warehouseは正確なDecimal値を照合するSQL層で, Ontology / Graphのバインディング先はLakehouseの管理Deltaテーブルです。PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続はありません。PowerTableは別Planと別DBに分かれています。
 
 ## はじめ方
 
@@ -139,9 +142,9 @@ cd FabricPlanWorkshop
 | ブラウザー | Microsoft EdgeまたはGoogle Chrome |
 | 基礎知識 | Excelのピボットテーブル, 損益計算書, Power BIセマンティックモデルの基本 |
 | 任意のツール | サンプルモデルを事前に確認する場合のみPower BI Desktop |
-| Lab09発展編 | Data Agentは有料F2以上またはFabric有効化済みP1以上が必要。OntologyはPreviewで, Tenant AI / クロスジオ設定, 地域提供状況, 読取権限, 事前検証済みSnapshot, 専用Warehouseと一時CSV保管用Lakehouseを確認 |
+| Lab09発展編 | Data Agentは有料F2以上またはFabric有効化済みP1以上が必要。OntologyはPreviewで, Tenant AI / クロスジオ設定, 地域提供状況, 読取権限, 事前検証済みSnapshot, 専用Warehouse, Lakehouse Filesとmanaged Delta tablesを確認 |
 
-Spark, Python, データパイプラインの作成は演習に含みません。
+Lab00〜08の基本ルートにSparkやPythonは必要ありません。任意発展編Lab09ではLakehouseのSpark SQLを使います。Pythonとデータパイプライン作成は演習に含みません。
 
 > [!IMPORTANT]
 > **操作の前に課金を確認してください。** Planningは操作に応じたユーザー単位のセッションが基本で, 途中終了できません。教材で参照する公式例ではPlannerの1セッションは **847 CU時間**です。Fabric SQLなどの消費は別途考慮します。試用容量や短時間の演習を理由に費用確認を省略せず, [Lab00](labs/00-prerequisites.md)と[公式課金資料](https://learn.microsoft.com/en-us/fabric/iq/plan/resources/billing-fabric-plan)を確認してください。
@@ -200,7 +203,7 @@ flowchart TD
 - Capacity ID / SKU / Region: <capacity-id / sku / region>
 - 実行モード: <full-workshop-demo または learner-start>
 - Lab07 PowerTable: <trueが全Labの既定 / false>
-- Lab09 Plan Variance Analyst: <falseが既定 / trueは発展編。Data Agent用の有料容量 / Tenant AI設定 / 検証済みSnapshot / 専用Warehouse / 一時Lakehouse Filesが必要>
+- Lab09 Plan Variance Analyst: <falseが既定 / trueは発展編。Data Agent用の有料容量 / Tenant AI設定 / 検証済みSnapshot / Decimal検算用Warehouse / 一時Lakehouse Files / managed Delta tables / Ontology Previewが必要>
 - 課金範囲の承認者と上限: <役割 / 明示した上限>
 - 実行する本人の認証済みIDと方式: <本人委任 / サービスプリンシパル名。秘密情報は記載しない>
 - ソースWorkspaceまたは承認済みFabric定義の所在: <あれば指定 / なければなし>
@@ -211,7 +214,7 @@ flowchart TD
 3. API、依存関係、アイテム単位の必要権限、認証対象、料金、期待する作成物、既存アイテムとの競合、手作業が必要な箇所、Lab00〜08と、利用者が有効化した場合のみLab09の受入条件を記したdry-run案を提示する。Planのシート / 数式 / シナリオ / PowerTable / Ontology設定に未文書化のAPIやJSONを作って使わない。
 4. dry-runの後は停止する。Workspace権限の変更、ロール / 承認者割り当て、容量消費が発生する操作、請求開始につながる操作、データ変更、上書き / 削除、外部送信は、対象と結果を示して利用者の具体的な承認を得るまで実行しない。ユーザー名義でのロール付与や承認の代行をしない。
 5. 承認後だけ、公式に文書化されたAPIまたは管理画面を使う。明示的な再開では、検証済みの記録にある作成済みIDを再利用し、完了済みのPBIXインポートや作成を繰り返さない。Pipelineの更新 / 再配備も、レビュー済みのsource-target対応と所有対象だけに限定して承認後に行う。無関係な項目を上書き / 削除しない。202 Acceptedは完了ではない。APIが返すLocation / Retry-Afterと操作状態を使い、有限回で確認する。失敗時にWorkspaceを削除してやり直さない。
-6. 各Labのオブジェクトと実際の挙動を受入表で確認する。Lab09が有効な場合は, Data Agentの容量 / Tenant AI設定 / Ontology Previewの利用可否と, Snapshotのキー / 粒度 / 履歴 / 数値照合を事前確認する。専用Lakehouseへの承認済みCSVアップロードとWarehouseの型指定COPY / 件数検査も含める。AgentはOntologyだけをデータソースとして読み取り専用で使い, Plan変更や承認を行わない。Lab09の手順だけを根拠にライブ実行済み / 画面キャプチャ取得済みと報告せず, 実行と証拠取得を独立に確認します。認可テストは許可された別ユーザーごとに実行し、管理者アカウントの表示だけで本人別検証済みとしない。期待する初期値を上書きせず、承認・書き戻し・削除の演習を勝手に実行しない。未確認項目は手動対応として残す。
+6. 各Labのオブジェクトと実際の挙動を受入表で確認する。Lab09が有効な場合は, Data Agentの容量 / Tenant AI設定 / Ontology Previewの利用可否と, Snapshotのキー / 粒度 / 履歴 / 数値照合を事前確認する。専用Lakehouseへの承認済みCSVアップロード, Warehouseの型指定COPY / 件数検査, Spark SQLでのmanaged Delta作成, Lakehouse binding / Graph materializationも受入項目に含める。AgentはOntologyだけをデータソースとして読み取り専用で使い, Plan変更や承認を行わない。**確認済みなのは合成CSVによるPart 3〜5で, 実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。** 手順だけを根拠にライブ検証を報告せず, 実機の成功 / 失敗と未確認項目を分けます。認可テストは許可された別ユーザーごとに実行し、管理者アカウントの表示だけで本人別検証済みとしない。期待する初期値を上書きせず、承認・書き戻し・削除の演習を勝手に実行しない。未確認項目は手動対応として残す。
 7. 非同期操作IDは組織が承認したプライベートな運用記録に保存し、公開内容には値を記載しない。最後に実際の結果、未完了 / 手動対応、証拠の保存先を報告する。トークン、パスワード、テナント固有情報、参加者データをGit、公開チャット、公開ログ、スクリーンショットへ保存しない。認証やMFAは公式の本人向けフローを使い、回避しない。Fabricに接続できていない場合は、配備成功と主張しない。
 ```
 
@@ -221,7 +224,7 @@ flowchart TD
 2. AIにはまずリポジトリを調べさせ, Workspace全アイテムをページングして読み取り, 依存関係とdry-run計画を出させます。初回構築は空のWorkspaceが必須です。中断した実行の再開は明示的に指定し, 非公開の前回実行記録で同一テナント / Workspace / 容量 / 所有者とitem IDを照合し, 種別 / バインディングを含む全ページの状態が一致し, 無関係なアイテムや差分がない場合だけ行います。記録の欠落 / 不一致や想定外の状態では停止し, 既存アイテムを消して空にしません。
 3. **空Workspaceからの初回構築:** `Northwind_FMCG.pbix`をMicrosoft公式ソースから取得してインポートし, 作成されたレポートとモデルを確認します。初回Importでは`nameConflict=Abort`を使います。明示的な再開時は記録で検証した完了済みImportのIDを再利用し, 再Importしません。Plan固有のシート, 数式, シナリオ, PowerTableは, 現行のサポートが確認できた管理画面 / 定義インポートを人が承認して構成します。存在しない自動化テンプレートを補ってはいけません。
 4. **再現可能な環境昇格:** 検証済みで機密情報を除いたソースWorkspaceまたは公式サポートされたFabric定義を用意します。Pipelineの更新 / 再配備はレビュー済みのsource-target対応と所有対象に絞り, 承認後に実行します。依存するモデル / SQLを先にまたは一緒に展開し, 環境固有のVariable Library参照を適用した後にPlanを展開します。詳細は[配備ガイド](docs/DEPLOYMENT-GUIDE-JA.md)を参照します。
-5. どちらの方式でもLab00〜08の受入表を完了するまで, 「基本Workshop配備済み」と扱いません。Lab09は別途指定された場合だけ追加する発展編です。Data Agentが使える有料F2以上 / P1以上, Tenant AI設定, Ontology Preview, 完全性確認済みSnapshot, 専用Warehouseと一時Lakehouse Filesの経路がそろわない場合は未実施として記録し, 「全Workshop配備済み」と表現しません。初回構築でLab09を追加する場合は新規の比較用成果物として明示し, 既存データや初期値を変更しません。費用 / 権限 / データ保存先 / 認可テストを別々に確認します。
+5. どちらの方式でもLab00〜08の受入表を完了するまで, 「基本Workshop配備済み」と扱いません。Lab09は別途指定された場合だけ追加する発展編です。Data Agentが使える有料F2以上 / P1以上, Tenant AI設定, Ontology Preview, 完全性確認済みSnapshot, 専用Warehouse, 一時Lakehouse Filesとmanaged Delta tablesの経路がそろわない場合は未実施として記録し, 「全Workshop配備済み」と表現しません。初回構築でLab09を追加する場合は新規の比較用成果物として明示し, 既存データや初期値を変更しません。費用 / 権限 / データ保存先 / 認可テストを別々に確認します。
 
 > [!WARNING]
 > Fabric Planningの操作は課金セッションを開始する場合があります。アイテム作成, 書き戻し, ロール付与, 承認割り当ては, 対象と費用範囲を明示し, 事前承認を得てから行ってください。失敗時に無関係なアイテムやWorkspaceを自動削除しないでください。
@@ -294,4 +297,4 @@ Microsoft Fabric and the Microsoft logo are trademarks of Microsoft Corporation.
 
 A Japanese community adaptation of [Diego Diaz's Fabric Planning Lab](https://github.com/Diaz506/fabric-planning-lab), preserving the original MIT license. The original-derived Labs00–08 are translated and extended with the Japan-specific, optional Lab09 advanced module. The ten labs follow Harborlight Provisions Co. from planning and allocation to forecasting, SQL writeback, analysis, and governance.
 
-This edition adds Japanese guidance, step-by-step screenshots, numerical checks, and a 180-minute facilitator-led format for 10–20 prospective customers. The self-study estimates 165 minutes for the core path, or 195 minutes with optional PowerTable. Lab09 adds 45–60 minutes plus data preparation and requires additional paid capacity, tenant AI settings, and preview features. Review permissions, billing, and current feature availability before running the labs. This is an independent, unofficial adaptation, not affiliated with or endorsed by Microsoft.
+This edition adds Japanese guidance, step-by-step screenshots, numerical checks, and a 180-minute facilitator-led format for 10–20 prospective customers. The self-study estimates 165 minutes for the core path, or 195 minutes with optional PowerTable. Lab09 adds 45–60 minutes plus data preparation and requires additional paid capacity, tenant AI settings, and preview features. Its Part 3–5 workflow was tested with a synthetic CSV; extraction from a real Plan/writeback flow was not end-to-end tested. Review permissions, billing, and current feature availability before running the labs. This is an independent, unofficial adaptation, not affiliated with or endorsed by Microsoft.

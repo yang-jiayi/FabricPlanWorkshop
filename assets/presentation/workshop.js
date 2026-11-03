@@ -1,14 +1,50 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const slides = [...document.querySelectorAll(".slide")];
+  const allSlides = [...document.querySelectorAll(".slide")];
+  let language = "ja";
+  try { language = localStorage.getItem("fabric-workshop-language") === "en" ? "en" : "ja"; } catch { /* The guide also works without storage. */ }
+  if (location.hash) language = location.hash.startsWith("#en-") ? "en" : "ja";
+  let slides = allSlides.filter(slide => slide.dataset.language === language);
+  const translations = JSON.parse($("ui-translations").textContent);
+  const english = () => language === "en";
+  const ui = text => english() ? translations[text] || text : text;
+  const chapterMarkup = {ja: document.querySelector(".chapter-list").innerHTML,
+    en: $("english-chapters").innerHTML};
+  const chromeText = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (!node.parentElement.closest(".slide, script, style, .chapter-list, select") &&
+        Object.hasOwn(translations, node.textContent.trim())) chromeText.push([node, node.textContent]);
+  }
+  const chromeAttributes = [];
+  document.querySelectorAll("[aria-label], [placeholder], meta[name='description']").forEach(element => {
+    if (element.closest(".slide")) return;
+    for (const name of ["aria-label", "placeholder", "content"]) {
+      const value = element.getAttribute(name);
+      if (value && Object.hasOwn(translations, value)) chromeAttributes.push([element, name, value]);
+    }
+  });
+  function applyChrome() {
+    document.documentElement.lang = language;
+    $("language-select").value = language;
+    chromeText.forEach(([node, original]) => {
+      node.textContent = original.replace(original.trim(), ui(original.trim()));
+    });
+    chromeAttributes.forEach(([element, name, original]) => element.setAttribute(name, ui(original)));
+    document.querySelectorAll(".utility-nav a, .outline-index, .brand-lockup, .workshop-name, .skip-link").forEach(link => {
+      const article = link.getAttribute("href").replace(/^#(?:en-)?/, "");
+      if (article !== "main") link.href = `#${english() ? "en-" : ""}${article}`;
+    });
+  }
   const searchDialog = $("search-dialog");
   const searchInput = $("global-search-input");
   const imageDialog = $("image-dialog");
   const sidebar = $("sidebar");
   const normalize = value => value.normalize("NFKC").toLocaleLowerCase("ja");
   const termsFor = value => [...new Set(normalize(value).trim().split(/\s+/).filter(Boolean))];
-  const labName = lab => lab === "overview" ? "概要" : lab.replace("lab", "Lab");
+  const labName = lab => lab === "overview" ? ui("概要") : lab.replace("lab", "Lab");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let index = 0;
   let searchTerms = [];
@@ -45,24 +81,24 @@
       if (payloads === undefined) {
         try {
           const registry = $("image-payloads");
-          if (!registry) throw new Error("画像レジストリがありません。");
+          if (!registry) throw new Error(english() ? "The image registry is missing." : "画像レジストリがありません。");
           payloads = JSON.parse(registry.textContent);
           if (!payloads || typeof payloads !== "object" || Array.isArray(payloads)) {
-            throw new Error("画像レジストリの形式が正しくありません。");
+            throw new Error(english() ? "The image registry format is invalid." : "画像レジストリの形式が正しくありません。");
           }
         } catch (error) {
-          payloadError = `画像を表示できません。画像レジストリの読み込みに失敗しました: ${error.message}`;
+          payloadError = english() ? `Cannot display the screenshot. The image registry could not be read: ${error.message}` : `画像を表示できません。画像レジストリの読み込みに失敗しました: ${error.message}`;
           return reportImageError(image, payloadError);
         }
       }
       const source = Object.hasOwn(payloads, image.dataset.image) ? payloads[image.dataset.image] : undefined;
       if (typeof source !== "string" || !/^data:image\/[a-z0-9.+-]+[;,]/i.test(source)) {
-        return reportImageError(image, "画像を表示できません。指定された画像データが存在しないか, 形式が正しくありません。");
+        return reportImageError(image, english() ? "Cannot display the screenshot. Image data is missing or invalid." : "画像を表示できません。指定された画像データが存在しないか, 形式が正しくありません。");
       }
       return source;
     }
     const source = image.getAttribute("src");
-    return source || reportImageError(image, "画像を表示できません。画像の参照がありません。");
+    return source || reportImageError(image, english() ? "Cannot display the screenshot. Its reference is missing." : "画像を表示できません。画像の参照がありません。");
   }
 
   function loadImage(image) {
@@ -81,7 +117,7 @@
       });
     }, {rootMargin: "400px 0px"}) : null;
   document.querySelectorAll(".step-image").forEach(image => {
-    image.addEventListener("error", () => reportImageError(image, "画像データを読み込めません。HTMLファイルを再取得してください。"));
+    image.addEventListener("error", () => reportImageError(image, english() ? "Cannot load the image data. Download the HTML file again." : "画像データを読み込めません。HTMLファイルを再取得してください。"));
     if (imageObserver) imageObserver.observe(image);
   });
 
@@ -104,6 +140,7 @@
   }
 
   function buildChapterNavigation() {
+    document.querySelector(".chapter-list").innerHTML = chapterMarkup[language];
     document.querySelectorAll(".chapter-list > .chapter-link").forEach((link, ordinal) => {
       const lab = link.dataset.chapter;
       const group = document.createElement("div");
@@ -115,14 +152,14 @@
       toggle.type = "button";
       toggle.className = "chapter-toggle";
       toggle.textContent = "+";
-      toggle.setAttribute("aria-label", `${labName(lab)}の手順を表示`);
+      toggle.setAttribute("aria-label", english() ? `Show ${labName(lab)} procedures` : `${labName(lab)}の手順を表示`);
       toggle.setAttribute("aria-expanded", "false");
       const sections = document.createElement("div");
       sections.className = "chapter-sections";
       sections.id = `chapter-sections-${ordinal}`;
       sections.hidden = true;
       toggle.setAttribute("aria-controls", sections.id);
-      slides.filter(slide => slide.dataset.lab === lab && !["welcome", "workshop-index", "index"].includes(slide.id)).forEach(slide => {
+      slides.filter(slide => slide.dataset.lab === lab && !["welcome", "workshop-index", "index"].includes(slide.dataset.article)).forEach(slide => {
         const item = document.createElement("a");
         item.className = "section-link";
         item.href = `#${slide.id}`;
@@ -171,8 +208,8 @@
 
   function updateBreadcrumbs(active) {
     const home = document.createElement("a");
-    home.href = "#welcome";
-    home.textContent = "ホーム";
+    home.href = english() ? "#en-welcome" : "#welcome";
+    home.textContent = ui("ホーム");
     const parts = [home];
     if (active.dataset.lab !== "overview") {
       const lab = document.createElement("a");
@@ -181,7 +218,7 @@
       parts.push(lab);
     }
     const current = document.createElement("span");
-    current.textContent = active.id === "welcome" ? "ワークショップ" : active.dataset.title;
+    current.textContent = active.dataset.article === "welcome" ? ui("ワークショップ") : active.dataset.title;
     current.setAttribute("aria-current", "page");
     parts.push(current);
     $("breadcrumbs").replaceChildren();
@@ -200,7 +237,7 @@
     index = Math.max(0, Math.min(nextIndex, slides.length - 1));
     const active = slides[index];
     if (active.id !== highlightedArticle) searchTerms = [];
-    slides.forEach(slide => { slide.hidden = slide !== active; });
+    allSlides.forEach(slide => { slide.hidden = slide !== active; });
     document.querySelectorAll(".chapter-link").forEach(link => {
       link.setAttribute("aria-current", String(link.dataset.chapter === active.dataset.lab));
     });
@@ -221,8 +258,8 @@
     $("progress-track").setAttribute("aria-valuenow", String(index + 1));
     $("previous").disabled = index === 0;
     $("next").disabled = index === slides.length - 1;
-    $("previous-title").textContent = slides[index - 1]?.dataset.title || "最初の記事です";
-    $("next-title").textContent = slides[index + 1]?.dataset.title || "最後の記事です";
+    $("previous-title").textContent = slides[index - 1]?.dataset.title || ui("最初の記事です");
+    $("next-title").textContent = slides[index + 1]?.dataset.title || ui("最後の記事です");
     document.title = `${active.dataset.title} — Microsoft Fabric Plan Workshop`;
     updateBreadcrumbs(active);
     updateOutline();
@@ -233,6 +270,9 @@
   }
 
   function navigate(id, focus = true) {
+    if (!id) return false;
+    const article = id.replace(/^en-/, "");
+    id = (english() ? "en-" : "") + article;
     const target = document.getElementById(id);
     const slide = target?.closest(".slide");
     if (!slide) return false;
@@ -337,11 +377,46 @@
     });
   }
 
-  const corpus = slides.map((slide, ordinal) => {
-    const body = (slide.querySelector(".prose") || slide).textContent.replace(/\s+/g, " ").trim();
-    const title = slide.dataset.title;
-    return {slide, ordinal, title, body, titleFolded: normalize(title), bodyFolded: normalize(body), lab: slide.dataset.lab};
-  });
+  let corpus = [];
+  function rebuildCorpus() {
+    corpus = slides.map((slide, ordinal) => {
+      const body = (slide.querySelector(".prose") || slide).textContent.replace(/\s+/g, " ").trim();
+      const title = slide.dataset.title;
+      return {slide, ordinal, title, body, titleFolded: normalize(title), bodyFolded: normalize(body), lab: slide.dataset.lab};
+    });
+  }
+
+  function setLanguage(nextLanguage, updateHistory = true) {
+    if (!["ja", "en"].includes(nextLanguage)) throw new Error("Unsupported guide language");
+    const article = slides[index].dataset.article;
+    closeDialogs();
+    setNav(false);
+    language = nextLanguage;
+    searchTerms = [];
+    highlightedArticle = null;
+    clearTimeout(searchTimer);
+    searchTimer = null;
+    document.querySelectorAll("mark.article-hit").forEach(mark => mark.replaceWith(mark.textContent));
+    searchInput.value = "";
+    $("search-results").replaceChildren();
+    results = [];
+    selectedResult = -1;
+    searchInput.removeAttribute("aria-activedescendant");
+    searchInput.setAttribute("aria-expanded", "false");
+    $("nav-filter").value = "";
+    $("nav-empty").hidden = true;
+    slides = allSlides.filter(slide => slide.dataset.language === language);
+    applyChrome();
+    applyTheme($("theme-toggle").dataset.mode);
+    $("search-status").textContent = ui("手順名または本文の語を入力してください。");
+    buildChapterNavigation();
+    rebuildCorpus();
+    showSlide(Math.max(0, slides.findIndex(slide => slide.dataset.article === article)));
+    if (updateHistory && location.hash !== `#${slides[index].id}`) {
+      history.pushState(null, "", `#${slides[index].id}`);
+    }
+    try { localStorage.setItem("fabric-workshop-language", language); } catch { /* The selected language still applies for this visit. */ }
+  }
 
   function selectResult(ordinal, scroll = false) {
     const options = [...$("search-results").querySelectorAll('[role="option"]')];
@@ -361,7 +436,7 @@
     container.replaceChildren();
     results = [];
     if (!terms.length) {
-      $("search-status").textContent = "手順名または本文の語を入力してください。";
+      $("search-status").textContent = ui("手順名または本文の語を入力してください。");
       searchInput.setAttribute("aria-expanded", "false");
       selectResult(-1);
       return;
@@ -377,7 +452,7 @@
     groups.forEach((items, lab) => {
       const heading = document.createElement("div");
       heading.className = "search-group";
-      heading.textContent = `${labName(lab)} / ${items.length}件`;
+      heading.textContent = `${labName(lab)} / ${items.length}${english() ? " results" : "件"}`;
       heading.setAttribute("role", "presentation");
       container.append(heading);
       items.forEach(item => {
@@ -402,7 +477,7 @@
         container.append(option);
       });
     });
-    $("search-status").textContent = matches.length ? `${matches.length}件の記事${matches.length > 60 ? " / 上位60件を表示" : ""}` : "一致する記事はありません。別の語で検索してください。";
+    $("search-status").textContent = matches.length ? (english() ? `${matches.length} articles${matches.length > 60 ? " / showing the top 60" : ""}` : `${matches.length}件の記事${matches.length > 60 ? " / 上位60件を表示" : ""}`) : ui("一致する記事はありません。別の語で検索してください。");
     searchInput.setAttribute("aria-expanded", String(results.length > 0));
     selectResult(0);
   }
@@ -432,7 +507,7 @@
     imageScale = null;
     zoom.onload = applyZoom;
     zoom.onerror = () => {
-      reportImageError(image, "画像データを読み込めません。HTMLファイルを再取得してください。");
+      reportImageError(image, english() ? "Cannot load the image data. Download the HTML file again." : "画像データを読み込めません。HTMLファイルを再取得してください。");
       $("image-caption").textContent = image.dataset.loadError;
     };
     // A selected screenshot may still be outside the lazy-loading viewport.
@@ -440,8 +515,8 @@
     if (source) zoom.src = source;
     else zoom.removeAttribute("src");
     zoom.alt = image.alt;
-    $("image-caption").textContent = source ? image.alt || "操作画像" : image.dataset.loadError;
-    $("image-counter").textContent = `この記事の画像 ${imageIndex + 1} / ${images.length}`;
+    $("image-caption").textContent = source ? image.alt || (english() ? "Screenshot" : "操作画像") : image.dataset.loadError;
+    $("image-counter").textContent = `${english() ? "Screenshot" : "この記事の画像"} ${imageIndex + 1} / ${images.length}`;
     $("image-previous").disabled = imageIndex === 0;
     $("image-next").disabled = imageIndex === images.length - 1;
     applyZoom();
@@ -462,7 +537,7 @@
     }
     stage.scrollTop = 0;
     stage.scrollLeft = 0;
-    $("zoom-label").textContent = imageScale === null ? "全体表示" : `${Math.round(imageScale * 100)}%`;
+    $("zoom-label").textContent = imageScale === null ? ui("全体表示") : `${Math.round(imageScale * 100)}%`;
     $("image-fit").setAttribute("aria-pressed", String(imageScale === null));
     $("image-actual").setAttribute("aria-pressed", String(imageScale === 1));
   }
@@ -496,7 +571,7 @@
     wrapper.className = "table-wrap";
     wrapper.tabIndex = 0;
     wrapper.setAttribute("role", "region");
-    wrapper.setAttribute("aria-label", "データ表 / 横スクロール可能");
+    wrapper.setAttribute("aria-label", table.closest(".slide").dataset.language === "en" ? "Data table / scroll horizontally" : "データ表 / 横スクロール可能");
     table.before(wrapper);
     wrapper.append(table);
   });
@@ -506,10 +581,11 @@
       button = document.createElement("button");
       button.type = "button";
       button.className = "copy-code";
-      button.textContent = "コピー";
+      button.textContent = ui("コピー");
       block.querySelector(".code-label")?.append(button);
     }
     button.addEventListener("click", async () => {
+      const copyLabel = button.closest(".slide").dataset.language === "en" ? "Copy" : "コピー";
       const text = block.querySelector("code").textContent;
       let copied = false;
       try {
@@ -526,9 +602,9 @@
         field.remove();
         button.focus({preventScroll: true});
       }
-      button.textContent = copied ? "コピーしました" : "コピーできませんでした";
+      button.textContent = copied ? ui("コピーしました") : ui("コピーできませんでした");
       button.setAttribute("aria-live", "polite");
-      setTimeout(() => { button.textContent = "コピー"; }, 2000);
+      setTimeout(() => { button.textContent = copyLabel; }, 2000);
     });
   });
 
@@ -573,9 +649,10 @@
   function applyTheme(theme) {
     if (theme === "auto") delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
-    const names = {light: "明", dark: "暗", auto: "自動"};
-    $("theme-toggle").textContent = `テーマ: ${names[theme]}`;
-    $("theme-toggle").setAttribute("aria-label", `表示テーマ: ${names[theme]}。選択すると${names[{auto: "light", light: "dark", dark: "auto"}[theme]]}に変更`);
+    const names = english() ? {light: "Light", dark: "Dark", auto: "Auto"} : {light: "明", dark: "暗", auto: "自動"};
+    $("theme-toggle").textContent = `${english() ? "Theme" : "テーマ"}: ${names[theme]}`;
+    const next = names[{auto: "light", light: "dark", dark: "auto"}[theme]];
+    $("theme-toggle").setAttribute("aria-label", english() ? `Theme: ${names[theme]}. Select to use ${next}` : `表示テーマ: ${names[theme]}。選択すると${next}に変更`);
     $("theme-toggle").dataset.mode = theme;
   }
   let savedTheme = "auto";
@@ -586,6 +663,7 @@
     applyTheme(theme);
     try { localStorage.setItem("fabric-workshop-theme", theme); } catch { /* Theme still applies for this visit. */ }
   });
+  $("language-select").addEventListener("change", event => setLanguage(event.target.value));
 
   searchInput.addEventListener("input", () => {
     clearTimeout(searchTimer);
@@ -665,16 +743,21 @@
   window.addEventListener("hashchange", () => {
     let id;
     try { id = decodeURIComponent(location.hash.slice(1)) || "welcome"; } catch { return; }
+    const requestedLanguage = id.startsWith("en-") ? "en" : "ja";
+    if (requestedLanguage !== language) setLanguage(requestedLanguage, false);
     navigate(id, true);
   });
   document.querySelectorAll(".slide details").forEach(details => details.addEventListener("toggle", () => {
     if (details.closest(".slide") === slides[index]) updateOutline();
   }));
-  window.matchMedia("(min-width: 851px)").addEventListener("change", event => { if (event.matches) setNav(false); });
+  window.matchMedia("(min-width: 53.1875em)").addEventListener("change", event => { if (event.matches) setNav(false); });
   window.addEventListener("beforeprint", () => document.querySelectorAll(".step-image").forEach(loadImage));
+  applyChrome();
   buildChapterNavigation();
+  rebuildCorpus();
   let initialId;
   try { initialId = decodeURIComponent(location.hash.slice(1)); } catch { initialId = ""; }
+  initialId = (english() ? "en-" : "") + (initialId.replace(/^en-/, "") || "welcome");
   const initialTarget = document.getElementById(initialId);
   const initialSlide = initialTarget?.closest(".slide");
   showSlide(initialSlide ? slides.indexOf(initialSlide) : 0);

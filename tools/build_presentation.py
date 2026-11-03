@@ -13,6 +13,7 @@ from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
 from presentation_assets import data_uri, encode_pack, read_pack
+from presentation_localization import LOCALE_ROOT, load_translation, translate_shell
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +45,13 @@ def exclude_unconfirmed(text):
     if 'presentation-exclude-' in cleaned:
         raise ValueError('Unbalanced presentation exclusion markers')
     return cleaned
+
+
+def english_term(term):
+    return {
+        'SQLデータベース': 'SQL database', 'シナリオ': 'Scenario',
+        'セマンティックモデル': 'Semantic model', '書き戻し': 'Writeback', '配賦': 'Allocation',
+    }.get(term['term'], term['term'])
 
 
 @dataclass
@@ -132,7 +140,7 @@ def split_document(md, source, text, lab):
     return title, slides, anchors
 
 
-def apply_alerts(tokens):
+def apply_alerts(tokens, language='ja'):
     for index, token in enumerate(tokens):
         if token.type != 'blockquote_open' or index + 2 >= len(tokens):
             continue
@@ -147,12 +155,42 @@ def apply_alerts(tokens):
         # Keep the source marker recognizable while making it readable offline.
         if inline.children and inline.children[0].type == 'text':
             inline.children[0].content = inline.children[0].content.replace(
-                match.group(0), ALERT_LABELS[kind], 1,
+                match.group(0), (kind.title() if language == 'en' else ALERT_LABELS[kind]), 1,
             )
 
 
-def build(root=ROOT):
+def build(root=ROOT, language='ja', _single=False):
     root = Path(root)
+    if not _single:
+        japanese = build(root, 'ja', True)
+        english = build(root, 'en', True)
+        english_sections = re.findall(r'<section class="slide\b.*?</section>', english, re.S)
+        def annotate(section, locale):
+            identifier = re.search(r'\bid="([^"]+)"', section)[1]
+            article = identifier.removeprefix('en-')
+            if locale == 'en':
+                section = re.sub(r'\b(id|aria-labelledby)="(?!en-)([^"]+)"',
+                                 lambda match: f'{match[1]}="en-{match[2]}"', section)
+                section = re.sub(r'href="#(?!en-)([^"]+)"', r'href="#en-\1"', section)
+            return section.replace('<section ', f'<section lang="{locale}" data-language="{locale}" '
+                                   f'data-article="{article}" ', 1).replace(
+                                       'class="slide', ('hidden class="slide' if locale == 'en' else 'class="slide'), 1)
+        japanese = re.sub(r'<section class="slide\b.*?</section>',
+                          lambda match: annotate(match[0], 'ja'), japanese, flags=re.S)
+        extra = '\n'.join(annotate(section, 'en') for section in english_sections)
+        japanese = japanese.replace('      </div>\n      <nav class="article-navigation"',
+                                    extra + '\n      </div>\n      <nav class="article-navigation"', 1)
+        chapters = re.search(r'<nav class="chapter-list"[^>]*>(.*?)</nav>', english, re.S)[1]
+        ui = json.loads((root / UI_ROOT / 'locales/ui-en.json').read_text(encoding='utf-8'))
+        screenshot_count = re.search(r'<span>(\d+)枚の操作画像</span>', japanese)[1]
+        def ui_placeholders(value):
+            return value.replace('@@SCREENSHOT_COUNT@@', screenshot_count).replace(
+                '@@SECTION_COUNT@@', str(len(english_sections)))
+        ui = {ui_placeholders(key): ui_placeholders(value) for key, value in ui.items()}
+        extras = ('<template id="english-chapters">' + chapters + '</template>'
+                  '<script type="application/json" id="ui-translations">'
+                  + json.dumps(ui, ensure_ascii=False).replace('<', '\\u003c') + '</script>')
+        return japanese.replace('<script>(() =>', extras + '<script>(() =>', 1)
     image_manifest, image_payloads = read_pack(root)
     terms = json.loads((root / UI_ROOT / 'index-terms.json').read_text(encoding='utf-8'))
     stable_sections = json.loads((root / UI_ROOT / 'section-ids.json').read_text(encoding='utf-8'))
@@ -189,6 +227,15 @@ def build(root=ROOT):
                 next_id += 1
             remapped[old_id] = slide.id
         anchors = {anchor: remapped[slide_id] for anchor, slide_id in anchors.items()}
+        if language == 'en':
+            translated = load_translation(root, lab, exclude_unconfirmed(text), slides, source)
+            title = translated['title']
+            for slide in slides:
+                entry = translated['sections'][slide.id]
+                slide.title = entry['title']
+                slide.parent = entry.get('parent', '')
+                slide.tokens = md.parse(entry['markdown'])
+                slide.id = 'en-' + slide.id
         if not slides:
             raise ValueError(f'No presentation sections in {source}')
         label = 'Overview' if lab == 'overview' else f'Lab{number - 1:02d}'
@@ -212,7 +259,8 @@ def build(root=ROOT):
         if not (root / path).exists():
             raise ValueError(f'Missing local target: {source}: {target}')
         if not image and destination in links:
-            return '#' + links[destination]
+            identifier = links[destination]
+            return '#' + ('en-' if language == 'en' and not identifier.startswith('en-') else '') + identifier
         if image:
             return data_uri(root / path)
         if path.suffix.lower() == '.csv':
@@ -243,8 +291,8 @@ def build(root=ROOT):
         caption = html.escape(alt)
         return (
             '<span class="shot-wrap"><button type="button" class="shot" '
-            f'aria-label="画像を拡大: {html.escape(alt, quote=True)}">'
-            f'{rendered}<span class="shot-hint" aria-hidden="true">拡大 ↗</span>'
+            f'aria-label="{"Enlarge screenshot" if language == "en" else "画像を拡大"}: {html.escape(alt, quote=True)}">'
+            f'{rendered}<span class="shot-hint" aria-hidden="true">{"Enlarge" if language == "en" else "拡大"} ↗</span>'
             f'</button><span class="shot-caption">{caption}</span></span>'
         )
 
@@ -271,18 +319,21 @@ def build(root=ROOT):
 
     def fence_rule(tokens, index, options, env):
         token = tokens[index]
-        language = token.info.strip().split()[0] if token.info.strip() else ''
-        if language == 'mermaid':
+        code_language = token.info.strip().split()[0] if token.info.strip() else ''
+        if code_language == 'mermaid':
             # Preserve the canonical diagram source, without a remote renderer.
             return (
-                '<details class="diagram-source"><summary>構成図のMermaidソース '
-                '/ 正本Markdownも参照</summary><pre><code>'
+                '<details class="diagram-source"><summary>'
+                + ('Mermaid diagram source / see the canonical Markdown' if language == 'en'
+                   else '構成図のMermaidソース / 正本Markdownも参照')
+                + '</summary><pre><code>'
                 + html.escape(token.content) + '</code></pre></details>\n'
             )
         return (
             '<div class="code-block"><div class="code-label">'
-            + html.escape(language or 'text')
-            + '<button type="button" class="copy-code">コピー</button></div><pre tabindex="0" aria-label="コード / 横スクロール可能"><code>' + html.escape(token.content)
+            + html.escape(code_language or 'text')
+            + f'<button type="button" class="copy-code">{"Copy" if language == "en" else "コピー"}</button></div>'
+            + f'<pre tabindex="0" aria-label="{"Code / scroll horizontally" if language == "en" else "コード / 横スクロール可能"}"><code>' + html.escape(token.content)
             + '</code></pre></div>\n'
         )
 
@@ -300,7 +351,7 @@ def build(root=ROOT):
     })
     rendered_slides = []
     for slide in all_slides:
-        apply_alerts(slide.tokens)
+        apply_alerts(slide.tokens, language)
         body = md.renderer.render(slide.tokens, md.options, {'source': slide.source})
         content = unicodedata.normalize('NFKC', slide.title + ' ' + ' '.join(
             token.content for token in slide.tokens if token.type == 'inline')).casefold()
@@ -310,14 +361,14 @@ def build(root=ROOT):
             icon = term.get('icon')
             if icon and icon not in used_icons and any(
                 unicodedata.normalize('NFKC', alias).casefold() in content
-                for alias in [term['term'], *term.get('aliases', [])]
+                for alias in [term['term'], english_term(term), *term.get('aliases', [])]
             ):
                 used_icons.add(icon)
                 chips.append(
                     f'<span class="item-chip"><img class="product-icon" width="22" height="22" alt="" '
-                    f'src="{data_uri(root / "assets/brand" / icon)}">{html.escape(term["term"])}</span>'
+                    f'src="{data_uri(root / "assets/brand" / icon)}">{html.escape(english_term(term) if language == "en" else term["term"])}</span>'
                 )
-        item_chips = '<div class="item-chips" aria-label="Fabricの製品 / アイテム">' + ''.join(chips) + '</div>' if chips else ''
+        item_chips = f'<div class="item-chips" aria-label="{"Fabric products / items" if language == "en" else "Fabricの製品 / アイテム"}">' + ''.join(chips) + '</div>' if chips else ''
         source_link = REPOSITORY + slide.source.as_posix()
         lab_label = 'Overview' if slide.lab == 'overview' else slide.lab.title()
         rendered_slides.append(
@@ -326,14 +377,14 @@ def build(root=ROOT):
             '<header class="slide-heading"><div class="breadcrumb">'
             f'{lab_label} <span> / {html.escape(slide.parent or "Microsoft Fabric Plan Workshop")}</span></div>'
             f'<h1 id="{slide.id}-title" tabindex="-1">{html.escape(slide.title)}</h1>'
-            f'<a class="source-link" href="{source_link}" target="_blank" rel="noopener">正本Markdown ↗</a>'
+            f'<a class="source-link" href="{source_link}" target="_blank" rel="noopener">{"Canonical Markdown (Japanese)" if language == "en" else "正本Markdown"} ↗</a>'
             '</header>' + item_chips + '<div class="prose">' + body + '</div></section>'
         )
 
     chapter_buttons = []
     toc_cards = []
     for lab, label, title, icon, slides in chapters:
-        start = 'welcome' if lab == 'overview' else slides[0].id
+        start = ('en-welcome' if language == 'en' else 'welcome') if lab == 'overview' else slides[0].id
         icon_tag = (
             f'<img src="../assets/brand/{icon}" width="28" height="28" alt="" '
             'class="product-icon">'
@@ -350,17 +401,19 @@ def build(root=ROOT):
         toc_cards.append(
             f'<article class="toc-card" data-chapter="{lab}"><a class="toc-chapter" href="#{start}">'
             + icon_tag + f'<span>{label}</span></a><h3>{html.escape(title)}</h3>'
-            f'<details><summary>手順を選ぶ / {len(slides)} sections</summary>'
+            f'<details><summary>{"Choose a procedure" if language == "en" else "手順を選ぶ"} / {len(slides)} sections</summary>'
             f'<ol>{steps}</ol></details></article>'
         )
     index_entries = []
     current_group = None
-    for term in terms:
-        if term['group'] != current_group:
-            current_group = term['group']
+    for term in sorted(terms, key=lambda item: english_term(item).casefold()) if language == 'en' else terms:
+        group = 'A–Z' if language == 'en' else term['group']
+        if group != current_group:
+            current_group = group
             index_entries.append(f'<h2>{html.escape(current_group)}</h2>')
-        aliases = term.get('aliases', [])
-        needles = [unicodedata.normalize('NFKC', word).casefold() for word in [term['term'], *aliases]]
+        aliases = [alias for alias in term.get('aliases', []) if language != 'en' or not re.search(r'[\u3040-\u9fff]', alias)]
+        term_title = english_term(term) if language == 'en' else term['term']
+        needles = [unicodedata.normalize('NFKC', word).casefold() for word in [term_title, term['term'], *aliases]]
         occurrences = []
         for slide in all_slides:
             content = ' '.join(t.content for t in slide.tokens if t.type in ('inline', 'fence'))
@@ -375,8 +428,8 @@ def build(root=ROOT):
         entries = ''.join(f'<li><a href="#{slide.id}">{slide.lab.title()} / {html.escape(slide.title)}</a></li>'
                           for slide in occurrences)
         index_entries.append(
-            f'<details class="index-entry" data-group="{html.escape(term["group"])}">'
-            f'<summary>{icon_tag}<span>{html.escape(term["term"])}</span>'
+            f'<details class="index-entry" data-group="{html.escape(group)}">'
+            f'<summary>{icon_tag}<span>{html.escape(term_title)}</span>'
             f'<span class="index-count">{len(occurrences)}</span></summary>'
             f'<p class="index-aliases">{html.escape(" / ".join(aliases))}</p><ul>{entries}</ul></details>'
         )
@@ -386,6 +439,8 @@ def build(root=ROOT):
         UI_ROOT / 'section-ids.json',
         Path('tools/build_presentation.py'), Path('requirements-docs.txt'),
         Path('tools/presentation_assets.py'),
+        Path('tools/presentation_localization.py'),
+        *[path.relative_to(root) for path in (root / UI_ROOT / 'locales').rglob('*.json')],
     ]
     digest = hashlib.sha256()
     for source in sorted([*sources, *assets], key=lambda path: path.as_posix()):
@@ -405,6 +460,9 @@ def build(root=ROOT):
         'IMAGE_PAYLOADS': json.dumps(image_payloads, separators=(',', ':')),
     }
     template = (root / UI_ROOT / 'shell.html').read_text(encoding='utf-8')
+    if language == 'en':
+        template = translate_shell(template, json.loads(
+            (root / UI_ROOT / 'locales/ui-en.json').read_text(encoding='utf-8')))
     rendered = re.sub(r'@@([A-Z_]+)@@', lambda match: replacements[match[1]], template)
     # Templates and navigation use the same original, unmodified icon files.
     rendered = re.sub(

@@ -21,7 +21,7 @@
 
 ## インタラクティブなHTML操作ガイド
 
-**[HTMLプレゼンテーションを開く](docs/workshop-presentation.html)** — READMEの概要とLab00〜09を, 章 / 手順の目次, 矢印キー, 進捗バー, 拡大できる操作画像で読み進める日本語ガイドです。明 / 暗の配色とスマートフォン表示に対応し, 作者 **Jiayi Yang** を表紙とフッターに記載しています。
+**[HTMLプレゼンテーションを開く](docs/workshop-presentation.html)** — READMEの概要とLab00〜09を, 章 / 手順の目次, 矢印キー, 進捗バー, 拡大できる操作画像で読み進める日本語 / 英語ガイドです。上部の言語選択で本文も切り替わります。Yu Gothic UIを優先し, 表示領域に応じた読みやすい文字サイズ, 明 / 暗の配色とスマートフォン表示に対応します。作者 **Jiayi Yang** を表紙とフッターに記載しています。
 
 GitHub上ではHTMLが実行されないため, **`docs/workshop-presentation.html`をダウンロードしてEdge / Chromeで開く**と使えます。操作画像を含む単一のHTMLファイルで, `assets`フォルダーのコピーは不要です。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 

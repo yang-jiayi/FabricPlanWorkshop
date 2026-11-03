@@ -24,9 +24,12 @@ class PresentationTree(HTMLParser):
         self.slides = []
         self.images = []
         self.scripts = []
+        self.language = None
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if tag == 'section' and 'slide' in attrs.get('class', '').split():
+            self.language = attrs.get('data-language')
         if 'id' in attrs:
             self.ids.append(attrs['id'])
         if tag == 'a':
@@ -36,6 +39,7 @@ class PresentationTree(HTMLParser):
             if resource:
                 self.resources.append(resource)
         if tag == 'img':
+            attrs['_language'] = self.language
             self.images.append(attrs)
         if tag == 'script':
             self.scripts.append(attrs)
@@ -73,7 +77,8 @@ class PresentationBuildTests(unittest.TestCase):
             expected.extend((path.parent / target).resolve().relative_to(presentation.ROOT).as_posix()
                             for target in re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', content))
         actual = [
-            image['data-source'] for image in self.tree.images if 'data-image' in image
+            image['data-source'] for image in self.tree.images
+            if 'data-image' in image and image['_language'] == 'ja'
         ]
         self.assertEqual(actual, expected)
         self.assertEqual(len(actual), 578)
@@ -81,6 +86,28 @@ class PresentationBuildTests(unittest.TestCase):
                             if 'data-image' in image))
         self.assertTrue(all(int(image['width']) > 0 and int(image['height']) > 0
                             for image in self.tree.images if 'data-image' in image))
+        english = [image['data-source'] for image in self.tree.images
+                   if 'data-image' in image and image['_language'] == 'en']
+        self.assertEqual(english, expected)
+
+    def test_complete_bilingual_articles_share_one_image_registry(self):
+        japanese = {slide['data-article'] for slide in self.tree.slides if slide['data-language'] == 'ja'}
+        english = {slide['data-article'] for slide in self.tree.slides if slide['data-language'] == 'en'}
+        self.assertEqual(japanese, english)
+        self.assertGreater(len(english), 200)
+        self.assertEqual(self.generated.count('id="image-payloads"'), 1)
+        self.assertEqual(self.generated.count('id="language-select"'), 1)
+        self.assertIn('id="en-lab09-s002"', self.generated)
+        self.assertIn('id="en-index"', self.generated)
+
+    def test_english_fenced_code_and_mermaid_controls_are_localized(self):
+        english = '\n'.join(re.findall(
+            r'<section lang="en".*?</section>', self.generated, re.S))
+        self.assertIn('class="copy-code">Copy</button>', english)
+        self.assertIn('aria-label="Code / scroll horizontally"', english)
+        self.assertIn('Mermaid diagram source / see the canonical Markdown', english)
+        self.assertNotIn('class="copy-code">コピー</button>', english)
+        self.assertNotIn('構成図のMermaidソース', english)
 
     def test_all_resources_are_local_and_exist(self):
         for target in self.tree.resources:
@@ -147,6 +174,21 @@ class PresentationBuildTests(unittest.TestCase):
             path.write_bytes(b'PeriodKey,Value\n202601,12.34\n')
             self.assertEqual(presentation.data_uri(path), windows)
 
+    def test_japanese_typography_is_fluid_and_respects_font_preferences(self):
+        css = (presentation.ROOT / presentation.UI_ROOT / 'workshop.css').read_text(encoding='utf-8')
+        self.assertIn('font-family: "Yu Gothic UI", "Yu Gothic", Meiryo', css)
+        self.assertIn('--type-body: clamp(1.0625rem, 1rem + .27vw, 1.25rem)', css)
+        self.assertIn('--type-ui: clamp(.9375rem, .875rem + .16vw, 1rem)', css)
+        self.assertIn('--type-small: clamp(.875rem, .8125rem + .16vw, .9375rem)', css)
+        sizes = re.findall(r'font-size:\s*([^;}]+)', css)
+        self.assertTrue(sizes)
+        self.assertTrue(all('px' not in size for size in sizes))
+        self.assertIn('font-family: Consolas, "Cascadia Code", monospace', css)
+        self.assertNotRegex(css, r'(?:^|[;}])\s*html\s*\{[^}]*font-size:')
+        script = (presentation.ROOT / presentation.UI_ROOT / 'workshop.js').read_text(encoding='utf-8')
+        self.assertNotIn('devicePixelRatio', script)
+        self.assertNotIn('screen.width', script)
+
     def test_exclusions_reject_malformed_markers(self):
         with self.assertRaisesRegex(ValueError, 'Unbalanced'):
             presentation.exclude_unconfirmed('<!-- presentation-exclude-start: TEST -->\nsecret')
@@ -154,7 +196,7 @@ class PresentationBuildTests(unittest.TestCase):
             'before\n<!-- presentation-exclude-start: TEST -->\nsecret\n'
             '<!-- presentation-exclude-end: TEST -->\nafter'), 'before\n\nafter')
 
-    def test_source_edit_changes_the_generated_output(self):
+    def test_source_edit_requires_synchronized_english_translation(self):
         original = Path.read_text
 
         def changed(path, *args, **kwargs):
@@ -164,9 +206,25 @@ class PresentationBuildTests(unittest.TestCase):
             return text
 
         with patch.object(Path, 'read_text', changed):
+            with self.assertRaisesRegex(ValueError, 'English translation is stale'):
+                presentation.build()
+
+    def test_translation_edit_changes_generated_output(self):
+        original = Path.read_text
+
+        def changed(path, *args, **kwargs):
+            text = original(path, *args, **kwargs)
+            if path.name == 'lab01.json':
+                content = json.loads(text)
+                section = next(iter(content['sections'].values()))
+                section['markdown'] += '\nEnglish synchronization probe.\n'
+                return json.dumps(content, ensure_ascii=False)
+            return text
+
+        with patch.object(Path, 'read_text', changed):
             updated = presentation.build()
         self.assertNotEqual(updated, self.generated)
-        self.assertIn('Presentation synchronization probe.', updated)
+        self.assertIn('English synchronization probe.', updated)
 
     def test_check_exits_nonzero_for_stale_generated_file(self):
         with tempfile.TemporaryDirectory() as directory:

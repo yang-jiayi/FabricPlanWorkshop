@@ -49,7 +49,7 @@ def run(output, axe):
 
         capture('after-home')
         audit('home-light')
-        check('578_screenshots', page.locator('img[data-image]').count() == 578)
+        check('578_screenshots', page.locator('.slide[data-language="ja"] img[data-image]').count() == 578)
         check('embedded_resources', page.evaluate("""() => [...document.querySelectorAll('img[src]')]
               .every(i => i.getAttribute('src').startsWith('data:'))"""))
         check('links_resolve', page.evaluate("""() => [...document.querySelectorAll('a[href]')].every(a => {
@@ -63,7 +63,7 @@ def run(output, axe):
         check('initial_render_under_10_seconds', report['load_seconds'] < 10)
         check('all_payloads_decode_at_original_dimensions', page.evaluate("""async () => {
             const payloads=JSON.parse(document.getElementById('image-payloads').textContent);
-            for (const original of document.querySelectorAll('img[data-image]')) {
+            for (const original of document.querySelectorAll('.slide[data-language="ja"] img[data-image]')) {
                 const image=new Image(); image.src=payloads[original.dataset.image];
                 try { await image.decode(); } catch { return false; }
                 if (image.naturalWidth!==Number(original.getAttribute('width')) ||
@@ -133,6 +133,8 @@ def run(output, axe):
                       .find(s=>s.querySelector('.copy-code')).id""")
         page.wait_for_timeout(150)
         page.locator('.slide:visible .copy-code').first.click()
+        page.wait_for_function("""() => /コピーしました|コピーできませんでした/.test(
+            document.querySelector('.slide:not([hidden]) .copy-code').textContent)""")
         check('copy_button', page.locator('.slide:visible .copy-code').first.inner_text() == 'コピーしました')
         page.evaluate("""location.hash=[...document.querySelectorAll('.slide')]
                       .find(s=>s.querySelector('a[download*="sample.csv"]')).id""")

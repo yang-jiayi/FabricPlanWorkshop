@@ -190,6 +190,17 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertNotIn('devicePixelRatio', script)
         self.assertNotIn('screen.width', script)
 
+    def test_motion_is_finite_reduced_and_preserves_icon_geometry(self):
+        css = (presentation.ROOT / presentation.UI_ROOT / 'workshop.css').read_text(encoding='utf-8')
+        self.assertIn('@keyframes card-shuffle', css)
+        self.assertIn('@keyframes hit-pulse', css)
+        self.assertIn('@keyframes gradient-arrival', css)
+        self.assertIn('@media (prefers-reduced-motion: reduce)', css)
+        self.assertIn('@media print {\n  *, *::before, *::after { animation: none !important; transition: none !important; }', css)
+        self.assertNotIn('infinite', css)
+        self.assertNotRegex(css, r'\b(?:rotate|skew|scaleX|scaleY)\s*\(')
+        self.assertNotRegex(css, r'(?:^|[;{])\s*filter\s*:')
+
     def test_exclusions_reject_malformed_markers(self):
         with self.assertRaisesRegex(ValueError, 'Unbalanced'):
             presentation.exclude_unconfirmed('<!-- presentation-exclude-start: TEST -->\nsecret')
@@ -291,6 +302,13 @@ class PresentationEditionTests(unittest.TestCase):
             for href in tree.links:
                 if href.startswith('#'):
                     self.assertIn(unquote(href[1:]), tree.ids)
+
+    def test_author_credit_and_linkedin_are_in_both_editions(self):
+        for content in (self.participant, self.instructor):
+            self.assertIn('<meta name="author" content="Jiayi Yang, Swarm Data SE">', content)
+            self.assertIn('<strong>Jiayi Yang, Swarm Data SE</strong>', content)
+            self.assertIn('href="https://www.linkedin.com/in/yangjiayi/" target="_blank" '
+                          'rel="noopener noreferrer">LinkedIn</a>', content)
 
     def test_answers_are_absent_from_serialized_participant_html(self):
         for lab in range(9):

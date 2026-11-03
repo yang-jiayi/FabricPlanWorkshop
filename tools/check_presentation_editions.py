@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 from check_presentation_browser import run as browser_checks
 from check_presentation_languages import run as language_checks
 from check_presentation_typography import run as typography_checks
+from check_presentation_motion import run as motion_checks
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,7 @@ def run(output, axe):
             'browser': browser_checks(folder / 'browser', axe, standalone),
             'languages': language_checks(folder / 'languages', axe, standalone),
             'typography': typography_checks(folder / 'typography', html_path=standalone),
+            'motion': motion_checks(folder / 'motion', standalone),
         }
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(channel='msedge')
@@ -43,10 +45,17 @@ def run(output, axe):
                 prefix = f'{edition}_{locale}_'
                 report['scope_checks'][prefix + 'visible_edition_label'] = page.locator(
                     '.edition-label').inner_text() == label
+                report['scope_checks'][prefix + 'author_credit'] = page.locator(
+                    '.guide-footer strong').inner_text() == 'Jiayi Yang, Swarm Data SE'
+                report['scope_checks'][prefix + 'linkedin'] = page.locator(
+                    '.guide-footer a', has_text='LinkedIn').get_attribute('href') == (
+                        'https://www.linkedin.com/in/yangjiayi/')
                 report['scope_checks'][prefix + 'instructor_scope'] = (
                     page.locator(f'.slide[data-language="{locale}"][data-lab="facilitator"]').count()
                     == (14 if edition == 'instructor' else 0))
                 page.screenshot(path=str(folder / f'{locale}-home.png'))
+                page.locator('.guide-footer').scroll_into_view_if_needed()
+                page.screenshot(path=str(folder / f'{locale}-credit.png'))
                 page.keyboard.press('Control+k')
                 page.locator('#global-search-input').fill('9,317')
                 page.wait_for_timeout(150)
@@ -88,7 +97,7 @@ def run(output, axe):
             browser.close()
     report['passed'] = all(report['scope_checks'].values()) and all(
         suite['passed'] for edition in report['editions'].values()
-        for suite in [edition['browser'], edition['languages'], edition['typography']])
+        for suite in [edition['browser'], edition['languages'], edition['typography'], edition['motion']])
     (output / 'edition-report.json').write_text(
         json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
     return report

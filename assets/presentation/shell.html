@@ -6,81 +6,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="author" content="Jiayi Yang">
-  <meta name="description" content="Microsoft Fabric Plan Workshop / 日本語のオフライン操作ガイド。Lab00–09の手順と画面を章ごとに確認できます。">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' file:; font-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>Microsoft Fabric Plan Workshop — Interactive Guide</title>
+  <meta name="description" content="Microsoft Fabric Plan Workshop / 日本語のオフライン操作ガイド。Lab00–09の手順と画面を確認できます。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Microsoft Fabric Plan Workshop</title>
   <style>@@STYLES@@</style>
 </head>
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="app-bar">
-    <a class="brand-lockup" href="#welcome" aria-label="Microsoft Fabric Plan Workshop 表紙">
-      <img src="../assets/brand/fabric_48_color.svg" width="36" height="36" alt="Microsoft Fabric 製品アイコン">
-      <span><strong>Microsoft Fabric</strong><small>PLAN WORKSHOP / 非公式教材</small></span>
-    </a>
+    <button type="button" id="nav-toggle" class="icon-button mobile-tool" aria-controls="sidebar" aria-expanded="false" aria-label="章のナビゲーションを開く">☰</button>
+    <a class="brand-lockup" href="#welcome"><img src="../assets/brand/fabric_48_color.svg" width="32" height="32" alt=""><strong>Microsoft Fabric</strong></a>
+    <span class="header-divider" aria-hidden="true"></span>
+    <a class="workshop-name" href="#welcome">Plan Workshop</a>
+    <button type="button" id="search-open" class="global-search" aria-haspopup="dialog" aria-label="ワークショップ内を検索"><span class="search-symbol" aria-hidden="true"></span><span>ワークショップ内を検索</span><kbd>Ctrl K</kbd></button>
     <div class="app-tools">
-      <button type="button" id="toc-open" class="tool-button"><span aria-hidden="true">☷</span> 目次</button>
-      <button type="button" id="theme-toggle" class="tool-button" aria-label="表示テーマを切り替える">テーマ: 自動</button>
-      <button type="button" id="focus-toggle" class="tool-button desktop-tool" aria-pressed="false">集中表示</button>
-      <button type="button" id="help-open" class="tool-button" aria-label="操作方法を表示">?</button>
+      <button type="button" id="theme-toggle" class="tool-button" aria-label="表示テーマ: 自動。選択すると明るいテーマに変更">テーマ: 自動</button>
+      <button type="button" id="help-open" class="icon-button" aria-label="操作方法を表示">?</button>
     </div>
   </header>
   <div class="workspace">
-    <aside class="sidebar" aria-label="ワークショップの章">
-      <div class="sidebar-heading"><span class="eyebrow">YOUR LEARNING PATH</span><p>準備から, 計画と差異分析へ。</p></div>
-      <nav class="chapter-list" aria-label="Labを選択">@@CHAPTERS@@</nav>
-      <div class="sidebar-footer">日本語 / 10 labs / オフライン対応<br>Author <strong>Jiayi Yang</strong></div>
+    <button type="button" id="nav-scrim" class="nav-scrim" aria-label="ナビゲーションを閉じる" hidden></button>
+    <aside id="sidebar" class="sidebar" aria-label="ワークショップの章">
+      <div class="sidebar-top"><a href="#welcome">ワークショップ</a><button type="button" id="nav-close" class="icon-button mobile-tool" aria-label="ナビゲーションを閉じる">×</button></div>
+      <label class="nav-filter-label" for="nav-filter">目次の絞り込み</label>
+      <input id="nav-filter" class="nav-filter" type="search" placeholder="章 / 手順名" autocomplete="off">
+      <nav class="utility-nav" aria-label="概要"><a href="#welcome">ホーム</a><a href="#workshop-index">全体の目次</a><a href="#index">索引</a></nav>
+      <nav class="chapter-list" aria-label="Labと手順">@@CHAPTERS@@</nav>
+      <p id="nav-empty" class="muted" hidden>一致する章 / 手順はありません。</p>
+      <div class="sidebar-footer">日本語 / オフライン操作ガイド<br><span>@@SCREENSHOT_COUNT@@枚の操作画像</span></div>
     </aside>
     <main id="main" tabindex="-1">
       <div class="reading-bar">
-        <button type="button" id="steps-open" class="step-picker" aria-haspopup="dialog">この章の手順 <span aria-hidden="true">⌄</span></button>
-        <span id="position-label">全@@SECTION_COUNT@@ sections</span>
+        <nav id="breadcrumbs" class="breadcrumbs" aria-label="現在の位置"><a href="#welcome">ホーム</a><span aria-hidden="true">/</span><span>ワークショップ</span></nav>
+        <button type="button" id="steps-open" class="text-button" aria-haspopup="dialog">この章の手順</button>
       </div>
       <div id="slide-scroller">
-        <section class="slide welcome" id="welcome" data-lab="overview" data-title="ワークショップへようこそ" aria-labelledby="welcome-title">
-          <div class="hero-grid">
+        <section class="slide welcome" id="welcome" data-lab="overview" data-title="Microsoft Fabric Plan Workshop" aria-labelledby="welcome-title">
+          <div class="home-hero">
             <div class="hero-copy">
-              <span class="hero-badge"><span aria-hidden="true"></span> HANDS-ON / 日本語</span>
-              <h1 id="welcome-title" tabindex="-1">Microsoft Fabric<br><span>Plan Workshop</span></h1>
-              <p class="hero-lead">数字をつなぎ,<br>計画を意思決定へ。</p>
-              <p>配賦 / 見通し / 書き戻し / 差異分析。<br>手順と画面を見比べながら, 自分のペースで進める操作ガイド。</p>
-              <div class="hero-actions"><a class="primary-button" href="#lab00-s000">Lab00から始める <span aria-hidden="true">→</span></a><button type="button" class="secondary-button" data-open-toc>全Labの目次</button></div>
-              <div class="author-line"><span class="author-avatar" aria-hidden="true">JY</span><span>Japanese edition &amp; guide<br><strong>Jiayi Yang</strong></span></div>
+              <h1 id="welcome-title" tabindex="-1">Microsoft Fabric<br>Plan Workshop</h1>
+              <div class="hero-actions"><a class="primary-button" href="#lab00-s000">Lab00を開く <span aria-hidden="true">→</span></a><a class="secondary-button" href="#workshop-index">全体の目次</a></div>
             </div>
-            <div class="hero-visual" aria-label="演習で使うMicrosoft Fabric製品とアイテム">
-              <div class="visual-caption">ONE CONNECTED LEARNING JOURNEY</div>
-              <div class="fabric-tile"><img src="../assets/brand/fabric_48_color.svg" width="88" height="88" alt="Microsoft Fabric 製品アイコン"><strong>Microsoft Fabric</strong><span>計画と分析を, 同じ基盤で。</span></div>
+            <div class="hero-products" aria-label="演習で使用する製品とアイテム">
+              <div class="hero-fabric"><img src="../assets/brand/fabric_48_color.svg" width="72" height="72" alt=""><strong>Microsoft Fabric</strong></div>
               <div class="product-grid">
-                <div><img src="../assets/brand/semantic_model_48_item.svg" width="40" height="40" alt=""><span>Semantic model</span></div>
-                <div><img src="../assets/brand/planning_48_item.svg" width="40" height="40" alt=""><span>Plan</span></div>
-                <div><img src="../assets/brand/sql_database_48_item.svg" width="40" height="40" alt=""><span>SQL database</span></div>
-                <div><img src="../assets/brand/report_48_item.svg" width="40" height="40" alt=""><span>Report</span></div>
-                <div><img src="../assets/brand/data_warehouse_48_item.svg" width="40" height="40" alt=""><span>Warehouse</span></div>
-                <div><img src="../assets/brand/data_agent_48_item.svg" width="40" height="40" alt=""><span>Data Agent</span></div>
+                <div><img src="../assets/brand/planning_48_item.svg" width="32" height="32" alt=""><span>Plan アイテム</span></div>
+                <div><img src="../assets/brand/semantic_model_48_item.svg" width="32" height="32" alt=""><span>セマンティックモデル</span></div>
+                <div><img src="../assets/brand/sql_database_48_item.svg" width="32" height="32" alt=""><span>SQL database</span></div>
+                <div><img src="../assets/brand/report_48_item.svg" width="32" height="32" alt=""><span>レポート</span></div>
+                <div><img src="../assets/brand/data_warehouse_48_item.svg" width="32" height="32" alt=""><span>Warehouse</span></div>
+                <div><img src="../assets/brand/data_agent_48_item.svg" width="32" height="32" alt=""><span>Data Agent</span></div>
+                <div><img src="../assets/brand/lakehouse_48_item.svg" width="32" height="32" alt=""><span>Lakehouse</span></div>
+                <div><img src="../assets/brand/notebook_48_item.svg" width="32" height="32" alt=""><span>ノートブック</span></div>
+                <div><img src="../assets/brand/graph_intelligence_48_color.svg" width="32" height="32" alt=""><span>Graph</span></div>
               </div>
             </div>
           </div>
-          <div class="hero-facts"><span><strong>10</strong> labs / 00–09</span><span><strong>180分</strong> 集合開催の基本案</span><span><strong>← →</strong> 手順を切り替え</span><span><strong>@@SCREENSHOT_COUNT@@</strong> 既存の操作画像</span></div>
-          <div class="welcome-note"><strong>操作前に確認:</strong> このHTMLは説明用です。Fabricへの接続や操作を自動実行しません。容量 / 権限 / 課金 / 承認をLab00で確認してください。Lab07は任意演習, Lab09は別枠の発展編です。Lab09の実機確認は合成CSVから始めたPart 3〜5に限定され, 実PlanからのEnd-to-End確認ではありません。</div>
-          <div class="welcome-credits">原典: Diego Diaz / <a href="https://github.com/Diaz506/fabric-planning-lab" target="_blank" rel="noopener noreferrer">Fabric Planning Lab: Harborlight Provisions Co. ↗</a> (MIT). 日本語版の改良 / 独自のLab09は<a href="../LOCALIZATION.md">LOCALIZATION.md</a>を参照。独立したコミュニティ教材であり, Microsoftの公式教材 / 承認を示しません。</div>
+          <div class="home-content prose">
+            <h2 id="home-overview">このガイドについて</h2>
+            <p>左の目次から章と手順を選択してください。操作画像は選択して拡大できます。検索は本文にも対応しています。表示する記事のURLはブックマークできます。</p>
+            <div class="home-facts"><div><strong>10</strong><span>Lab00–09</span></div><div><strong>180分</strong><span>集合開催の基本案</span></div><div><strong>@@SCREENSHOT_COUNT@@枚</strong><span>操作画像</span></div></div>
+            <h2 id="home-preparation">操作前の確認</h2>
+            <div class="welcome-note"><strong>重要</strong><p>このHTMLは説明用です。Fabricへの接続や操作を自動実行しません。容量 / 権限 / 課金 / 承認をLab00で確認してください。Lab07は任意演習, Lab09は別枠の発展編です。Lab09は合成CSVを用いたPart 3〜5の操作を実機で確認しています。</p></div>
+            <h2 id="home-sources">原典と日本語版</h2>
+            <p>原典: Diego Diaz / <a href="https://github.com/Diaz506/fabric-planning-lab" target="_blank" rel="noopener noreferrer">Fabric Planning Lab: Harborlight Provisions Co.</a> (MIT). 日本語版の改良 / 独自のLab09は<a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/LOCALIZATION.md" target="_blank" rel="noopener noreferrer">翻訳と用語の方針</a>を参照してください。</p>
+          </div>
+        </section>
+        <section class="slide index-page" id="workshop-index" data-lab="overview" data-title="全体の目次" aria-labelledby="workshop-index-title">
+          <header class="slide-heading"><h1 id="workshop-index-title" tabindex="-1">全体の目次</h1></header>
+          <div class="prose workshop-toc"><div class="toc-grid">@@TOC@@</div></div>
+        </section>
+        <section class="slide index-page" id="index" data-lab="overview" data-title="索引" aria-labelledby="index-title">
+          <header class="slide-heading"><h1 id="index-title" tabindex="-1">索引</h1></header>
+          <div class="prose workshop-index">@@INDEX@@</div>
         </section>
         @@SLIDES@@
       </div>
-      <footer class="guide-footer"><span>Author <strong>Jiayi Yang</strong> · 非公式コミュニティ教材</span><a href="../assets/brand/README.md">公式アイコンの出典 / 利用条件 ↗</a></footer>
+      <nav class="article-navigation" aria-label="前後の記事">
+        <button type="button" id="previous"><span>← 前の記事</span><strong id="previous-title"></strong></button>
+        <button type="button" id="next"><span>次の記事 →</span><strong id="next-title"></strong></button>
+      </nav>
+      <div class="reading-position"><span id="position-label">全@@SECTION_COUNT@@記事</span><span id="progress-label" aria-live="polite"></span></div>
+      <div id="progress-track" class="progress-track" role="progressbar" aria-label="教材内の表示位置" aria-valuemin="1" aria-valuemax="@@SECTION_COUNT@@" aria-valuenow="1"><div id="progress-fill"></div></div>
+      <footer class="guide-footer">
+        <p>日本語版 / HTMLガイド: <strong>Jiayi Yang</strong></p>
+        <p>原典: <a href="https://github.com/Diaz506/fabric-planning-lab" target="_blank" rel="noopener noreferrer">Diego Diaz / fabric-planning-lab</a> / <a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MITライセンス</a></p>
+        <p>独立したコミュニティ教材です。Microsoftの公式教材 / 承認を示しません。</p>
+        <p>Microsoft Fabric and the Microsoft logo are trademarks of Microsoft Corporation. 製品アイコンは無改変で使用しています。<a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/assets/brand/README.md" target="_blank" rel="noopener noreferrer">アイコンの出典 / 利用条件</a></p>
+      </footer>
     </main>
+    <aside class="article-outline" aria-label="この記事の内容"><div class="outline-sticky"><h2>この記事の内容</h2><nav id="article-toc"></nav><a class="outline-index" href="#workshop-index">全体の目次</a><a class="outline-index" href="#index">索引</a></div></aside>
   </div>
-  <nav class="player" aria-label="プレゼンテーション操作">
-    <div id="progress-track" class="progress-track" role="progressbar" aria-label="教材内の表示位置" aria-valuemin="1" aria-valuemax="@@SECTION_COUNT@@" aria-valuenow="1"><div id="progress-fill"></div></div>
-    <button type="button" id="previous" class="nav-button" aria-label="前の手順">← <span>前へ</span></button>
-    <div class="player-status"><span id="current-chapter">Overview</span><strong id="current-step">ワークショップへようこそ</strong><span id="progress-label" aria-live="polite">1 / @@SECTION_COUNT@@</span></div>
-    <button type="button" id="next" class="nav-button next-button"><span>次へ</span> →</button>
-  </nav>
-  <dialog id="toc-dialog" aria-labelledby="toc-title">
-    <div class="dialog-heading"><div><span class="eyebrow">EXPLORE THE WORKSHOP</span><h2 id="toc-title">学びたい章から, 始めよう。</h2></div><button type="button" class="close-button" data-close-dialog aria-label="目次を閉じる">×</button></div>
-    <p>章または手順を選択。本文は上下にスクロールできます。操作画像は選択すると拡大します。</p>
-    <label class="search-label" for="toc-search">手順名を検索<input id="toc-search" type="search" placeholder="例: Forecast, Ontology, 課金" autocomplete="off"></label>
-    <p id="toc-empty" hidden>一致する手順はありません。別の語で検索してください。</p>
-    <div class="toc-grid">@@TOC@@</div>
+  <dialog id="search-dialog" aria-labelledby="search-title">
+    <div class="dialog-heading"><h2 id="search-title">ワークショップ内を検索</h2><button type="button" class="close-button" data-close-dialog aria-label="検索を閉じる">×</button></div>
+    <label class="search-label" for="global-search-input">検索語<input id="global-search-input" type="search" placeholder="例: Forecast 書き戻し" autocomplete="off" aria-controls="search-results" aria-describedby="search-hint" role="combobox" aria-expanded="false" aria-autocomplete="list"></label>
+    <p id="search-hint" class="muted">複数の語はすべて含む記事を検索します。↑ ↓で選択 / Enterで開く / Escで閉じる</p>
+    <p id="search-status" role="status">手順名または本文の語を入力してください。</p>
+    <div id="search-results" role="listbox" aria-label="検索結果"></div>
   </dialog>
   <dialog id="steps-dialog" aria-labelledby="steps-title">
     <div class="dialog-heading"><h2 id="steps-title">この章の手順</h2><button type="button" class="close-button" data-close-dialog aria-label="手順一覧を閉じる">×</button></div>
@@ -88,27 +110,21 @@
   </dialog>
   <dialog id="image-dialog" aria-labelledby="image-caption">
     <div class="image-toolbar"><span id="image-counter"></span><button type="button" class="close-button" data-close-dialog aria-label="拡大画像を閉じる">×</button></div>
-    <div class="zoom-toolbar" aria-label="画像の表示倍率">
-      <button type="button" id="image-fit" class="secondary-button">全体</button>
-      <button type="button" id="image-actual" class="secondary-button">100%</button>
-      <button type="button" id="image-minus" class="secondary-button" aria-label="画像を縮小">−</button>
-      <button type="button" id="image-plus" class="secondary-button" aria-label="画像を拡大">+</button>
-      <span id="zoom-label" aria-live="polite">全体表示</span>
-    </div>
-    <div class="image-stage" tabindex="0" role="region" aria-label="拡大画像 / 100%表示では縦横にスクロール可能"><img id="zoom-image" alt=""></div>
-    <p class="zoom-hint">画像を選択すると100% / 全体を切り替え。100%以上では縦横にスクロールして細部を読めます。</p>
+    <div class="zoom-toolbar" aria-label="画像の表示倍率"><button type="button" id="image-fit" class="secondary-button">全体</button><button type="button" id="image-actual" class="secondary-button">100%</button><button type="button" id="image-minus" class="secondary-button" aria-label="画像を縮小">−</button><button type="button" id="image-plus" class="secondary-button" aria-label="画像を拡大">+</button><span id="zoom-label" aria-live="polite">全体表示</span></div>
+    <div class="image-stage" tabindex="0" role="region" aria-label="拡大画像 / ドラッグまたはスクロールで移動"><img id="zoom-image" alt="" draggable="false"></div>
+    <p class="zoom-hint">全体 / 100%で表示を切り替えます。拡大時はドラッグまたは縦横のスクロールで移動できます。</p>
     <div class="image-controls"><button type="button" id="image-previous" class="secondary-button" aria-label="この手順の前の画像">←</button><p id="image-caption"></p><button type="button" id="image-next" class="secondary-button" aria-label="この手順の次の画像">→</button></div>
   </dialog>
   <dialog id="help-dialog" aria-labelledby="help-title">
     <div class="dialog-heading"><h2 id="help-title">読み方 / キーボード操作</h2><button type="button" class="close-button" data-close-dialog aria-label="操作方法を閉じる">×</button></div>
-    <dl class="shortcut-list"><dt>← / →</dt><dd>前 / 次の手順。画像の拡大中は同じ手順の画像を切り替え。</dd><dt>Home / End</dt><dd>最初 / 最後の手順。</dd><dt>T / ?</dt><dd>全Labの目次 / この操作方法。</dd><dt>Esc</dt><dd>開いているダイアログを閉じる。</dd></dl>
-    <p>長い手順は本文を上下にスクロール。画像集は見出しを開き, 画像を選択して拡大します。コードと表は横スクロールできます。URLの <code>#lab…</code> は手順へのブックマークに使えます。</p>
-    <p>本文 / 画像 / UIはローカルファイルだけで表示します。Microsoft Learn等の外部リンクと, Microsoft配布のPBIX / XLSX取得には通信が必要です。正本Markdownへのリンクはローカルの <code>.md</code> を開きます。Fabricの操作には別途オンライン環境が必要です。</p>
-    <p>Microsoft Fabricの公式製品アイコンを教材として無改変で使用しています。Microsoft企業ロゴは収録していません。Microsoft Fabric and the Microsoft logo are trademarks of Microsoft Corporation.</p>
-    <p><a href="../LICENSE">MITライセンス</a> / <a href="../assets/brand/README.md">アイコンの出典と権利</a> / <a href="../docs/PRESENTATION-GUIDE-JA.md">更新 / 利用ガイド</a></p>
+    <dl class="shortcut-list"><dt>Ctrl K / /</dt><dd>ワークショップ内を検索。</dd><dt>← / →</dt><dd>前 / 次の記事。画像の拡大中は同じ手順の画像を切り替え。</dd><dt>Home / End</dt><dd>最初 / 最後の記事。</dd><dt>Esc</dt><dd>ダイアログ / モバイルの目次を閉じる。</dd></dl>
+    <p>長い記事は上下にスクロールできます。コードと表は横スクロールに対応しています。URLの <code>#lab…</code> は手順へのブックマークに使えます。</p>
+    <p>本文 / 画像 / UIはオフラインで表示します。Microsoft Learn等の外部リンクと, Microsoft配布のPBIX / XLSX取得には通信が必要です。Fabricの操作には別途オンライン環境が必要です。</p>
+    <p><a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/docs/PRESENTATION-GUIDE-JA.md" target="_blank" rel="noopener noreferrer">更新 / 利用ガイド</a> / <a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/LOCALIZATION.md" target="_blank" rel="noopener noreferrer">翻訳と用語の方針</a></p>
   </dialog>
   <noscript><p class="noscript-note">JavaScriptが無効なため, 全手順を縦に表示しています。ブラウザーのページ内検索または章リンクを使ってください。</p></noscript>
   <span class="build-info" hidden>Source fingerprint: @@DIGEST@@</span>
+  <script type="application/json" id="image-payloads">@@IMAGE_PAYLOADS@@</script>
   <script>@@SCRIPT@@</script>
 </body>
 </html>

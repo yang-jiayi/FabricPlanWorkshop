@@ -1,0 +1,1107 @@
+[
+  {
+    "id": "overview-s000",
+    "lab": "overview",
+    "title": "このワークショップで学べること"
+  },
+  {
+    "id": "overview-s001",
+    "lab": "overview",
+    "title": "Workshopの目的"
+  },
+  {
+    "id": "overview-s002",
+    "lab": "overview",
+    "title": "アーキテクチャ"
+  },
+  {
+    "id": "overview-s003",
+    "lab": "overview",
+    "title": "ラボ一覧"
+  },
+  {
+    "id": "overview-s004",
+    "lab": "overview",
+    "title": "開催と利用上の注意"
+  },
+  {
+    "id": "overview-s005",
+    "lab": "overview",
+    "title": "原典とライセンス"
+  },
+  {
+    "id": "lab00-s000",
+    "lab": "lab00",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab00-s001",
+    "lab": "lab00",
+    "title": "開催環境と対象フォルダー"
+  },
+  {
+    "id": "lab00-s002",
+    "lab": "lab00",
+    "title": "管理画面で確認する"
+  },
+  {
+    "id": "lab00-s003",
+    "lab": "lab00",
+    "title": "今回のシナリオ"
+  },
+  {
+    "id": "lab00-s004",
+    "lab": "lab00",
+    "title": "Fabric Planningとは"
+  },
+  {
+    "id": "lab00-s005",
+    "lab": "lab00",
+    "title": "操作を始める前に：課金の仕組み"
+  },
+  {
+    "id": "lab00-s006",
+    "lab": "lab00",
+    "title": "CU時間とCUの違い"
+  },
+  {
+    "id": "lab00-s007",
+    "lab": "lab00",
+    "title": "月単位ではなくセッション単位"
+  },
+  {
+    "id": "lab00-s008",
+    "lab": "lab00",
+    "title": "実際の容量で考える"
+  },
+  {
+    "id": "lab00-s009",
+    "lab": "lab00",
+    "title": "容量を一時停止しても、セッションのコストはなくなりません"
+  },
+  {
+    "id": "lab00-s010",
+    "lab": "lab00",
+    "title": "課金ロールは、操作内容によって決まります"
+  },
+  {
+    "id": "lab00-s011",
+    "lab": "lab00",
+    "title": "管理者による上限設定"
+  },
+  {
+    "id": "lab00-s012",
+    "lab": "lab00",
+    "title": "事前準備のチェックリスト"
+  },
+  {
+    "id": "lab00-s013",
+    "lab": "lab00",
+    "title": "1. 容量"
+  },
+  {
+    "id": "lab00-s014",
+    "lab": "lab00",
+    "title": "2. ワークスペースのロール"
+  },
+  {
+    "id": "lab00-s015",
+    "lab": "lab00",
+    "title": "3. テナント設定"
+  },
+  {
+    "id": "lab00-s016",
+    "lab": "lab00",
+    "title": "4. 容量の設定"
+  },
+  {
+    "id": "lab00-s017",
+    "lab": "lab00",
+    "title": "5. ブラウザー"
+  },
+  {
+    "id": "lab00-s018",
+    "lab": "lab00",
+    "title": "6. サンプルデータ"
+  },
+  {
+    "id": "lab00-s019",
+    "lab": "lab00",
+    "title": "「セマンティックモデルがなくても使えますか？」"
+  },
+  {
+    "id": "lab00-s020",
+    "lab": "lab00",
+    "title": "モデルはあるが、レポートがない場合"
+  },
+  {
+    "id": "lab00-s021",
+    "lab": "lab00",
+    "title": "Fabricにデータはあるが、モデルがない場合"
+  },
+  {
+    "id": "lab00-s022",
+    "lab": "lab00",
+    "title": "データもモデルもない場合"
+  },
+  {
+    "id": "lab00-s023",
+    "lab": "lab00",
+    "title": "事前に把握しておきたい制限"
+  },
+  {
+    "id": "lab00-s024",
+    "lab": "lab00",
+    "title": "自動的に作成されるもの"
+  },
+  {
+    "id": "lab00-s025",
+    "lab": "lab00",
+    "title": "Fabric SQLのコストは、ロール別の消費量とは別です"
+  },
+  {
+    "id": "lab00-s026",
+    "lab": "lab00",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab00-s027",
+    "lab": "lab00",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab01-s000",
+    "lab": "lab01",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab01-s001",
+    "lab": "lab01",
+    "title": "このモジュールで取り組むこと"
+  },
+  {
+    "id": "lab01-s002",
+    "lab": "lab01",
+    "title": "手順1：セマンティックモデルをインポートする"
+  },
+  {
+    "id": "lab01-s003",
+    "lab": "lab01",
+    "title": "次に進む前に、レポートを開いてみましょう"
+  },
+  {
+    "id": "lab01-s004",
+    "lab": "lab01",
+    "title": "手順2：Fabric SQLデータベースを作成する"
+  },
+  {
+    "id": "lab01-s005",
+    "lab": "lab01",
+    "title": "手順3：Planアイテムを作成する"
+  },
+  {
+    "id": "lab01-s006",
+    "lab": "lab01",
+    "title": "手順4：計画シートを作成し、セマンティックモデルに接続する"
+  },
+  {
+    "id": "lab01-s007",
+    "lab": "lab01",
+    "title": "手順5：最初の計画シートを作成する"
+  },
+  {
+    "id": "lab01-s008",
+    "lab": "lab01",
+    "title": "フィールドを割り当てる"
+  },
+  {
+    "id": "lab01-s009",
+    "lab": "lab01",
+    "title": "シートを保存する"
+  },
+  {
+    "id": "lab01-s010",
+    "lab": "lab01",
+    "title": "手順6：SQLデータベースに接続する"
+  },
+  {
+    "id": "lab01-s011",
+    "lab": "lab01",
+    "title": "手順7：画面の構成を確認する"
+  },
+  {
+    "id": "lab01-s012",
+    "lab": "lab01",
+    "title": "最初にPlanningリボンを展開する"
+  },
+  {
+    "id": "lab01-s013",
+    "lab": "lab01",
+    "title": "NotesとCommentsの場所を確認する"
+  },
+  {
+    "id": "lab01-s014",
+    "lab": "lab01",
+    "title": "ペインとフッターを確認する"
+  },
+  {
+    "id": "lab01-s015",
+    "lab": "lab01",
+    "title": "保存したシートを再読み込みして確認する"
+  },
+  {
+    "id": "lab01-s016",
+    "lab": "lab01",
+    "title": "ここまでの成果"
+  },
+  {
+    "id": "lab01-s017",
+    "lab": "lab01",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab01-s018",
+    "lab": "lab01",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab02-s000",
+    "lab": "lab02",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab02-s001",
+    "lab": "lab02",
+    "title": "このモジュールの位置づけ"
+  },
+  {
+    "id": "lab02-s002",
+    "lab": "lab02",
+    "title": "入力可能な列を作成する"
+  },
+  {
+    "id": "lab02-s003",
+    "lab": "lab02",
+    "title": "目標を配賦する"
+  },
+  {
+    "id": "lab02-s004",
+    "lab": "lab02",
+    "title": "上期をロックする"
+  },
+  {
+    "id": "lab02-s005",
+    "lab": "lab02",
+    "title": "パート2：ボトムアップの計画を作成する"
+  },
+  {
+    "id": "lab02-s006",
+    "lab": "lab02",
+    "title": "サブカテゴリを調整する"
+  },
+  {
+    "id": "lab02-s007",
+    "lab": "lab02",
+    "title": "年間の配分に傾向を付ける"
+  },
+  {
+    "id": "lab02-s008",
+    "lab": "lab02",
+    "title": "複数地域を一括編集する"
+  },
+  {
+    "id": "lab02-s009",
+    "lab": "lab02",
+    "title": "パート3：数値の前提を共有する"
+  },
+  {
+    "id": "lab02-s010",
+    "lab": "lab02",
+    "title": "コメント列を追加する"
+  },
+  {
+    "id": "lab02-s011",
+    "lab": "lab02",
+    "title": "ステータス列を追加する"
+  },
+  {
+    "id": "lab02-s012",
+    "lab": "lab02",
+    "title": "パート4：承認を依頼する"
+  },
+  {
+    "id": "lab02-s013",
+    "lab": "lab02",
+    "title": "動作を確認する"
+  },
+  {
+    "id": "lab02-s014",
+    "lab": "lab02",
+    "title": "提出後の引き渡し"
+  },
+  {
+    "id": "lab02-s015",
+    "lab": "lab02",
+    "title": "ここまでの成果"
+  },
+  {
+    "id": "lab02-s016",
+    "lab": "lab02",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab02-s017",
+    "lab": "lab02",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab03-s000",
+    "lab": "lab03",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab03-s001",
+    "lab": "lab03",
+    "title": "このモジュールの位置づけ"
+  },
+  {
+    "id": "lab03-s002",
+    "lab": "lab03",
+    "title": "Optimizer の仕組み"
+  },
+  {
+    "id": "lab03-s003",
+    "lab": "lab03",
+    "title": "手順1：売上総利益シートを作成する"
+  },
+  {
+    "id": "lab03-s004",
+    "lab": "lab03",
+    "title": "手順2：編集可能な入力列を作成する"
+  },
+  {
+    "id": "lab03-s005",
+    "lab": "lab03",
+    "title": "手順3：売上総利益を計算する"
+  },
+  {
+    "id": "lab03-s006",
+    "lab": "lab03",
+    "title": "手順4：Optimizer を実行する"
+  },
+  {
+    "id": "lab03-s007",
+    "lab": "lab03",
+    "title": "手順5：何が変わったかを確認する"
+  },
+  {
+    "id": "lab03-s008",
+    "lab": "lab03",
+    "title": "総計の調整が明細まで反映される"
+  },
+  {
+    "id": "lab03-s009",
+    "lab": "lab03",
+    "title": "保存して読み込み直す"
+  },
+  {
+    "id": "lab03-s010",
+    "lab": "lab03",
+    "title": "制約を設定する場合"
+  },
+  {
+    "id": "lab03-s011",
+    "lab": "lab03",
+    "title": "目標に到達しない場合"
+  },
+  {
+    "id": "lab03-s012",
+    "lab": "lab03",
+    "title": "ここまでの成果"
+  },
+  {
+    "id": "lab03-s013",
+    "lab": "lab03",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab03-s014",
+    "lab": "lab03",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab04-s000",
+    "lab": "lab04",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab04-s001",
+    "lab": "lab04",
+    "title": "ここまでの状況"
+  },
+  {
+    "id": "lab04-s002",
+    "lab": "lab04",
+    "title": "パート1：見通し用シートを作成する"
+  },
+  {
+    "id": "lab04-s003",
+    "lab": "lab04",
+    "title": "パート2：予測メジャーを定義する"
+  },
+  {
+    "id": "lab04-s004",
+    "lab": "lab04",
+    "title": "パート3：統計予測を生成する"
+  },
+  {
+    "id": "lab04-s005",
+    "lab": "lab04",
+    "title": "パート4：期間を確定し、予測期間を先へ延ばす"
+  },
+  {
+    "id": "lab04-s006",
+    "lab": "lab04",
+    "title": "新しい期間の初期値を設定する"
+  },
+  {
+    "id": "lab04-s007",
+    "lab": "lab04",
+    "title": "パート5：データを書き戻す"
+  },
+  {
+    "id": "lab04-s008",
+    "lab": "lab04",
+    "title": "SQLに保存された値を確認する"
+  },
+  {
+    "id": "lab04-s009",
+    "lab": "lab04",
+    "title": "書き戻し設定を保存する"
+  },
+  {
+    "id": "lab04-s010",
+    "lab": "lab04",
+    "title": "このモジュールで扱う内容"
+  },
+  {
+    "id": "lab04-s011",
+    "lab": "lab04",
+    "title": "履歴と復元を専用環境で確認する（任意）"
+  },
+  {
+    "id": "lab04-s012",
+    "lab": "lab04",
+    "title": "理解を確認する"
+  },
+  {
+    "id": "lab04-s013",
+    "lab": "lab04",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab05-s000",
+    "lab": "lab05",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab05-s001",
+    "lab": "lab05",
+    "title": "サンプルデータで単価の粒度を確認する"
+  },
+  {
+    "id": "lab05-s002",
+    "lab": "lab05",
+    "title": "修正版：数量加重単価を使うメジャーモデル"
+  },
+  {
+    "id": "lab05-s003",
+    "lab": "lab05",
+    "title": "修正版モデルのシナリオ"
+  },
+  {
+    "id": "lab05-s004",
+    "lab": "lab05",
+    "title": "診断演習：原文の単純平均モデル"
+  },
+  {
+    "id": "lab05-s005",
+    "lab": "lab05",
+    "title": "シートを準備する"
+  },
+  {
+    "id": "lab05-s006",
+    "lab": "lab05",
+    "title": "同じ年,同じ単位で値を確認する"
+  },
+  {
+    "id": "lab05-s007",
+    "lab": "lab05",
+    "title": "階層を作成する"
+  },
+  {
+    "id": "lab05-s008",
+    "lab": "lab05",
+    "title": "全6数式の表示値を照合する"
+  },
+  {
+    "id": "lab05-s009",
+    "lab": "lab05",
+    "title": "表示を確認する"
+  },
+  {
+    "id": "lab05-s010",
+    "lab": "lab05",
+    "title": "Treeのカードを展開して比較する"
+  },
+  {
+    "id": "lab05-s011",
+    "lab": "lab05",
+    "title": "保存し、再読み込み後の状態を確認する"
+  },
+  {
+    "id": "lab05-s012",
+    "lab": "lab05",
+    "title": "倍率なし,小数5桁で計算を照合する"
+  },
+  {
+    "id": "lab05-s013",
+    "lab": "lab05",
+    "title": "旧手順の再現：単純平均モデルのシナリオ"
+  },
+  {
+    "id": "lab05-s014",
+    "lab": "lab05",
+    "title": "Best Case：売上を伸ばす"
+  },
+  {
+    "id": "lab05-s015",
+    "lab": "lab05",
+    "title": "Cost Restructuring：費用変更を検証する"
+  },
+  {
+    "id": "lab05-s016",
+    "lab": "lab05",
+    "title": "2つのシナリオを比較する"
+  },
+  {
+    "id": "lab05-s017",
+    "lab": "lab05",
+    "title": "保存,再読み込み後の状態を確認する"
+  },
+  {
+    "id": "lab05-s018",
+    "lab": "lab05",
+    "title": "発展：Actual2024の行モデル"
+  },
+  {
+    "id": "lab05-s019",
+    "lab": "lab05",
+    "title": "既存の階層を整理する"
+  },
+  {
+    "id": "lab05-s020",
+    "lab": "lab05",
+    "title": "ルートから順に階層を作成する"
+  },
+  {
+    "id": "lab05-s021",
+    "lab": "lab05",
+    "title": "元データと再計算値を比較する"
+  },
+  {
+    "id": "lab05-s022",
+    "lab": "lab05",
+    "title": "このモジュールで扱う内容"
+  },
+  {
+    "id": "lab05-s023",
+    "lab": "lab05",
+    "title": "理解を確認する"
+  },
+  {
+    "id": "lab05-s024",
+    "lab": "lab05",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab06-s000",
+    "lab": "lab06",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab06-s001",
+    "lab": "lab06",
+    "title": "ここまでの振り返り"
+  },
+  {
+    "id": "lab06-s002",
+    "lab": "lab06",
+    "title": "手順1：インテリジェンスシートを作成する"
+  },
+  {
+    "id": "lab06-s003",
+    "lab": "lab06",
+    "title": "手順2：最初に計画シートを埋め込む"
+  },
+  {
+    "id": "lab06-s004",
+    "lab": "lab06",
+    "title": "手順3：計画と前年度実績の差異を可視化する"
+  },
+  {
+    "id": "lab06-s005",
+    "lab": "lab06",
+    "title": "手順4：時系列の傾向を表示する"
+  },
+  {
+    "id": "lab06-s006",
+    "lab": "lab06",
+    "title": "手順5：シート内の入力値と連動するKPIを作成する"
+  },
+  {
+    "id": "lab06-s007",
+    "lab": "lab06",
+    "title": "手順6：財務マトリックスを作成する"
+  },
+  {
+    "id": "lab06-s008",
+    "lab": "lab06",
+    "title": "手順7：1つのフィルターで全ビジュアルを絞り込む"
+  },
+  {
+    "id": "lab06-s009",
+    "lab": "lab06",
+    "title": "手順8：見やすく整える"
+  },
+  {
+    "id": "lab06-s010",
+    "lab": "lab06",
+    "title": "キャンバスと要素のサイズ,位置"
+  },
+  {
+    "id": "lab06-s011",
+    "lab": "lab06",
+    "title": "保存"
+  },
+  {
+    "id": "lab06-s012",
+    "lab": "lab06",
+    "title": "手順9：数値の文脈を共有しながらレビューする"
+  },
+  {
+    "id": "lab06-s013",
+    "lab": "lab06",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab06-s014",
+    "lab": "lab06",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab07-s000",
+    "lab": "lab07",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab07-s001",
+    "lab": "lab07",
+    "title": "ここまでの振り返り"
+  },
+  {
+    "id": "lab07-s002",
+    "lab": "lab07",
+    "title": "パート1：環境を準備する"
+  },
+  {
+    "id": "lab07-s003",
+    "lab": "lab07",
+    "title": "パート2：テーブルをインポートする"
+  },
+  {
+    "id": "lab07-s004",
+    "lab": "lab07",
+    "title": "拠点テーブルを作成する"
+  },
+  {
+    "id": "lab07-s005",
+    "lab": "lab07",
+    "title": "社員テーブルを作成する"
+  },
+  {
+    "id": "lab07-s006",
+    "lab": "lab07",
+    "title": "資産テーブルを作成する"
+  },
+  {
+    "id": "lab07-s007",
+    "lab": "lab07",
+    "title": "SQLで取込み結果を確認する（任意）"
+  },
+  {
+    "id": "lab07-s008",
+    "lab": "lab07",
+    "title": "Planを開き直して確認する"
+  },
+  {
+    "id": "lab07-s009",
+    "lab": "lab07",
+    "title": "パート3：列を設定する"
+  },
+  {
+    "id": "lab07-s010",
+    "lab": "lab07",
+    "title": "列の設定を開く"
+  },
+  {
+    "id": "lab07-s011",
+    "lab": "lab07",
+    "title": "ロゴを画像で表示する"
+  },
+  {
+    "id": "lab07-s012",
+    "lab": "lab07",
+    "title": "状態を4つの選択肢にそろえる"
+  },
+  {
+    "id": "lab07-s013",
+    "lab": "lab07",
+    "title": "社員をIDで参照し,名前で表示する"
+  },
+  {
+    "id": "lab07-s014",
+    "lab": "lab07",
+    "title": "拠点をIDで参照し,名称で表示する"
+  },
+  {
+    "id": "lab07-s015",
+    "lab": "lab07",
+    "title": "Expected EOL Dateを計算する"
+  },
+  {
+    "id": "lab07-s016",
+    "lab": "lab07",
+    "title": "パート4：変更を申請し,承認後の保存を確認する"
+  },
+  {
+    "id": "lab07-s017",
+    "lab": "lab07",
+    "title": "承認を設定する"
+  },
+  {
+    "id": "lab07-s018",
+    "lab": "lab07",
+    "title": "状態を変更して申請する"
+  },
+  {
+    "id": "lab07-s019",
+    "lab": "lab07",
+    "title": "承認して変更を反映する"
+  },
+  {
+    "id": "lab07-s020",
+    "lab": "lab07",
+    "title": "元の状態へ戻す"
+  },
+  {
+    "id": "lab07-s021",
+    "lab": "lab07",
+    "title": "パート5：アクセスを制御する"
+  },
+  {
+    "id": "lab07-s022",
+    "lab": "lab07",
+    "title": "基本演習：編集できる利用者を限定する"
+  },
+  {
+    "id": "lab07-s023",
+    "lab": "lab07",
+    "title": "閲覧する行も制限する場合：Roles & Policies Security"
+  },
+  {
+    "id": "lab07-s024",
+    "lab": "lab07",
+    "title": "パート6：ボタンで資産の廃止処理を実行する"
+  },
+  {
+    "id": "lab07-s025",
+    "lab": "lab07",
+    "title": "トリガーと参照先を設定する"
+  },
+  {
+    "id": "lab07-s026",
+    "lab": "lab07",
+    "title": "クリックした資産1件だけを更新する"
+  },
+  {
+    "id": "lab07-s027",
+    "lab": "lab07",
+    "title": "ボタンを配置して試験する"
+  },
+  {
+    "id": "lab07-s028",
+    "lab": "lab07",
+    "title": "設計時に注意したい制限"
+  },
+  {
+    "id": "lab07-s029",
+    "lab": "lab07",
+    "title": "パート7：監査ログを確認する"
+  },
+  {
+    "id": "lab07-s030",
+    "lab": "lab07",
+    "title": "このモジュールの到達目標"
+  },
+  {
+    "id": "lab07-s031",
+    "lab": "lab07",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab07-s032",
+    "lab": "lab07",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab08-s000",
+    "lab": "lab08",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab08-s001",
+    "lab": "lab08",
+    "title": "ここまでの成果と、残る検討事項"
+  },
+  {
+    "id": "lab08-s002",
+    "lab": "lab08",
+    "title": "Harborlightに必要な容量を見積もる"
+  },
+  {
+    "id": "lab08-s003",
+    "lab": "lab08",
+    "title": "容量に収まるか"
+  },
+  {
+    "id": "lab08-s004",
+    "lab": "lab08",
+    "title": "この数値は全員が利用した場合の見積もり"
+  },
+  {
+    "id": "lab08-s005",
+    "lab": "lab08",
+    "title": "30%の余裕で、本当にFabric SQLを賄えるか"
+  },
+  {
+    "id": "lab08-s006",
+    "lab": "lab08",
+    "title": "サイジングで陥りやすい3つの誤解"
+  },
+  {
+    "id": "lab08-s007",
+    "lab": "lab08",
+    "title": "容量の一時停止では、セッション料金を減らせない"
+  },
+  {
+    "id": "lab08-s008",
+    "lab": "lab08",
+    "title": "Fabric SQLは別途課金される"
+  },
+  {
+    "id": "lab08-s009",
+    "lab": "lab08",
+    "title": "容量メトリックの読み方"
+  },
+  {
+    "id": "lab08-s010",
+    "lab": "lab08",
+    "title": "費用を管理する"
+  },
+  {
+    "id": "lab08-s011",
+    "lab": "lab08",
+    "title": "テナント設定を確認する"
+  },
+  {
+    "id": "lab08-s012",
+    "lab": "lab08",
+    "title": "行レベルセキュリティの運用"
+  },
+  {
+    "id": "lab08-s013",
+    "lab": "lab08",
+    "title": "地域ロールを明示的に割り当てて確認する"
+  },
+  {
+    "id": "lab08-s014",
+    "lab": "lab08",
+    "title": "ロール変更後の表示を再確認する"
+  },
+  {
+    "id": "lab08-s015",
+    "lab": "lab08",
+    "title": "地域別KPIとコメントを扱う"
+  },
+  {
+    "id": "lab08-s016",
+    "lab": "lab08",
+    "title": "設計前に把握しておきたい上限"
+  },
+  {
+    "id": "lab08-s017",
+    "lab": "lab08",
+    "title": "Connected planningの考え方"
+  },
+  {
+    "id": "lab08-s018",
+    "lab": "lab08",
+    "title": "運用開始前のチェックリスト"
+  },
+  {
+    "id": "lab08-s019",
+    "lab": "lab08",
+    "title": "理解度チェック"
+  },
+  {
+    "id": "lab08-s020",
+    "lab": "lab08",
+    "title": "次のステップ"
+  },
+  {
+    "id": "lab08-s021",
+    "lab": "lab08",
+    "title": "参考資料"
+  },
+  {
+    "id": "lab09-s000",
+    "lab": "lab09",
+    "title": "このLabを始める前に"
+  },
+  {
+    "id": "lab09-s001",
+    "lab": "lab09",
+    "title": "1. 目的と検証境界"
+  },
+  {
+    "id": "lab09-s002",
+    "lab": "lab09",
+    "title": "確認済みの範囲"
+  },
+  {
+    "id": "lab09-s003",
+    "lab": "lab09",
+    "title": "Fabric / AI"
+  },
+  {
+    "id": "lab09-s004",
+    "lab": "lab09",
+    "title": "2つのデータ経路"
+  },
+  {
+    "id": "lab09-s005",
+    "lab": "lab09",
+    "title": "3. データ契約"
+  },
+  {
+    "id": "lab09-s006",
+    "lab": "lab09",
+    "title": "4. Part 1：実Planから比較Snapshotを準備する（実機未検証）"
+  },
+  {
+    "id": "lab09-s007",
+    "lab": "lab09",
+    "title": "5. Part 2：実績 / Forecastを同じ粒度で照合する（実機未検証）"
+  },
+  {
+    "id": "lab09-s008",
+    "lab": "lab09",
+    "title": "6. Part 3A：CSVをLakehouseへ置き、Warehouseで照合する"
+  },
+  {
+    "id": "lab09-s009",
+    "lab": "lab09",
+    "title": "6.1 Lakehouseを作成してCSVをアップロード"
+  },
+  {
+    "id": "lab09-s010",
+    "lab": "lab09",
+    "title": "6.2 WarehouseのStageに型を明示してロード"
+  },
+  {
+    "id": "lab09-s011",
+    "lab": "lab09",
+    "title": "6.3 Stageの選択範囲とデータ品質を検査"
+  },
+  {
+    "id": "lab09-s012",
+    "lab": "lab09",
+    "title": "7. Part 3B：LakehouseにDeltaテーブルを作る"
+  },
+  {
+    "id": "lab09-s013",
+    "lab": "lab09",
+    "title": "8. Part 4：Ontologyを定義してGraphをmaterializeする"
+  },
+  {
+    "id": "lab09-s014",
+    "lab": "lab09",
+    "title": "8.1 Ontologyを作成する"
+  },
+  {
+    "id": "lab09-s015",
+    "lab": "lab09",
+    "title": "8.2 Productだけの診断経路"
+  },
+  {
+    "id": "lab09-s016",
+    "lab": "lab09",
+    "title": "8.3 PeriodとRevenue Observationを追加する"
+  },
+  {
+    "id": "lab09-s017",
+    "lab": "lab09",
+    "title": "8.4 Relationshipを作る"
+  },
+  {
+    "id": "lab09-s018",
+    "lab": "lab09",
+    "title": "8.5 Business ruleを追加する"
+  },
+  {
+    "id": "lab09-s019",
+    "lab": "lab09",
+    "title": "8.6 Graphへ投影する"
+  },
+  {
+    "id": "lab09-s020",
+    "lab": "lab09",
+    "title": "9.1 完成済みOntologyを追加する"
+  },
+  {
+    "id": "lab09-s021",
+    "lab": "lab09",
+    "title": "9.2 Instructionsを設定する"
+  },
+  {
+    "id": "lab09-s022",
+    "lab": "lab09",
+    "title": "9.3 質問して結果を検算する"
+  },
+  {
+    "id": "lab09-s023",
+    "lab": "lab09",
+    "title": "10. よくある問題と対応"
+  },
+  {
+    "id": "lab09-s024",
+    "lab": "lab09",
+    "title": "11. 安全な終了"
+  },
+  {
+    "id": "lab09-s025",
+    "lab": "lab09",
+    "title": "12. 公式資料"
+  }
+]

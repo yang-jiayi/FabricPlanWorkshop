@@ -27,3 +27,5 @@ python tools/check_public_hygiene.py
 画像を追加,削除した場合は、Markdownから参照されていることと、代替テキストが内容を説明していることを確認してください。モジュールの追加や番号変更では、READMEの一覧,隣接モジュールのナビゲーション,演習フロー図も更新してください。
 
 HTML操作ガイドは生成物です。`docs/workshop-presentation.html`を直接編集せず, 正本Markdownまたは`assets/presentation`を変更して再生成し, HTMLも同じ変更に含めてください。更新漏れはCIの同期チェックで失敗します。[利用 / 更新方法](docs/PRESENTATION-GUIDE-JA.md)
+
+HTMLは画像 / アイコン / CSVを含む単一ファイルです。操作画像を変更した場合だけ開発用依存関係を導入して`python -X utf8 tools/build_presentation.py --encode-images`を実行し, 画像パックも更新します。HTMLから除外する確認事項は正本のマーカーと[確認事項リスト](docs/UNCONFIRMED-ITEMS-JA.md)を対で管理します。UI変更では[品質ループ](docs/PRESENTATION-GUIDE-JA.md#品質ループ)も実施してください。

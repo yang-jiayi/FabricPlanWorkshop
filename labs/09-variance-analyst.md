@@ -17,14 +17,29 @@ Lab04のPlanは *Gross Revenue* と *Forecast* を使い、行はProduct Categor
 | ルート | 対象 | 状態 |
 |---|---|---|
 | **合成サンプルルート** | 同梱CSVをLakehouseへアップロードし、Part 3のWarehouse / Spark SQL、Part 4のOntology、Part 5のData Agentを試す | Part 3〜5をこの合成CSVで実機確認済み。これは実Planからの抽出や本番データの検証ではない |
-| **実Planルート** | Part 1〜2で自分のLab04データから完全な比較Snapshotを作り、Part 3以降へ渡す | 手順上の確認項目。Part 1〜2の実Plan / writeback抽出を含む実機End-to-End確認は未実施 |
 
-### 確認済み / 未確認
+<!-- presentation-exclude-start: LAB09-REAL-PLAN-ROUTE -->
+| ルート | 対象 | 状態 |
+|---|---|---|
+| **実Planルート** | Part 1〜2で自分のLab04データから完全な比較Snapshotを作り、Part 3以降へ渡す | 手順上の確認項目。Part 1〜2の実Plan / writeback抽出を含む実機End-to-End確認は未実施 |
+<!-- presentation-exclude-end: LAB09-REAL-PLAN-ROUTE -->
+
+### 確認済みの範囲
 
 - **確認済み:** 合成CSVの18行をWarehouse StageへCOPYし、件数 / キー / 値の検査に合格。LakehouseにProduct 6行、Period 3行、Revenue Observation 18行のDeltaテーブルを作成。Ontologyのentity type / relationship typeをグラフへ投影し、3つのentity typeと2つのrelationship typeがmaterializeされた状態を確認。Data Agentでは下表のQ1 / Q3 / Q4cが期待値と一致しました。
-- **確認済みの限定:** `nodes 3 / edges 2`はOntologyのentity type 3種類 / relationship type 2種類を示す構成表示です。18件のObservationを含むデータインスタンス数や、グラフのedge traversalを検証した数ではありません。Edge traversalは未確認です。
+- **確認済みの限定:** `nodes 3 / edges 2`はOntologyのentity type 3種類 / relationship type 2種類を示す構成表示です。18件のObservationを含むデータインスタンス数や、グラフのedge traversalを検証した数ではありません。
+
+<!-- presentation-exclude-start: LAB09-VERIFICATION-BACKLOG -->
+Edge traversalは未確認です。
+
 - **未確認:** 実Plan / writebackからの抽出、Q2、Q5、合計比率だけを尋ねる質問、Q4cの生成SQL表示、`_LH2`のinstructionsがAgent再読込後にも残ること、edge traversal。日本語質問の全パターンや本番利用の適合性も保証しません。
-- **失敗の記録:** Q4 / Q4aは`SQLCandidatesFailedFilterError`になりました。原因は特定されていません。複数月を指定する質問全般が失敗するとは結論付けず、同じ失敗を成功例として扱いません。
+<!-- presentation-exclude-end: LAB09-VERIFICATION-BACKLOG -->
+
+- **失敗の記録:** Q4 / Q4aは`SQLCandidatesFailedFilterError`になりました。複数月を指定する質問全般が失敗するとは結論付けず、同じ失敗を成功例として扱いません。
+
+<!-- presentation-exclude-start: LAB09-ERROR-CAUSE-SUMMARY -->
+Q4 / Q4aの失敗の原因は特定されていません。
+<!-- presentation-exclude-end: LAB09-ERROR-CAUSE-SUMMARY -->
 
 ## 2. 前提条件と安全上の注意
 
@@ -39,7 +54,10 @@ Lab04のPlanは *Gross Revenue* と *Forecast* を使い、行はProduct Categor
 
 ### 2つのデータ経路
 
+<!-- presentation-exclude-start: LAB09-REAL-PLAN-PREPARATION -->
 1. **実Planルート:** Part 1〜2でLab04の保存済みForecastとセマンティックモデルのGross Revenueを同一粒度で抽出し、全件一致を確認してからCSVを用意します。ここは実機でEnd-to-End確認していません。
+<!-- presentation-exclude-end: LAB09-REAL-PLAN-PREPARATION -->
+
 2. **合成サンプルルート:** Part 1〜2を行わず、同梱の`data/lab09-variance-snapshot-sample.csv`を使います。このCSVの値は合成です。Part 3〜5で実証したUI操作を再現するためのルートです。
 
 > [!WARNING]
@@ -65,6 +83,7 @@ Lab04のPlanは *Gross Revenue* と *Forecast* を使い、行はProduct Categor
 - 分母の`ModelGrossRevenue`が0なら`VarianceRate`はNULLです。NULLを0に置き換えません。
 - Long with Changesの履歴を足し上げたり、`TOP 1`や最大timestampだけで現行値を選びません。完全な現在状態を証明できなければPart 1で停止します。
 
+<!-- presentation-exclude-start: LAB09-PART1-PROCEDURE -->
 ## 4. Part 1：実Planから比較Snapshotを準備する（実機未検証）
 
 **合成サンプルルートではこのPartを飛ばし、Part 3へ進みます。** 以下は実Planを使う場合の安全な準備手順ですが、実Plan / writebackを使った一連の抽出は未検証です。画面や書き戻しスキーマが本書と異なる場合は推測せず停止してください。
@@ -74,6 +93,9 @@ Lab04のPlanは *Gross Revenue* と *Forecast* を使い、行はProduct Categor
 3. Lab04のSQL宛先の実スキーマを読み、Category / Sub Category / Year / Month / Scenario / Measure / Valueに対応する実在列を特定します。`IsLatest`、`PreviousValue`、実行IDなどは実在し、公式の意味と選択範囲での値を確認できた場合のみ使います。
 4. 選択した全キーについて現在値が1行ずつ存在することを確認します。履歴行が差分なら履歴を合計して現在値を再構成しません。現在値の全件状態を証明できない場合、承認済みのサポートされた手順で完全なSnapshotを作れるまで停止します。
 
+<!-- presentation-exclude-end: LAB09-PART1-PROCEDURE -->
+
+<!-- presentation-exclude-start: LAB09-PART2-PROCEDURE -->
 ## 5. Part 2：実績 / Forecastを同じ粒度で照合する（実機未検証）
 
 1. 元レポートを変更せず、一時レポートまたは承認済みエクスポート経路を用意します。Dataペインで存在を確認した`Product[Category]`、`Product[Sub Category]`、`Date[Year]`と`Date[Month]`または`Date[Year Month]`、`Measures Table[Gross Revenue]`を使います。Month Shortだけでは期間キーにしません。
@@ -82,6 +104,8 @@ Lab04のPlanは *Gross Revenue* と *Forecast* を使い、行はProduct Categor
 4. 両方の全件エクスポートで`ProductKey + PeriodKey`ごとに重複がないことを確認し、Full Outer結合でキー集合を比較します。片側だけのキーが1件でもある、行数が一致しない、通貨 / Measure / PeriodStatusが不明なら停止します。欠損行を補完したり0で埋めたりしません。
 5. 合成サンプルルートではなく実Planルートを実施する場合、選択したSnapshot / Scenario / PlanVersionについて、各ソースの全行数と一意キー件数、結合後の正の期待件数を組織承認済みの非公開記録に残します。期待件数を0または未記入のままロードしません。
 6. 列契約に合わせて15列のUTF-8 CSVを作り、独立して確認した正の`ExpectedRows`はCSVに追加せず非公開の検算記録へ保存します。金額の精度を保ち、PeriodStartがPeriodKeyの月初日であることを確認します。
+
+<!-- presentation-exclude-end: LAB09-PART2-PROCEDURE -->
 
 ## 6. Part 3A：CSVをLakehouseへ置き、Warehouseで照合する
 
@@ -496,7 +520,11 @@ Warehouseは精度を保つ検算層です。Ontology / Graph / Data Agent用に
 
 Ontologyはエンティティ / 関係 / ルールとデータバインディングを持つPreviewの意味付け層です。以下ではWarehouseではなく、Part 3BのLakehouse管理Deltaテーブルをバインドします。
 
-実証では先にWarehouseのテーブルをOntologyへバインドしましたが、Manage graphで`Unsupported Datasource`となり、Data Agentも汎用エラーになりました。この初回失敗は履歴として示します。再現手順としてWarehouseをGraph sourceに設定せず、Part 3AのWarehouseは数値検算に使い、以降のOntology / GraphではLakehouse Deltaを使います。Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原因は特定されていません。
+実証では先にWarehouseのテーブルをOntologyへバインドしましたが、Manage graphで`Unsupported Datasource`となり、Data Agentも汎用エラーになりました。この初回失敗は履歴として示します。再現手順としてWarehouseをGraph sourceに設定せず、Part 3AのWarehouseは数値検算に使い、以降のOntology / GraphではLakehouse Deltaを使います。
+
+<!-- presentation-exclude-start: LAB09-WAREHOUSE-CAUSE -->
+Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原因は特定されていません。
+<!-- presentation-exclude-end: LAB09-WAREHOUSE-CAUSE -->
 
 
 
@@ -764,7 +792,11 @@ Ontologyはエンティティ / 関係 / ルールとデータバインディン
 1. 3 entity typeと2 relationship typeの全てがEligibleであることを確認し、**Manage graph → Continue**を選びます。
 2. Choose what to project画面で3 entity typeを選びます。relationshipのチェックボックスは両端のentityを選択しただけでは自動で有効にならないため、2つのrelationshipも明示的に選びます。
 3. Projection summaryを確認して**Materialize**します。ボタンがDoneになっても画面遷移しないことがあります。その場合はDoneを再実行せずHomeへ戻り、Graph statusを確認します。
-4. Graph statusに`nodes 3 / edges 2`と表示されたら、entity type 3種類 / relationship type 2種類がmaterializeされたことを確認します。この値を18 observation instanceやedge traversalの検証として説明しません。Edge traversalは未検証です。
+4. Graph statusに`nodes 3 / edges 2`と表示されたら、entity type 3種類 / relationship type 2種類がmaterializeされたことを確認します。この値を18 observation instanceやedge traversalの検証として説明しません。
+
+<!-- presentation-exclude-start: LAB09-EDGE-TRAVERSAL -->
+Edge traversalは未検証です。
+<!-- presentation-exclude-end: LAB09-EDGE-TRAVERSAL -->
 5. Homeの**Explore graph**からGraph queryを開けます。実証時、最初のGraph queryはRun後に数分かかったため、すぐに失敗と判断せず状態を確認します。
 
 <details><summary>3 entity typeと2 relationship typeのGraph投影（9枚）</summary>
@@ -823,7 +855,11 @@ Ontologyはエンティティ / 関係 / ルールとデータバインディン
 
 ### 9.2 Instructionsを設定する
 
-実証時に`_LH2`へ入力したInstructionsは17行 / 856文字です。下記と一字一句同じ内容にします。編集後はテキスト外をクリックしてプレビューに戻します。今回の`_LH2`では再読込後の永続確認は未実施です。
+実証時に`_LH2`へ入力したInstructionsは17行 / 856文字です。下記と一字一句同じ内容にします。編集後はテキスト外をクリックしてプレビューに戻します。
+
+<!-- presentation-exclude-start: LAB09-INSTRUCTIONS-PERSISTENCE -->
+今回の`_LH2`では再読込後の永続確認は未実施です。
+<!-- presentation-exclude-end: LAB09-INSTRUCTIONS-PERSISTENCE -->
 
 ```text
 このAgentはHPC_Lab09_VarianceOntology_LHだけを使う読み取り専用の分析Agentです。
@@ -861,7 +897,7 @@ Support group by in GQL
 
 各質問にSnapshotId、ScenarioName、PlanVersion、PeriodKey、CurrencyCodeを明記します。「同じ条件」は同一チャットスレッドの文脈に依存するので、新しい質問では条件を繰り返します。下表の数値は合成サンプルのみの結果です。
 
-Q1は次の単月条件で実機確認しました。下記は再試行時に条件名を明示する文面で、実機入力の逐語転記ではありません。Q3の実機質問はQ1と同じチャットスレッドで条件を引き継ぎました。単独で再試行するときは下記のようにQ3にも条件をすべて明記してください。この完全なQ3文面自体は個別の新規実行で検証していません。
+Q1は次の単月条件で実機確認しました。下記は再試行時に条件名を明示する文面で、実機入力の逐語転記ではありません。Q3の実機質問はQ1と同じチャットスレッドで条件を引き継ぎました。
 
 ```text
 Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, PeriodKey 2026-03, Currency USDについて、
@@ -869,13 +905,21 @@ ModelGrossRevenue合計, PlanForecast合計, VarianceAmount合計を比較して
 PeriodStatusと、この値が実績かサンプルの比較値かも示してください。
 ```
 
+<!-- presentation-exclude-start: LAB09-Q3-STANDALONE-PROMPT -->
+単独で再試行するときは下記のようにQ3にも条件をすべて明記してください。この完全なQ3文面自体は個別の新規実行で検証していません。
+
 ```text
 Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, PeriodKey 2026-03, Currency USDで、
 Product SNK-NUTSのModelGrossRevenue, PlanForecast, VarianceAmount, VarianceRateを示し、
 PlanForecast - ModelGrossRevenueを検算してください。
 ```
+<!-- presentation-exclude-end: LAB09-Q3-STANDALONE-PROMPT -->
 
-Q4 / Q4aは複数期間に対してStatus別集計や行数を含めた質問で失敗しました。次のような条件を含む質問では成功を期待せず、失敗時は`SQLCandidatesFailedFilterError`として記録します。原因は特定されていません。
+Q4 / Q4aは複数期間に対してStatus別集計や行数を含めた質問で失敗しました。次のような条件を含む質問では成功を期待せず、失敗時は`SQLCandidatesFailedFilterError`として記録します。
+
+<!-- presentation-exclude-start: LAB09-ERROR-CAUSE-QUESTIONS -->
+原因は特定されていません。
+<!-- presentation-exclude-end: LAB09-ERROR-CAUSE-QUESTIONS -->
 
 ```text
 Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, Currency USDで、
@@ -901,8 +945,12 @@ PlanForecast合計, VarianceAmount合計を示してください。
 | **Q1 / 2026-03合計** | Snapshot `LAB09-SAMPLE-001`、Scenario `Base`、PlanVersion `FY26-Workshop-v1`、Period `2026-03`、USDでModelGrossRevenue **1,366,441.40**、PlanForecast **1,397,256.575**、VarianceAmount **30,815.175**。期間は`OpenSampleReference`で、確定実績ではない | 実機回答とWarehouse検算が一致 |
 | **Q3 / SNK-NUTSの2026-03** | ModelGrossRevenue **0**、PlanForecast **12,500**、VarianceAmount **12,500**、VarianceRate **NULL / 算出不可** | 実機回答とWarehouse検算が一致 |
 | **Q4c / 2026-01〜03をPeriodKey別に集計** | 下表のModel / Forecast / VarianceをPeriodKeyごとに返す。Q4cではPeriodStatus、行数、率を求めず、期間別合計だけを質問 | 実機回答とWarehouse検算が3期間すべて一致 |
-| **Q4 / 複数月をStatus別に行数・合計・率まで質問** | `SQLCandidatesFailedFilterError` | 失敗。原因未特定 |
-| **Q4a / 期間別・Status別の行数と合計を質問** | `SQLCandidatesFailedFilterError` | 失敗。原因未特定 |
+| **Q4 / 複数月をStatus別に行数・合計・率まで質問** | `SQLCandidatesFailedFilterError` | 失敗 |
+| **Q4a / 期間別・Status別の行数と合計を質問** | `SQLCandidatesFailedFilterError` | 失敗 |
+
+<!-- presentation-exclude-start: LAB09-ERROR-CAUSE-RESULTS -->
+Q4 / Q4a: 失敗。原因未特定。
+<!-- presentation-exclude-end: LAB09-ERROR-CAUSE-RESULTS -->
 
 | PeriodKey | PlanPeriodStatus | Gross Revenue合計 | Forecast合計 | VarianceAmount合計 | 合計比率（Warehouse照合値） |
 |---|---|---:|---:|---:|---:|
@@ -912,7 +960,11 @@ PlanForecast合計, VarianceAmount合計を示してください。
 
 Warehouseの表示はDecimal比率の小数末尾が丸められ、手計算の最終桁と1桁異なる場合があります。金額 / 比率を照合する際はWarehouseの実値と表示丸めを区別してください。Gross Revenueが0のSNK-NUTS行では率を計算しません。
 
-Q4 / Q4aの失敗を成功例として記載せず、複数条件を詰め込まずに1期間ずつの単純な合計へ分割する方法を推奨します。ただしその分割方法自体の全パターンは未確認です。3期間をまとめる場合、実証済みなのはPeriodKey別の3つの合計だけを尋ねるQ4cです。全期間の合計比率だけを問う質問や、Q4cの生成SQL表示は未実施です。
+Q4 / Q4aの失敗を成功例として記載しません。3期間をまとめる場合、実証済みなのはPeriodKey別の3つの合計だけを尋ねるQ4cです。
+
+<!-- presentation-exclude-start: LAB09-QUESTION-VARIATIONS -->
+複数条件を詰め込まずに1期間ずつの単純な合計へ分割する方法を推奨します。ただしその分割方法自体の全パターンは未確認です。全期間の合計比率だけを問う質問や、Q4cの生成SQL表示は未実施です。
+<!-- presentation-exclude-end: LAB09-QUESTION-VARIATIONS -->
 
 Agentの回答を公開 / 共有する前に、Warehouseで同じSnapshot / Scenario / PlanVersion / PeriodKey / ProductKeyの読み取り専用SQLを実行し、元行、合計、VarianceAmount、0分母のNULLを独立に照合します。AgentにWarehouseの直接アクセスがあるとは扱わず、回答とSource表示だけを正解の根拠にしません。Data Agentの質問結果は読み取り専用の回答で、Planの更新 / 承認 / 書き戻しではありません。
 
@@ -950,15 +1002,21 @@ Agentの回答を公開 / 共有する前に、Warehouseで同じSnapshot / Scen
 |---|---|
 | `COPY INTO`がWorkspace Identity付きでMsg 13840 | 実証ではWorkspace Identity資格情報の取得に失敗しました。EntraパススルーのCREDENTIALなし経路を使用。Identity設定を勝手に変更しません |
 | Spark SQLの`PARSE_SYNTAX_ERROR` | 1回のRunに複数文が入っています。新しいQueryで一文ずつ実行します |
-| Warehouse-bound ontologyで`Unsupported Datasource` | WarehouseはSQL検算用に保ち、OntologyのGraph用sourceにはLakehouse管理Deltaテーブルを使います。単独原因は特定されていません |
+| Warehouse-bound ontologyで`Unsupported Datasource` | WarehouseはSQL検算用に保ち、OntologyのGraph用sourceにはLakehouse管理Deltaテーブルを使います |
 | Agentの`There's content here I can't work with` | SourceのGraph eligibility / materialization、Ontologyのbinding、Data AgentのSourceを確認。Warehouse-bound失敗は観測済みですが、一般原因を断定しません |
-| Instancesタブに`doesn't have a table named` | Spark側のdboテーブル存在とBindingを別々に確認し、しばらく待ってから再読込します。原因は未特定で、Instancesタブのエラーを成功 / 失敗の唯一の判定にしません |
+| Instancesタブに`doesn't have a table named` | Spark側のdboテーブル存在とBindingを別々に確認し、しばらく待ってから再読込します。Instancesタブのエラーを成功 / 失敗の唯一の判定にしません |
 | Direct relationshipで`No Datasource` | Relationship detailsでUse mapping tableをOnにし、LakehouseのRevenue ObservationテーブルとOrigin / ObservationKeyのmappingを確認します |
 | Relationshipの選択が無効 | Graph projectionで両端entityを先に選択し、relationship typeも個別にチェックします |
 | Materialize後のDoneが無効のまま | Doneを再実行せずHomeに戻り、Graph statusを再確認します |
 | Graph queryの最初のRunが長い | 数分かかる場合があるため、即時に再実行せず状態を待って確認します |
 | Agentにentity typeが一つしか出ない | Ontologyを完成 / materializeしてからAgentへ追加します。`_LH`のRefreshではentity type一覧が更新されませんでした。完成後に作成した`_LH2`で3種類を確認しました |
-| `SQLCandidatesFailedFilterError` | Q4 / Q4aで再現したが原因未特定です。Q4cのように期間ごとの合計だけに分けて試し、毎回Warehouseで検算します。成功を保証しません |
+| `SQLCandidatesFailedFilterError` | Q4 / Q4aで再現しました。Q4cのように期間ごとの合計だけに分けて試し、毎回Warehouseで検算します。成功を保証しません |
+
+<!-- presentation-exclude-start: LAB09-ERROR-CAUSE-TROUBLESHOOTING -->
+- Warehouse-bound ontologyで`Unsupported Datasource`: 単独原因は特定されていません。
+- Instancesタブに`doesn't have a table named`: 原因は未特定です。
+- `SQLCandidatesFailedFilterError`: Q4 / Q4aで再現したが原因未特定です。
+<!-- presentation-exclude-end: LAB09-ERROR-CAUSE-TROUBLESHOOTING -->
 
 ## 11. 安全な終了
 

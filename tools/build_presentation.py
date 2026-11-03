@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import html
+import json
 import re
 import sys
 import unicodedata
@@ -11,6 +12,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
+from presentation_assets import data_uri, encode_pack, read_pack
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +32,18 @@ ALERT_LABELS = {
     'NOTE': '補足', 'TIP': 'ヒント', 'IMPORTANT': '重要',
     'WARNING': '注意', 'CAUTION': '警告',
 }
+REPOSITORY = 'https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/'
+EXCLUSION = re.compile(
+    r'<!-- presentation-exclude-start: ([A-Z0-9-]+) -->\s*\n?(.*?)'
+    r'<!-- presentation-exclude-end: \1 -->', re.DOTALL,
+)
+
+
+def exclude_unconfirmed(text):
+    cleaned = EXCLUSION.sub('', text)
+    if 'presentation-exclude-' in cleaned:
+        raise ValueError('Unbalanced presentation exclusion markers')
+    return cleaned
 
 
 @dataclass
@@ -139,6 +153,9 @@ def apply_alerts(tokens):
 
 def build(root=ROOT):
     root = Path(root)
+    image_manifest, image_payloads = read_pack(root)
+    terms = json.loads((root / UI_ROOT / 'index-terms.json').read_text(encoding='utf-8'))
+    stable_sections = json.loads((root / UI_ROOT / 'section-ids.json').read_text(encoding='utf-8'))
     md = MarkdownIt('default', {'html': True}).enable(['table', 'strikethrough'])
     sources = [Path('README.md')]
     for number in range(10):
@@ -155,7 +172,23 @@ def build(root=ROOT):
         text = (root / source).read_text(encoding='utf-8')
         if lab != 'overview':
             screenshot_paths.update(re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', text))
-        title, slides, anchors = split_document(md, source, text, lab)
+        title, slides, anchors = split_document(md, source, exclude_unconfirmed(text), lab)
+        original = [entry for entry in stable_sections if entry['lab'] == lab]
+        available = {}
+        for entry in original:
+            available.setdefault(entry['title'], []).append(entry['id'])
+        next_id = max((int(entry['id'].rsplit('s', 1)[1]) for entry in original), default=-1) + 1
+        remapped = {}
+        for slide in slides:
+            old_id = slide.id
+            matches = available.get(slide.title, [])
+            if matches:
+                slide.id = matches.pop(0)
+            else:
+                slide.id = f'{lab}-s{next_id:03d}'
+                next_id += 1
+            remapped[old_id] = slide.id
+        anchors = {anchor: remapped[slide_id] for anchor, slide_id in anchors.items()}
         if not slides:
             raise ValueError(f'No presentation sections in {source}')
         label = 'Overview' if lab == 'overview' else f'Lab{number - 1:02d}'
@@ -180,14 +213,28 @@ def build(root=ROOT):
             raise ValueError(f'Missing local target: {source}: {target}')
         if not image and destination in links:
             return '#' + links[destination]
-        # Output is in docs/, so all canonical repository assets are one level up.
-        return '../' + path.as_posix() + (f'#{parsed.fragment}' if fragment else '')
+        if image:
+            return data_uri(root / path)
+        if path.suffix.lower() == '.csv':
+            return data_uri(root / path)
+        return REPOSITORY + path.as_posix() + (f'#{parsed.fragment}' if fragment else '')
 
     original_image = md.renderer.rules['image']
 
     def image_rule(tokens, index, options, env):
         token = tokens[index]
-        token.attrSet('src', rewrite(token.attrGet('src'), env['source'], image=True))
+        target = token.attrGet('src')
+        destination = local_target(env['source'], target)
+        if destination and destination[0].as_posix() in image_manifest:
+            path = destination[0].as_posix()
+            entry = image_manifest[path]
+            token.attrs.pop('src', None)
+            token.attrSet('data-image', entry['source_sha256'])
+            token.attrSet('data-source', path)
+            token.attrSet('width', str(entry['width']))
+            token.attrSet('height', str(entry['height']))
+        else:
+            token.attrSet('src', rewrite(target, env['source'], image=True))
         token.attrSet('loading', 'lazy')
         token.attrSet('decoding', 'async')
         token.attrSet('class', 'step-image')
@@ -203,8 +250,11 @@ def build(root=ROOT):
 
     def link_rule(tokens, index, options, env):
         token = tokens[index]
-        href = rewrite(token.attrGet('href'), env['source'])
+        original_href = token.attrGet('href')
+        href = rewrite(original_href, env['source'])
         token.attrSet('href', href)
+        if href.startswith('data:text/csv'):
+            token.attrSet('download', Path(urlsplit(original_href).path).name)
         if urlsplit(href).scheme in ('https', 'http'):
             token.attrSet('target', '_blank')
             token.attrSet('rel', 'noopener noreferrer')
@@ -232,28 +282,52 @@ def build(root=ROOT):
         return (
             '<div class="code-block"><div class="code-label">'
             + html.escape(language or 'text')
-            + '</div><pre tabindex="0" aria-label="コード / 横スクロール可能"><code>' + html.escape(token.content)
+            + '<button type="button" class="copy-code">コピー</button></div><pre tabindex="0" aria-label="コード / 横スクロール可能"><code>' + html.escape(token.content)
             + '</code></pre></div>\n'
         )
 
+    def code_inline_rule(tokens, index, options, env):
+        content = tokens[index].content
+        if content == 'data/lab09-variance-snapshot-sample.csv':
+            path = root / content
+            return (f'<a href="{data_uri(path)}" download="{path.name}">'
+                    f'<code>{html.escape(content)}</code></a>')
+        return '<code>' + html.escape(content) + '</code>'
+
     md.renderer.rules.update({
         'image': image_rule, 'link_open': link_rule, 'html_block': html_rule,
-        'html_inline': html_rule, 'fence': fence_rule,
+        'html_inline': html_rule, 'fence': fence_rule, 'code_inline': code_inline_rule,
     })
     rendered_slides = []
     for slide in all_slides:
         apply_alerts(slide.tokens)
         body = md.renderer.render(slide.tokens, md.options, {'source': slide.source})
-        source_link = '../' + slide.source.as_posix()
+        content = unicodedata.normalize('NFKC', slide.title + ' ' + ' '.join(
+            token.content for token in slide.tokens if token.type == 'inline')).casefold()
+        chips = []
+        used_icons = set()
+        for term in terms:
+            icon = term.get('icon')
+            if icon and icon not in used_icons and any(
+                unicodedata.normalize('NFKC', alias).casefold() in content
+                for alias in [term['term'], *term.get('aliases', [])]
+            ):
+                used_icons.add(icon)
+                chips.append(
+                    f'<span class="item-chip"><img class="product-icon" width="22" height="22" alt="" '
+                    f'src="{data_uri(root / "assets/brand" / icon)}">{html.escape(term["term"])}</span>'
+                )
+        item_chips = '<div class="item-chips" aria-label="Fabricの製品 / アイテム">' + ''.join(chips) + '</div>' if chips else ''
+        source_link = REPOSITORY + slide.source.as_posix()
         lab_label = 'Overview' if slide.lab == 'overview' else slide.lab.title()
         rendered_slides.append(
             f'<section class="slide" id="{slide.id}" data-lab="{slide.lab}" '
             f'data-title="{html.escape(slide.title, quote=True)}" aria-labelledby="{slide.id}-title">'
-            '<header class="slide-heading"><div class="eyebrow">'
+            '<header class="slide-heading"><div class="breadcrumb">'
             f'{lab_label} <span> / {html.escape(slide.parent or "Microsoft Fabric Plan Workshop")}</span></div>'
             f'<h1 id="{slide.id}-title" tabindex="-1">{html.escape(slide.title)}</h1>'
             f'<a class="source-link" href="{source_link}" target="_blank" rel="noopener">正本Markdown ↗</a>'
-            '</header><div class="prose">' + body + '</div></section>'
+            '</header>' + item_chips + '<div class="prose">' + body + '</div></section>'
         )
 
     chapter_buttons = []
@@ -279,9 +353,39 @@ def build(root=ROOT):
             f'<details><summary>手順を選ぶ / {len(slides)} sections</summary>'
             f'<ol>{steps}</ol></details></article>'
         )
+    index_entries = []
+    current_group = None
+    for term in terms:
+        if term['group'] != current_group:
+            current_group = term['group']
+            index_entries.append(f'<h2>{html.escape(current_group)}</h2>')
+        aliases = term.get('aliases', [])
+        needles = [unicodedata.normalize('NFKC', word).casefold() for word in [term['term'], *aliases]]
+        occurrences = []
+        for slide in all_slides:
+            content = ' '.join(t.content for t in slide.tokens if t.type in ('inline', 'fence'))
+            haystack = unicodedata.normalize('NFKC', slide.title + ' ' + content).casefold()
+            if any(needle in haystack for needle in needles):
+                occurrences.append(slide)
+        if not occurrences:
+            raise ValueError(f'Index term does not occur: {term["term"]}')
+        icon = term.get('icon')
+        icon_tag = (f'<img class="product-icon" width="28" height="28" alt="" '
+                    f'src="{data_uri(root / "assets/brand" / icon)}">' if icon else '')
+        entries = ''.join(f'<li><a href="#{slide.id}">{slide.lab.title()} / {html.escape(slide.title)}</a></li>'
+                          for slide in occurrences)
+        index_entries.append(
+            f'<details class="index-entry" data-group="{html.escape(term["group"])}">'
+            f'<summary>{icon_tag}<span>{html.escape(term["term"])}</span>'
+            f'<span class="index-count">{len(occurrences)}</span></summary>'
+            f'<p class="index-aliases">{html.escape(" / ".join(aliases))}</p><ul>{entries}</ul></details>'
+        )
     assets = [
         UI_ROOT / 'shell.html', UI_ROOT / 'workshop.css', UI_ROOT / 'workshop.js',
+        UI_ROOT / 'index-terms.json',
+        UI_ROOT / 'section-ids.json',
         Path('tools/build_presentation.py'), Path('requirements-docs.txt'),
+        Path('tools/presentation_assets.py'),
     ]
     digest = hashlib.sha256()
     for source in sorted([*sources, *assets], key=lambda path: path.as_posix()):
@@ -295,17 +399,33 @@ def build(root=ROOT):
         'CHAPTERS': '\n'.join(chapter_buttons),
         'TOC': '\n'.join(toc_cards),
         'DIGEST': digest.hexdigest(),
-        'SECTION_COUNT': str(len(all_slides) + 1),
+        'SECTION_COUNT': str(len(all_slides) + 3),
         'SCREENSHOT_COUNT': str(len(screenshot_paths)),
+        'INDEX': '\n'.join(index_entries),
+        'IMAGE_PAYLOADS': json.dumps(image_payloads, separators=(',', ':')),
     }
     template = (root / UI_ROOT / 'shell.html').read_text(encoding='utf-8')
-    return re.sub(r'@@([A-Z_]+)@@', lambda match: replacements[match[1]], template)
+    rendered = re.sub(r'@@([A-Z_]+)@@', lambda match: replacements[match[1]], template)
+    # Templates and navigation use the same original, unmodified icon files.
+    rendered = re.sub(
+        r'src="\.\./assets/brand/([^"]+)"',
+        lambda match: f'src="{data_uri(root / "assets/brand" / match[1])}"', rendered,
+    )
+    rendered = re.sub(r'href="\.\./([^"]+)"',
+                      lambda match: f'href="{REPOSITORY}{match[1]}"', rendered)
+    if 'id="image-payloads"' not in rendered:
+        rendered = rendered.replace('</body>', '<script type="application/json" id="image-payloads">'
+                                    + replacements['IMAGE_PAYLOADS'] + '</script></body>')
+    return rendered
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true', help='fail if generated HTML is stale')
+    parser.add_argument('--encode-images', action='store_true', help='refresh the committed full-resolution WebP pack')
     args = parser.parse_args(argv)
+    if args.encode_images:
+        encode_pack(ROOT)
     generated = build()
     destination = ROOT / OUTPUT
     if args.check:

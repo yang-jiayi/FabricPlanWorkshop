@@ -1,8 +1,10 @@
 import re
+import json
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 from html.parser import HTMLParser
+from html import escape as html_escape
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
@@ -68,25 +70,23 @@ class PresentationBuildTests(unittest.TestCase):
         expected = []
         for path in sorted((presentation.ROOT / 'labs').glob('*.md')):
             content = path.read_text(encoding='utf-8')
-            expected.extend(re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', content))
+            expected.extend((path.parent / target).resolve().relative_to(presentation.ROOT).as_posix()
+                            for target in re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', content))
         actual = [
-            image['src'] for image in self.tree.images
-            if '/screenshots/' in image.get('src', '')
+            image['data-source'] for image in self.tree.images if 'data-image' in image
         ]
         self.assertEqual(actual, expected)
-        self.assertGreater(len(actual), 0)
+        self.assertEqual(len(actual), 578)
         self.assertTrue(all(image.get('alt') for image in self.tree.images
-                            if '/screenshots/' in image.get('src', '')))
+                            if 'data-image' in image))
+        self.assertTrue(all(int(image['width']) > 0 and int(image['height']) > 0
+                            for image in self.tree.images if 'data-image' in image))
 
     def test_all_resources_are_local_and_exist(self):
         for target in self.tree.resources:
             with self.subTest(target=target):
-                self.assertFalse(urlsplit(target).scheme)
-                self.assertFalse(urlsplit(target).netloc)
-                self.assertTrue((presentation.ROOT / presentation.OUTPUT.parent /
-                                 unquote(target)).is_file())
-        self.assertEqual(len(self.tree.scripts), 1)
-        self.assertNotIn('src', self.tree.scripts[0])
+                self.assertEqual(urlsplit(target).scheme, 'data')
+        self.assertTrue(all('src' not in script for script in self.tree.scripts))
         self.assertNotIn('@import', self.generated)
         self.assertNotIn('fetch(', self.generated)
         self.assertNotIn('XMLHttpRequest', self.generated)
@@ -94,9 +94,57 @@ class PresentationBuildTests(unittest.TestCase):
     def test_factual_boundaries_and_author_are_visible(self):
         self.assertIn('Jiayi Yang', self.generated)
         self.assertIn('SQLCandidatesFailedFilterError', self.generated)
-        self.assertIn('実PlanからのEnd-to-End確認ではありません', self.generated)
         self.assertIn('Microsoftの公式教材 / 承認を示しません', self.generated)
         self.assertIn('Source fingerprint:', self.generated)
+        self.assertIn('Diego Diaz', self.generated)
+        for term in ('未確認', '未検証', '未実施', '原因未特定', '未実証', '実機未'):
+            self.assertNotIn(term, self.generated)
+
+    def test_exclusion_markers_match_agent_list(self):
+        marked = []
+        for path in [presentation.ROOT / 'README.md', *sorted((presentation.ROOT / 'labs').glob('*.md'))]:
+            text = path.read_text(encoding='utf-8')
+            starts = re.findall(r'<!-- presentation-exclude-start: ([A-Z0-9-]+) -->', text)
+            ends = re.findall(r'<!-- presentation-exclude-end: ([A-Z0-9-]+) -->', text)
+            self.assertEqual(starts, ends)
+            self.assertEqual(len(presentation.EXCLUSION.findall(text)), len(starts))
+            marked.extend(starts)
+        listed = re.findall(r'^### ([A-Z0-9-]+)\s*$', (presentation.ROOT / 'docs/UNCONFIRMED-ITEMS-JA.md').read_text(encoding='utf-8'), re.M)
+        self.assertGreater(len(marked), 0)
+        self.assertEqual(len(marked), len(set(marked)))
+        self.assertCountEqual(marked, listed)
+
+    def test_index_terms_have_occurrences_and_aliases(self):
+        terms = json.loads((presentation.ROOT / presentation.UI_ROOT / 'index-terms.json').read_text(encoding='utf-8'))
+        self.assertGreaterEqual(len(terms), 15)
+        for term in terms:
+            self.assertIn(html_escape(term['term']), self.generated)
+        self.assertIn('class="index-entry"', self.generated)
+        self.assertIn('data-group="五十音"', self.generated)
+
+    def test_existing_bookmarks_keep_their_article_titles(self):
+        registry = json.loads((presentation.ROOT / presentation.UI_ROOT / 'section-ids.json').read_text(encoding='utf-8'))
+        original = {entry['id']: entry['title'] for entry in registry}
+        retained = {slide['id']: slide['data-title'] for slide in self.tree.slides}
+        for identifier, title in retained.items():
+            if identifier in original:
+                self.assertEqual(title, original[identifier])
+        post_part_two = next(entry for entry in registry if entry['lab'] == 'lab09'
+                             and entry['title'].startswith('6. Part 3'))
+        self.assertEqual(retained[post_part_two['id']], post_part_two['title'])
+        self.assertEqual(retained['lab09-s002'], '確認済みの範囲')
+
+    def test_standalone_size_and_downloads(self):
+        self.assertLess(len(self.generated.encode('utf-8')), 50 * 1024 * 1024)
+        self.assertTrue(any(target.startswith('data:text/csv') for target in self.tree.links))
+        self.assertFalse(any(target.startswith('../') for target in self.tree.links))
+
+    def test_exclusions_reject_malformed_markers(self):
+        with self.assertRaisesRegex(ValueError, 'Unbalanced'):
+            presentation.exclude_unconfirmed('<!-- presentation-exclude-start: TEST -->\nsecret')
+        self.assertEqual(presentation.exclude_unconfirmed(
+            'before\n<!-- presentation-exclude-start: TEST -->\nsecret\n'
+            '<!-- presentation-exclude-end: TEST -->\nafter'), 'before\n\nafter')
 
     def test_source_edit_changes_the_generated_output(self):
         original = Path.read_text

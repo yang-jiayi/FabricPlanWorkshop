@@ -23,7 +23,7 @@
 
 **[HTMLプレゼンテーションを開く](docs/workshop-presentation.html)** — READMEの概要とLab00〜09を, 章 / 手順の目次, 矢印キー, 進捗バー, 拡大できる操作画像で読み進める日本語ガイドです。明 / 暗の配色とスマートフォン表示に対応し, 作者 **Jiayi Yang** を表紙とフッターに記載しています。
 
-GitHub上ではHTMLが実行されないため, **cloneまたはDownload ZIP → すべて展開 → `docs/workshop-presentation.html`をEdge / Chromeで開く**と使えます。`assets`を含むフォルダー全体を保持してください。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
+GitHub上ではHTMLが実行されないため, **`docs/workshop-presentation.html`をダウンロードしてEdge / Chromeで開く**と使えます。操作画像を含む単一のHTMLファイルで, `assets`フォルダーのコピーは不要です。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
 ## このワークショップで学べること
 
@@ -99,7 +99,15 @@ PowerTableは主Plan内のシートではなく, 専用の別PlanとSQLデータ
 <img src="assets/brand/semantic_model_48_item.svg" width="26" height="26" alt="Gross Revenue の出所となるFabric セマンティックモデル"> <img src="assets/brand/planning_48_item.svg" width="26" height="26" alt="Forecast の出所となるFabric Plan"> <img src="assets/brand/data_warehouse_48_item.svg" width="26" height="26" alt="比較Snapshotを保管するFabric Warehouse"> <img src="assets/brand/data_agent_48_item.svg" width="26" height="26" alt="Ontologyを使って読み取り専用で回答するFabric Data Agent">
 **5 / 日本語版独自の発展編Lab09:** Lab04のGross Revenue / Forecastを同じProduct × 月の粒度で照合し, 一時Lakehouse FilesからWarehouseへCOPYして数値を検算します。Ontology / GraphにはWarehouseではなくLakehouseの管理Deltaテーブルをバインドし, Fabric Data AgentがOntologyを通じて読み取り専用で回答します。Plan / 元モデルへの自動書き戻しではありません。[Lab09](labs/09-variance-analyst.md) / [合成サンプルCSV](data/lab09-variance-snapshot-sample.csv) / [構成図](assets/diagrams/lab09-variance-analyst.md)
 
-> **検証状況:** Part 3〜5は同梱の合成CSVを使ってFabricで操作し, Warehouse検算, Lakehouse Delta, Ontology / Graph, Data Agentの一部の質問を確認しました。Part 1〜2の実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。Q4 / Q4aは`SQLCandidatesFailedFilterError`となり, 原因未特定です。実機での確認範囲 / 未確認事項は[Lab09](labs/09-variance-analyst.md)を参照してください。
+> **検証状況:** Part 3〜5は同梱の合成CSVを使ってFabricで操作し, Warehouse検算, Lakehouse Delta, Ontology / Graph, Data Agentの一部の質問を確認しました。Q4 / Q4aは`SQLCandidatesFailedFilterError`となりました。実機での確認範囲は[Lab09](labs/09-variance-analyst.md)を参照してください。
+
+<!-- presentation-exclude-start: README-LAB09-END-TO-END -->
+> Part 1〜2の実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。
+<!-- presentation-exclude-end: README-LAB09-END-TO-END -->
+
+<!-- presentation-exclude-start: README-LAB09-ERROR-CAUSE -->
+> Q4 / Q4aの`SQLCandidatesFailedFilterError`は原因未特定です。
+<!-- presentation-exclude-end: README-LAB09-ERROR-CAUSE -->
 
 **参照とコピーは異なります。** From Sheetsで参照した計画系列は参照元の変更を受け取ります。一方, Lab03の編集可能なコピーは元シートと自動同期しません。Intelligence上でも, From Sheetsの入力値とセマンティックモデル由来の実績を区別して設定します。[既存の構成図](assets/diagrams/lab-flow.md) / [データ構成ガイド](data/README.md)
 

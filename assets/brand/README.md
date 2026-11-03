@@ -17,6 +17,13 @@ Microsoft製品を説明する教材 / ドキュメントとして使用しま�
 | [semantic_model_48_item.svg](semantic_model_48_item.svg) | Fabricセマンティックモデル | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
 | [data_warehouse_48_item.svg](data_warehouse_48_item.svg) | Fabric Warehouse | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
 | [data_agent_48_item.svg](data_agent_48_item.svg) | Fabric Data Agent | 2026-11-02 | [公式アーカイブ](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/Icons.zip) / 下記Fabricアイコン利用条件 |
+| [lakehouse_48_item.svg](lakehouse_48_item.svg) | Lakehouse | 2026-11-03 | 同上 / v6.1.0 |
+| [notebook_48_item.svg](notebook_48_item.svg) | Notebook | 2026-11-03 | 同上 / v6.1.0 |
+| [power_bi_48_color.svg](power_bi_48_color.svg) | Power BI | 2026-11-03 | 同上 / v6.1.0 |
+| [one_lake_48_color.svg](one_lake_48_color.svg) | OneLake | 2026-11-03 | 同上 / v6.1.0 |
+| [graph_intelligence_48_color.svg](graph_intelligence_48_color.svg) | Graph intelligence | 2026-11-03 | 同上 / v6.1.0 |
+| [group_workspace_48_non-item.svg](group_workspace_48_non-item.svg) | Workspace | 2026-11-03 | 同上 / v6.1.0 |
+| [copilot_48_color.svg](copilot_48_color.svg) | Copilot | 2026-11-03 | 同上 / v6.1.0 |
 
 ## 利用条件
 
@@ -34,7 +41,7 @@ Microsoft Learnの[FabricアイコンのTerms](https://learn.microsoft.com/en-us
 
 2026-11-03に上記の[Fabricアイコン利用条件](https://learn.microsoft.com/en-us/fabric/fundamentals/icons#terms), [Azureアイコン利用条件](https://learn.microsoft.com/en-us/azure/architecture/icons/#icon-terms), [Microsoft Trademark and Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks)を再確認しました。Fabric公式ページはtraining materials / slide decks / documentationでの利用を案内しています。
 
-[HTML操作ガイド](../../docs/workshop-presentation.html)では, 上表の既存7ファイルをそのまま相対パスで参照します。新しい画像の取得 / 変形 / 再配色は行っていません。製品の説明に使い, 近くにFabric / 各アイテムの名前を添えます。Microsoft企業ロゴの利用はこの教材向けに別途許諾されたとは判断できないため収録せず, Fabric製品アイコンと通常のテキスト表記を使います。Azureアイコンも使用しません。
+[HTML操作ガイド](../../docs/workshop-presentation.html)では, 上表の公式ファイルをデータURIとして埋め込みます。2026-11-03追加分も同じv6.1.0アーカイブの原本とバイト単位で一致します。製品の説明に使い, 近くにFabric / 各アイテムの名前を添えます。アイコンの回転 / 反転 / 歪曲 / CSSフィルター / 再配色は行いません。Microsoft企業ロゴの利用はこの教材向けに別途許諾されたとは判断できないため収録せず, Fabric製品アイコンと通常のテキスト表記を使います。Azureアイコンも使用しません。
 
 HTMLの面 / 余白 / ナビゲーション / 緑系アクセントは独自のFluent風デザインで, Microsoftの公式デザインテンプレートや公式サイトの複製ではありません。Segoe UIは利用者のシステムにある場合のみ表示し, フォントファイルを配布しません。作者名Jiayi Yangは教材の制作クレジットであり, Microsoftとの関係を示しません。
 

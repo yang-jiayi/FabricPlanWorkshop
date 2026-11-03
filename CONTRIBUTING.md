@@ -16,9 +16,14 @@
 文書を変更したら、リポジトリのルートから次のチェックを実行してください。
 
 ```powershell
+python -m pip install -r requirements-docs.txt
+python -X utf8 tools/build_presentation.py
+python -X utf8 tools/build_presentation.py --check
 python tools/validate_docs.py
 python -m unittest discover -s tools -p "test_*.py"
 python tools/check_public_hygiene.py
 ```
 
 画像を追加,削除した場合は、Markdownから参照されていることと、代替テキストが内容を説明していることを確認してください。モジュールの追加や番号変更では、READMEの一覧,隣接モジュールのナビゲーション,演習フロー図も更新してください。
+
+HTML操作ガイドは生成物です。`docs/workshop-presentation.html`を直接編集せず, 正本Markdownまたは`assets/presentation`を変更して再生成し, HTMLも同じ変更に含めてください。更新漏れはCIの同期チェックで失敗します。[利用 / 更新方法](docs/PRESENTATION-GUIDE-JA.md)

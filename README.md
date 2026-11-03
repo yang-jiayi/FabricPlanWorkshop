@@ -10,7 +10,7 @@
 
 **日本語** &nbsp; | &nbsp; **10 labs** &nbsp; | &nbsp; **集合開催180分** &nbsp; | &nbsp; **MIT**
 
-[**ラボを始める →**](labs/00-prerequisites.md) &nbsp; | &nbsp; [講師向けガイド](docs/FACILITATOR-GUIDE.md) &nbsp; | &nbsp; [原典 / English](https://github.com/Diaz506/fabric-planning-lab)
+[**HTML操作ガイド →**](docs/workshop-presentation.html) &nbsp; | &nbsp; [Markdownのラボ](labs/00-prerequisites.md) &nbsp; | &nbsp; [講師向けガイド](docs/FACILITATOR-GUIDE.md) &nbsp; | &nbsp; [原典 / English](https://github.com/Diaz506/fabric-planning-lab)
 
 </div>
 
@@ -18,6 +18,12 @@
 > 本教材はDiego Diaz氏の **[Fabric Planning Lab: Harborlight Provisions Co.](https://github.com/Diaz506/fabric-planning-lab)** のLab00〜08を基にした日本語版です。原典のMITライセンスと著作権表示を保持し, 日本語訳, 手順の画像, 数値の確認方法, 集合開催の進行案に加えて,日本語版独自の発展編Lab09を追加しています。[変更点](LOCALIZATION.md) / [翻訳基準コミット](https://github.com/Diaz506/fabric-planning-lab/commit/486be63004b30554ab44a0e3ae654e3e762188ad)
 >
 > 独立した非公式のコミュニティ教材であり, Microsoftによる承認, 提携, 公式認定を示すものではありません。
+
+## インタラクティブなHTML操作ガイド
+
+**[HTMLプレゼンテーションを開く](docs/workshop-presentation.html)** — READMEの概要とLab00〜09を, 章 / 手順の目次, 矢印キー, 進捗バー, 拡大できる操作画像で読み進める日本語ガイドです。明 / 暗の配色とスマートフォン表示に対応し, 作者 **Jiayi Yang** を表紙とフッターに記載しています。
+
+GitHub上ではHTMLが実行されないため, **cloneまたはDownload ZIP → すべて展開 → `docs/workshop-presentation.html`をEdge / Chromeで開く**と使えます。`assets`を含むフォルダー全体を保持してください。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
 ## このワークショップで学べること
 

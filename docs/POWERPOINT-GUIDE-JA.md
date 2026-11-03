@@ -43,4 +43,4 @@ python -X utf8 tools\render_workshop_powerpoint.py docs\workshop-overview-ja.ppt
 
 ## 原典と日本語版
 
-Lab00〜08はDiego Diaz氏の[Fabric Planning Lab](https://github.com/Diaz506/fabric-planning-lab)に基づき, 原典のMITライセンスと著作権表示を保持します。日本語の説明, 操作画像, このPowerPointとLab09は日本語版の追加 / 修正です。制作: Jiayi Yang。[翻訳と用語の方針](../LOCALIZATION.md)
+Lab00〜08はDiego Diaz氏の[Fabric Planning Lab](https://github.com/Diaz506/fabric-planning-lab)に基づき, 原典のMITライセンスと著作権表示を保持します。日本語の説明, 操作画像, このPowerPointとLab09は日本語版の追加 / 修正です。制作: [Jiayi Yang, Swarm Data SE](https://www.linkedin.com/in/yangjiayi/)。[翻訳と用語の方針](../LOCALIZATION.md)

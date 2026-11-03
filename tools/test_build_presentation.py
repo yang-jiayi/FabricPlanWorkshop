@@ -162,6 +162,18 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertEqual(retained[post_part_two['id']], post_part_two['title'])
         self.assertEqual(retained['lab09-s002'], '確認済みの範囲')
 
+    def test_audited_architecture_routes_and_graph_reference(self):
+        for caption in (
+            '破線はSQL書き戻し / 明示的に構成する後続分析 / 独立検算 / 任意のPowerTable経路を示します。',
+            'Dashed lines show SQL writeback / explicitly configured downstream analysis / independent verification / the optional PowerTable path.',
+        ):
+            self.assertTrue(caption in self.generated, 'Corrected architecture legend is missing')
+        titles = {slide['id']: slide['data-title'] for slide in self.tree.slides}
+        self.assertEqual(titles['lab09-s004'], 'データ経路')
+        self.assertEqual(titles['en-lab09-s004'], 'Data Routes')
+        self.assertIn('https://learn.microsoft.com/en-us/fabric/graph/limitations', self.tree.links)
+        self.assertFalse(any('/fabric/iq/graph/limitations' in link for link in self.tree.links))
+
     def test_standalone_size_and_downloads(self):
         self.assertLess(len(self.generated.encode('utf-8')), 50 * 1024 * 1024)
         self.assertTrue(any(target.startswith('data:text/csv') for target in self.tree.links))

@@ -21,7 +21,7 @@
 
 ## インタラクティブなHTML操作ガイド
 
-**配布用は[参加者用HTML](docs/workshop-presentation.html)です。** READMEの概要とLab00〜09の操作 / 確認問題 / 安全上の注意を収録し, 解答と講師の進行資料を含みません。[講師用HTML](docs/workshop-instructor.html)は演習の解答と準備 / 180分の進行 / 復帰 / 費用確認も収録し, 講師だけが使用します。両版とも日本語 / Englishの全文切り替え, Yu Gothic UIによる可変文字サイズ, 明 / 暗とスマートフォン表示に対応し, 作者 **Jiayi Yang** を記載しています。
+**配布用は[参加者用HTML](docs/workshop-presentation.html)です。** READMEの概要とLab00〜09の操作 / 確認問題 / 安全上の注意を収録し, 解答と講師の進行資料を含みません。[講師用HTML](docs/workshop-instructor.html)は演習の解答と準備 / 180分の進行 / 復帰 / 費用確認も収録し, 講師だけが使用します。両版とも日本語 / Englishの全文切り替え, Yu Gothic UIによる可変文字サイズ, 明 / 暗とスマートフォン表示に対応し, 作者 **[Jiayi Yang, Swarm Data SE](https://www.linkedin.com/in/yangjiayi/)** を記載しています。
 
 GitHub上ではHTMLが実行されないため, **`docs/workshop-presentation.html`をダウンロードしてEdge / Chromeで開く**と使えます。操作画像を含む単一のHTMLファイルで, `assets`フォルダーのコピーは不要です。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
@@ -132,7 +132,7 @@ flowchart LR
     POWER_TABLE -.-> SEPARATE_DB["専用Fabric SQL DB"]
 ```
 
-**破線は独立した検算です。** Warehouseは正確なDecimal値を照合するSQL層で, Ontology / Graphのバインディング先はLakehouseの管理Deltaテーブルです。PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続はありません。PowerTableは別Planと別DBに分かれています。
+**破線はSQL書き戻し / 明示的に構成する後続分析 / 独立検算 / 任意のPowerTable経路を示します。** Warehouseは正確なDecimal値を照合するSQL層で, Ontology / Graphのバインディング先はLakehouseの管理Deltaテーブルです。PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続はありません。PowerTableは別Planと別DBに分かれています。
 
 ## はじめ方
 

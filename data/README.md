@@ -8,7 +8,7 @@ Lab01〜08の主なデータはMicrosoft公式のNorthwind FMCGサンプルで�
 
 | ファイル | サイズ | 使用するモジュール |
 |---|---|---|
-| [`Northwind_FMCG.pbix`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind_FMCG.pbix) | 9.3 MB | モジュール01〜06,09 |
+| [`Northwind_FMCG.pbix`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind_FMCG.pbix) | 9.3 MB | モジュール01〜06 / 09の実Planルート |
 | [`Northwind-FMCG-assets-powertable-tutorial.xlsx`](https://github.com/microsoft/fabric-samples/blob/main/docs-samples/iq/plan/Northwind-FMCG-assets-powertable-tutorial.xlsx) | 36 KB | モジュール07（任意） |
 | [`lab09-variance-snapshot-sample.csv`](lab09-variance-snapshot-sample.csv) | 18行 / 15列 | Lab09のPart 3〜5（合成データによる実機手順の再現） |
 
@@ -60,7 +60,7 @@ Lab01〜08の主なデータはMicrosoft公式のNorthwind FMCGサンプルで�
 > | *COGS* | 全年度 | 全年度 |
 > | *2025 COGS* | FY25のみ | FY25のみ |
 >
-> この演習ではMicrosoftのチュートリアルに合わせ、**2025年に限定したメジャー**を使います。年度を限定していないメジャーを選んでもエラーにはなりませんが、意図した列構成になりません。
+> 最初の計画シート（モジュール01）ではMicrosoftのチュートリアルに合わせ, **2025年に限定したメジャー**を使います。ここで年度を限定していないメジャーを選んでもエラーにはなりませんが, 意図した列構成になりません。モジュール04の予測では, 複数年度の履歴を使うため年度限定なしの`Gross Revenue`を選びます。
 
 > [!NOTE]
 > **Microsoftのチュートリアルに書かれた名称と、サンプルモデルの名称が異なる場合があります。** 翻訳元では、次の違いが報告されています。この演習の操作手順では、モデル側で報告された名称を使っています。

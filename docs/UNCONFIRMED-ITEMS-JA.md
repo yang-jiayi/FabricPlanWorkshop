@@ -117,11 +117,11 @@ Edge traversalは未確認です。
 
 ### LAB09-REAL-PLAN-PREPARATION
 
-- 出典: [labs/09-variance-analyst.md / 2つのデータ経路](../labs/09-variance-analyst.md#2つのデータ経路)
+- 出典: [labs/09-variance-analyst.md / データ経路](../labs/09-variance-analyst.md#データ経路)
 - 原文:
 
 ```markdown
-1. **実Planルート:** Part 1〜2でLab04の保存済みForecastとセマンティックモデルのGross Revenueを同一粒度で抽出し、全件一致を確認してからCSVを用意します。ここは実機でEnd-to-End確認していません。
+- **実Planルート:** Part 1〜2でLab04の保存済みForecastとセマンティックモデルのGross Revenueを同一粒度で抽出し、全件一致を確認してからCSVを用意します。ここは実機でEnd-to-End確認していません。
 ```
 
 - 検証作業: Lab04の保存状態と元モデルから同一Product / 月の全件を抽出する。

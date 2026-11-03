@@ -52,13 +52,13 @@ Q4 / Q4aの失敗の原因は特定されていません。
 - 合成データで再実行する場合も専用の新規演習アイテムを使い、既存アイテムが見つかったら停止します。既存テーブルを`DROP`、`TRUNCATE`、`DELETE`、`CREATE OR REPLACE`で上書きしません。今回のSpark `CREATE OR REPLACE TABLE`は新規専用テーブルに実行した実証記録であり、既存テーブルへの公開手順ではありません。
 - テナントID、アカウント名、トークン、資格情報、顧客データをプロンプト、公開ログ、画像、CSVへ含めません。Data Agentの会話 / データ処理に関する保存と監査の条件も管理者に確認します。
 
-### 2つのデータ経路
+### データ経路
 
 <!-- presentation-exclude-start: LAB09-REAL-PLAN-PREPARATION -->
-1. **実Planルート:** Part 1〜2でLab04の保存済みForecastとセマンティックモデルのGross Revenueを同一粒度で抽出し、全件一致を確認してからCSVを用意します。ここは実機でEnd-to-End確認していません。
+- **実Planルート:** Part 1〜2でLab04の保存済みForecastとセマンティックモデルのGross Revenueを同一粒度で抽出し、全件一致を確認してからCSVを用意します。ここは実機でEnd-to-End確認していません。
 <!-- presentation-exclude-end: LAB09-REAL-PLAN-PREPARATION -->
 
-2. **合成サンプルルート:** Part 1〜2を行わず、同梱の`data/lab09-variance-snapshot-sample.csv`を使います。このCSVの値は合成です。Part 3〜5で実証したUI操作を再現するためのルートです。
+- **合成サンプルルート:** Part 1〜2を行わず、同梱の`data/lab09-variance-snapshot-sample.csv`を使います。このCSVの値は合成です。Part 3〜5で実証したUI操作を再現するためのルートです。
 
 > [!WARNING]
 > Fabricの実Planルートでは、Plan / writebackの対象テーブルや既存値を書き換えません。Tenant AI設定、権限、アイテム作成、容量消費、ファイルアップロードなど、影響のある操作は管理者の承認後に行います。本書のキャプチャは個人情報等を含まないマスク済み画面ですが、実環境で証拠を撮る場合は共有前に個人名、workspace識別子、URL、IDを確認してください。
@@ -1035,7 +1035,7 @@ CSV、Lakehouse、Warehouse、Ontology、Data Agentは演習専用の新規資�
 - [WarehouseのSQL Query Editor](https://learn.microsoft.com/en-us/fabric/data-warehouse/sql-query-editor)
 - [Warehouseでサポートされるデータ型](https://learn.microsoft.com/en-us/fabric/data-warehouse/data-types)
 - [ローカルCSVをLakehouseへアップロード](https://learn.microsoft.com/en-us/fabric/data-engineering/get-started-csv-upload)
-- [Fabric Graphの制限事項](https://learn.microsoft.com/en-us/fabric/iq/graph/limitations)
+- [Fabric Graphの制限事項](https://learn.microsoft.com/en-us/fabric/graph/limitations)
 
 ---
 

@@ -21,7 +21,7 @@
 
 ## インタラクティブなHTML操作ガイド
 
-**[HTMLプレゼンテーションを開く](docs/workshop-presentation.html)** — READMEの概要とLab00〜09を, 章 / 手順の目次, 矢印キー, 進捗バー, 拡大できる操作画像で読み進める日本語 / 英語ガイドです。上部の言語選択で本文も切り替わります。Yu Gothic UIを優先し, 表示領域に応じた読みやすい文字サイズ, 明 / 暗の配色とスマートフォン表示に対応します。作者 **Jiayi Yang** を表紙とフッターに記載しています。
+**配布用は[参加者用HTML](docs/workshop-presentation.html)です。** READMEの概要とLab00〜09の操作 / 確認問題 / 安全上の注意を収録し, 解答と講師の進行資料を含みません。[講師用HTML](docs/workshop-instructor.html)は演習の解答と準備 / 180分の進行 / 復帰 / 費用確認も収録し, 講師だけが使用します。両版とも日本語 / Englishの全文切り替え, Yu Gothic UIによる可変文字サイズ, 明 / 暗とスマートフォン表示に対応し, 作者 **Jiayi Yang** を記載しています。
 
 GitHub上ではHTMLが実行されないため, **`docs/workshop-presentation.html`をダウンロードしてEdge / Chromeで開く**と使えます。操作画像を含む単一のHTMLファイルで, `assets`フォルダーのコピーは不要です。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
@@ -262,7 +262,9 @@ flowchart TD
 
 ## 開催と利用上の注意
 
+<!-- presentation-instructor-start -->
 **講師が設計 / 設定し, 参加者が入力 / レビュー / 承認を体験する形式**を基本にします。[講師向けガイド](docs/FACILITATOR-GUIDE.md)には事前準備, 180分の時間割, ペアの役割, つまずいた場合の復帰方法, PoCの検討シートを収録しています。
+<!-- presentation-instructor-end -->
 
 <details>
 <summary><strong>製品の提供状況と画面が教材と違う場合</strong></summary>
@@ -274,7 +276,13 @@ flowchart TD
 <details>
 <summary><strong>容量と権限を人数に合わせて決めるには</strong></summary>
 
-F2という最小容量から, 同時操作の性能や料金を推定しません。課金上のPlanner / Stakeholder / Viewerとワークスペースのロールは別です。[講師向けガイド](docs/FACILITATOR-GUIDE.md)の操作別試算を使い, 容量と費用の責任者を決めてください。モデルRLS, 入力値, コメント, KPIの表示範囲は同一と決めつけず, [Lab08](labs/08-sizing-and-governance.md)の制約と確認手順を参照します。
+F2という最小容量から, 同時操作の性能や料金を推定しません。課金上のPlanner / Stakeholder / Viewerとワークスペースのロールは別です。容量と費用の責任者を決めてください。
+
+<!-- presentation-instructor-start -->
+[講師向けガイド](docs/FACILITATOR-GUIDE.md)の操作別試算を使います。
+<!-- presentation-instructor-end -->
+
+モデルRLS, 入力値, コメント, KPIの表示範囲は同一と決めつけず, [Lab08](labs/08-sizing-and-governance.md)の制約と確認手順を参照します。
 
 </details>
 

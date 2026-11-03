@@ -129,7 +129,8 @@ class PresentationBuildTests(unittest.TestCase):
 
     def test_exclusion_markers_match_agent_list(self):
         marked = []
-        for path in [presentation.ROOT / 'README.md', *sorted((presentation.ROOT / 'labs').glob('*.md'))]:
+        for path in [presentation.ROOT / 'README.md', presentation.ROOT / presentation.FACILITATOR_SOURCE,
+                     *sorted((presentation.ROOT / 'labs').glob('*.md'))]:
             text = path.read_text(encoding='utf-8')
             starts = re.findall(r'<!-- presentation-exclude-start: ([A-Z0-9-]+) -->', text)
             ends = re.findall(r'<!-- presentation-exclude-end: ([A-Z0-9-]+) -->', text)
@@ -196,6 +197,22 @@ class PresentationBuildTests(unittest.TestCase):
             'before\n<!-- presentation-exclude-start: TEST -->\nsecret\n'
             '<!-- presentation-exclude-end: TEST -->\nafter'), 'before\n\nafter')
 
+    def test_participant_filters_answers_and_instructor_blocks_before_rendering(self):
+        source = ('Question\n<details><summary>Answers</summary>\n'
+                  '<details><summary>Reason</summary>private answer</details>\n</details>\n'
+                  'Safety warning\n<!-- presentation-instructor-start -->private note'
+                  '<!-- presentation-instructor-end -->')
+        participant = presentation.edition_markdown(source, 'participant')
+        self.assertIn('Question', participant)
+        self.assertIn('Safety warning', participant)
+        self.assertNotIn('private', participant)
+        instructor = presentation.edition_markdown(source, 'instructor')
+        self.assertIn('private answer', instructor)
+        self.assertIn('private note', instructor)
+        for edition in ('participant', 'instructor'):
+            with self.assertRaisesRegex(ValueError, 'Unbalanced'):
+                presentation.edition_markdown('<!-- presentation-instructor-start -->x', edition)
+
     def test_source_edit_requires_synchronized_english_translation(self):
         original = Path.read_text
 
@@ -235,6 +252,91 @@ class PresentationBuildTests(unittest.TestCase):
                     patch.object(presentation, 'build', return_value='fresh'), \
                     redirect_stdout(StringIO()):
                 self.assertEqual(presentation.main(['--check']), 1)
+
+    def test_check_rejects_stale_instructor_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'docs').mkdir()
+            (root / presentation.OUTPUT).write_text('fresh', encoding='utf-8')
+            (root / presentation.INSTRUCTOR_OUTPUT).write_text('stale', encoding='utf-8')
+            with patch.object(presentation, 'ROOT', root), \
+                    patch.object(presentation, 'build', return_value='fresh'), \
+                    redirect_stdout(StringIO()):
+                self.assertEqual(presentation.main(['--check']), 1)
+
+
+class PresentationEditionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.participant = presentation.build()
+        cls.instructor = presentation.build(edition='instructor')
+        cls.participant_tree = PresentationTree()
+        cls.participant_tree.feed(cls.participant)
+        cls.instructor_tree = PresentationTree()
+        cls.instructor_tree.feed(cls.instructor)
+
+    def test_only_two_current_standalone_outputs(self):
+        self.assertEqual({p.name for p in (presentation.ROOT / 'docs').glob('workshop-*.html')},
+                         {presentation.OUTPUT.name, presentation.INSTRUCTOR_OUTPUT.name})
+        self.assertEqual((presentation.ROOT / presentation.INSTRUCTOR_OUTPUT).read_text(encoding='utf-8'),
+                         self.instructor)
+        self.assertIn('参加者用', self.participant)
+        self.assertIn('Instructor edition', self.instructor)
+        for content, tree in [(self.participant, self.participant_tree),
+                              (self.instructor, self.instructor_tree)]:
+            self.assertLess(len(content.encode('utf-8')), 50 * 1024 * 1024)
+            self.assertEqual(len(tree.ids), len(set(tree.ids)))
+            self.assertEqual(content.count('id="image-payloads"'), 1)
+            self.assertTrue(all(urlsplit(target).scheme == 'data' for target in tree.resources))
+            for href in tree.links:
+                if href.startswith('#'):
+                    self.assertIn(unquote(href[1:]), tree.ids)
+
+    def test_answers_are_absent_from_serialized_participant_html(self):
+        for lab in range(9):
+            document = json.loads((presentation.ROOT / presentation.UI_ROOT /
+                                   f'locales/en/lab{lab:02d}.json').read_text(encoding='utf-8'))
+            answers = [value['markdown'] for value in document['sections'].values()
+                       if '<summary>Answers</summary>' in value['markdown']]
+            self.assertEqual(len(answers), 1)
+            answer = re.search(r'<summary>Answers</summary>(.*?)</details>', answers[0], re.S)[1]
+            first_answer = re.search(r'^1\. (.+)$', answer, re.M)[1]
+            # Inspect rendered text, including hidden articles, not just visible UI.
+            from html import unescape
+            participant_text = unescape(re.sub(r'<[^>]*>', '', self.participant))
+            instructor_text = unescape(re.sub(r'<[^>]*>', '', self.instructor))
+            plain_answer = unescape(re.sub(r'<[^>]*>', '', MarkdownIt('default').renderInline(first_answer)))
+            self.assertNotIn(plain_answer, participant_text)
+            self.assertIn(plain_answer, instructor_text)
+        self.assertNotIn('<summary>解答</summary>', self.participant)
+        self.assertNotIn('<summary>Answers</summary>', self.participant)
+        self.assertEqual(self.instructor.count('<summary>解答</summary>'), 9)
+        self.assertEqual(self.instructor.count('<summary>Answers</summary>'), 9)
+
+    def test_facilitator_content_and_links_are_instructor_only(self):
+        self.assertNotIn('FACILITATOR-GUIDE.md', self.participant)
+        self.assertNotIn('data-lab="facilitator"', self.participant)
+        self.assertIn('data-lab="facilitator"', self.instructor)
+        self.assertIn('当日の進行：合計180分', self.instructor)
+        self.assertIn('9,317', self.instructor)
+        self.assertNotIn('9,317', self.participant)
+        self.assertIn('GEN_DB_010', self.participant)
+        self.assertIn('講師に確認してください', self.participant)
+
+    def test_surviving_articles_and_images_are_identical_in_both_editions(self):
+        for language in ('ja', 'en'):
+            participant = {s['id']: s['data-title'] for s in self.participant_tree.slides
+                           if s['data-language'] == language and s['data-article'] != 'welcome'}
+            instructor = {s['id']: s['data-title'] for s in self.instructor_tree.slides
+                          if s['data-language'] == language and s['data-lab'] != 'facilitator'
+                          and s['data-article'] != 'welcome'}
+            self.assertEqual(participant, instructor)
+            images = lambda tree: [i['data-source'] for i in tree.images if 'data-image' in i
+                                   and i['_language'] == language]
+            self.assertEqual(images(self.participant_tree), images(self.instructor_tree))
+            self.assertEqual(len(images(self.instructor_tree)), 578)
+        for term in ('未確認', '未検証', '原因未特定', '未実証'):
+            self.assertFalse(term in self.instructor, f'Unconfirmed annotation: {term}')
 
     def test_split_preserves_nested_steps_and_code_fences(self):
         md = MarkdownIt('default')

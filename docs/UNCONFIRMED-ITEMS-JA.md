@@ -1,10 +1,34 @@
 # 日本語版の確認待ち項目
 
-この一覧は日本語版の編集 / 検証用です。正本はREADMEと各LabのMarkdownです。HTML操作ガイドでは, 独立した行の`<!-- presentation-exclude-start: STABLE-ID -->`と`<!-- presentation-exclude-end: STABLE-ID -->`で囲んだ範囲だけを表示対象から外します。IDは一意で, この文書の`### ID`と1対1に対応します。入れ子にはしません。この一覧自体をHTMLへ取り込んだり, HTMLからリンクしたりしません。
+この一覧は日本語版の編集 / 検証用です。正本はREADME, 各Labと講師ガイドのMarkdownです。HTML操作ガイドでは, 独立した行の`<!-- presentation-exclude-start: STABLE-ID -->`と`<!-- presentation-exclude-end: STABLE-ID -->`で囲んだ範囲だけを表示対象から外します。IDは一意で, この文書の`### ID`と1対1に対応します。入れ子にはしません。この一覧自体をHTMLへ取り込んだり, HTMLからリンクしたりしません。
 
 原文欄は編集前の文言をそのまま残します。表や段落に確認済みの観測が混在する場合は, 正本で原因 / 確認待ちの部分だけを独立させています。失敗の観測, 数値, 安全上の注意はHTMLにも残します。Part 1 / 2は手順全体が対象で, その範囲にスクリーンショット参照はありません。その他の除外範囲にも画像参照は含めず, 全578件のスクリーンショット参照と順序を維持します。
 
 ## 項目
+
+### FACILITATOR-LAB09-EXTRACTION
+
+- 出典: [講師ガイド / 発展編](FACILITATOR-GUIDE.md#発展編モジュール09追加4560分)
+- 原文:
+
+```text
+モジュール04で使ったProduct × 月のGross RevenueとForecastを同一Scenario / Plan versionで照合し、UTF-8 CSVをLakehouse Filesへ一時配置します。実機で確認したのは合成CSVを使うPart 3〜5です。実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。
+```
+
+- 検証作業: Lab09の実Plan / writeback抽出からPart 3〜5までを同一Snapshotで実行する。
+- 受入条件: キー / Scenario / PlanVersion / 値の連続した対応と独立検算を記録すること。それまでは両HTMLとも合成CSVのPart 3〜5だけを実施範囲にする。
+
+### FACILITATOR-LAB09-ERROR-CAUSE
+
+- 出典: [講師ガイド / 発展編](FACILITATOR-GUIDE.md#発展編モジュール09追加4560分)
+- 原文:
+
+```text
+AgentのQ4 / Q4aは`SQLCandidatesFailedFilterError`となり原因未特定です。
+```
+
+- 検証作業: Lab09と同じ合成CSVでエラーを再現し, 製品根拠と最小再現で原因を調査する。
+- 受入条件: 原因を独立して説明できること。失敗した観測とQ4cの検算済み結果は両HTMLに維持する。
 
 ### README-LAB09-END-TO-END
 

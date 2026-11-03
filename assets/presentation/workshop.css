@@ -61,6 +61,7 @@ img { object-fit: contain; }
 .search-symbol { position: relative; display: inline-block; flex: 0 0 13px; width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 50%; }
 .search-symbol::after { content: ""; position: absolute; width: 6px; height: 6px; background: linear-gradient(45deg, transparent 40%, currentColor 45%, currentColor 60%, transparent 65%); top: 8px; left: 9px; }
 .app-tools { display: flex; align-items: center; gap: 8px; }
+ .edition-label { font-size: var(--type-ui); font-weight: 600; color: var(--accent); }
 .language-control { display: inline-flex; align-items: center; gap: 7px; font-size: var(--type-ui); }
 .language-control select { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--text); font-size: var(--type-ui); }
 .tool-button, .icon-button, .close-button { border: 1px solid transparent; background: transparent; border-radius: 4px; padding: 7px 9px; font-size: var(--type-ui); white-space: nowrap; }
@@ -261,7 +262,7 @@ html[lang="en"] .index-count::after { content: " articles"; }
   .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 53.125em) {
-  :root { --header: 7.5rem; }
+  :root { --header: 10rem; }
   .app-bar { padding: 0 15px; gap: 12px; }
   .mobile-tool { display: inline-flex; align-items: center; justify-content: center; }
   .brand-lockup img { width: 28px; height: 28px; }
@@ -272,7 +273,8 @@ html[lang="en"] .index-count::after { content: " articles"; }
   .nav-open { overflow: hidden; }
   .global-search { width: 2.5rem; height: 2.5rem; padding: 9px; justify-content: center; background: transparent; border-color: transparent; }
   .global-search > span:not(.search-symbol), .global-search kbd { display: none; }
-  .app-tools { flex-basis: 100%; justify-content: flex-end; gap: 12px; }
+  .app-tools { flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; gap: 8px 12px; }
+  .edition-label { flex-basis: 100%; text-align: right; }
   .tool-button { padding-inline: 5px; }
   main { padding-inline: 24px; }
   .home-hero { grid-template-columns: 1fr; }

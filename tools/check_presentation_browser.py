@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(output, axe):
+def run(output, axe, html_path=ROOT / 'docs/workshop-presentation.html'):
     output.mkdir(parents=True, exist_ok=True)
     report = {'checks': {}, 'console_errors': [], 'network_attempts': [], 'accessibility': {}}
 
@@ -30,10 +30,10 @@ def run(output, axe):
         page.on('request', lambda request: report['network_attempts'].append(request.url)
                 if request.url.startswith(('http:', 'https:')) else None)
         started = time.perf_counter()
-        page.goto((ROOT / 'docs/workshop-presentation.html').as_uri(), wait_until='load')
+        page.goto(html_path.resolve().as_uri(), wait_until='load')
         page.wait_for_function("document.documentElement.classList.contains('js')")
         report['load_seconds'] = round(time.perf_counter() - started, 3)
-        report['html_bytes'] = (ROOT / 'docs/workshop-presentation.html').stat().st_size
+        report['html_bytes'] = html_path.stat().st_size
 
         def capture(name):
             page.screenshot(path=str(output / (name + '.png')), animations='disabled')
@@ -182,7 +182,7 @@ def run(output, axe):
         broken.add_init_script("""document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('image-payloads').textContent='{';
         });""")
-        broken.goto((ROOT / 'docs/workshop-presentation.html').as_uri())
+        broken.goto(html_path.resolve().as_uri())
         broken.evaluate("""location.hash=[...document.querySelectorAll('.slide')]
                         .find(s=>s.querySelector('.step-image')).id""")
         broken.locator('.image-load-error').first.wait_for()
@@ -200,8 +200,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--axe', type=Path, required=True, help='local axe-core axe.min.js')
+    parser.add_argument('--html', type=Path, default=ROOT / 'docs/workshop-presentation.html')
     args = parser.parse_args()
-    report = run(args.output_dir, args.axe)
+    report = run(args.output_dir, args.axe, args.html)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if report['passed'] else 1
 

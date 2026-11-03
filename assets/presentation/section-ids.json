@@ -1,4 +1,18 @@
 [
+  {"id": "facilitator-s000", "lab": "facilitator", "title": "このLabを始める前に"},
+  {"id": "facilitator-s001", "lab": "facilitator", "title": "投影 / 配布用HTML"},
+  {"id": "facilitator-s002", "lab": "facilitator", "title": "終了時に持ち帰るもの"},
+  {"id": "facilitator-s003", "lab": "facilitator", "title": "推奨する運営"},
+  {"id": "facilitator-s004", "lab": "facilitator", "title": "1週間前：管理者と環境を確認する"},
+  {"id": "facilitator-s005", "lab": "facilitator", "title": "2〜3日前：講師が通しで実施する"},
+  {"id": "facilitator-s006", "lab": "facilitator", "title": "前日〜開始直前"},
+  {"id": "facilitator-s007", "lab": "facilitator", "title": "当日の進行：合計180分"},
+  {"id": "facilitator-s008", "lab": "facilitator", "title": "発展編：モジュール09（追加45〜60分）"},
+  {"id": "facilitator-s009", "lab": "facilitator", "title": "体験を導入判断につなげる問い"},
+  {"id": "facilitator-s010", "lab": "facilitator", "title": "成功判定と、つまずいた場合の進め方"},
+  {"id": "facilitator-s011", "lab": "facilitator", "title": "10〜20名の費用確認"},
+  {"id": "facilitator-s012", "lab": "facilitator", "title": "導入検討シート"},
+  {"id": "facilitator-s013", "lab": "facilitator", "title": "関連資料"},
   {
     "id": "overview-s000",
     "lab": "overview",

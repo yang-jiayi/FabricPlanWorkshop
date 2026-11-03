@@ -1,4 +1,11 @@
 {
+  "参加者用": "Participant edition",
+  "講師用": "Instructor edition",
+  "講師ガイド": "Instructor guide",
+  "Plan Workshop / 参加者用": "Plan Workshop / Participant edition",
+  "Plan Workshop / 講師用": "Plan Workshop / Instructor edition",
+  "Microsoft Fabric Plan Workshop / 参加者用": "Microsoft Fabric Plan Workshop / Participant edition",
+  "Microsoft Fabric Plan Workshop / 講師用": "Microsoft Fabric Plan Workshop / Instructor edition",
   "Microsoft Fabric Plan Workshop / 日本語のオフライン操作ガイド。Lab00–09の手順と画面を確認できます。": "Microsoft Fabric Plan Workshop / Offline guide to the procedures and screenshots in Labs 00–09.",
   "本文へ移動": "Skip to content",
   "章のナビゲーションを開く": "Open chapter navigation",

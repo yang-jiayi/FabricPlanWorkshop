@@ -12,14 +12,14 @@ VIEWPORTS = {'mobile': (390, 844), 'tablet': (768, 1024), 'compact': (1280, 1000
              'desktop': (1440, 1000), 'large': (1920, 1080)}
 
 
-def run(output, capture_only=False):
+def run(output, capture_only=False, html_path=ROOT / 'docs/workshop-presentation.html'):
     output.mkdir(parents=True, exist_ok=True)
     report = {'viewports': {}, 'checks': {}, 'errors': []}
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(channel='msedge')
         page = browser.new_page(reduced_motion='reduce')
         page.on('pageerror', lambda error: report['errors'].append(str(error)))
-        page.goto((ROOT / 'docs/workshop-presentation.html').as_uri())
+        page.goto(html_path.resolve().as_uri())
         page.wait_for_function("document.documentElement.classList.contains('js')")
 
         def capture(name):
@@ -130,8 +130,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--capture-only', action='store_true', help='record baseline without type assertions')
+    parser.add_argument('--html', type=Path, default=ROOT / 'docs/workshop-presentation.html')
     args = parser.parse_args()
-    report = run(args.output_dir, args.capture_only)
+    report = run(args.output_dir, args.capture_only, args.html)
     print(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False))
     return 0 if args.capture_only or report['passed'] else 1
 

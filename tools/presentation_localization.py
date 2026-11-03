@@ -84,6 +84,13 @@ def validate_translation(document, source_text, slides, source):
         if not translated.get('title', '').strip() or not translated.get('markdown', '').strip():
             raise ValueError(f'Empty English section: {slide.id}')
         original = section_markdown(slide, lines)
+        for marker in ('presentation-instructor-start', 'presentation-instructor-end'):
+            if original.count(marker) != translated['markdown'].count(marker):
+                raise ValueError(f'English instructor boundary mismatch: {slide.id}')
+        original_answers = len(re.findall(r'<summary>\s*解答\s*</summary>', original))
+        translated_answers = len(re.findall(r'<summary>\s*Answers\s*</summary>', translated['markdown']))
+        if original_answers != translated_answers:
+            raise ValueError(f'English answer coverage mismatch: {slide.id}')
         images = re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', original)
         translated_images = re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', translated['markdown'])
         if images != translated_images:

@@ -13,11 +13,13 @@ from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
 from presentation_assets import data_uri, encode_pack, read_pack
-from presentation_localization import LOCALE_ROOT, load_translation, translate_shell
+from presentation_localization import load_translation, section_markdown, translate_shell
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = Path('docs/workshop-presentation.html')
+INSTRUCTOR_OUTPUT = Path('docs/workshop-instructor.html')
+FACILITATOR_SOURCE = Path('docs/FACILITATOR-GUIDE.md')
 UI_ROOT = Path('assets/presentation')
 OVERVIEW_SECTIONS = {
     'このワークショップで学べること', 'Workshopの目的', 'アーキテクチャ',
@@ -44,6 +46,37 @@ def exclude_unconfirmed(text):
     cleaned = EXCLUSION.sub('', text)
     if 'presentation-exclude-' in cleaned:
         raise ValueError('Unbalanced presentation exclusion markers')
+    return cleaned
+
+
+def edition_markdown(text, edition):
+    """Remove instructor content before rendering or constructing the index."""
+    marker = re.compile(r'<!-- presentation-instructor-start -->.*?'
+                        r'<!-- presentation-instructor-end -->', re.S)
+    cleaned = marker.sub('', text)
+    if 'presentation-instructor-' in cleaned:
+        raise ValueError('Unbalanced instructor content markers')
+    if edition == 'instructor':
+        return text.replace('<!-- presentation-instructor-start -->', '').replace(
+            '<!-- presentation-instructor-end -->', '')
+    # Match full details ranges, including nested details, rather than hiding answers.
+    stack = []
+    ranges = []
+    for match in re.finditer(r'</?details\b[^>]*>', cleaned, re.I):
+        if not match[0].startswith('</'):
+            stack.append(match.start())
+        elif stack:
+            start = stack.pop()
+            content = cleaned[start:match.end()]
+            summary = re.match(r'<details\b[^>]*>\s*<summary\b[^>]*>(.*?)</summary>',
+                               content, re.S | re.I)
+            if summary and re.sub(r'<[^>]*>', '', summary[1]).strip() in ('解答', 'Answers'):
+                ranges.append((start, match.end()))
+    outer_ranges = [(start, end) for start, end in ranges
+                    if not any(other_start < start and end <= other_end
+                               for other_start, other_end in ranges)]
+    for start, end in sorted(outer_ranges, reverse=True):
+        cleaned = cleaned[:start] + cleaned[end:]
     return cleaned
 
 
@@ -159,11 +192,13 @@ def apply_alerts(tokens, language='ja'):
             )
 
 
-def build(root=ROOT, language='ja', _single=False):
+def build(root=ROOT, language='ja', _single=False, edition='participant'):
+    if edition not in ('participant', 'instructor'):
+        raise ValueError(f'Unknown edition: {edition}')
     root = Path(root)
     if not _single:
-        japanese = build(root, 'ja', True)
-        english = build(root, 'en', True)
+        japanese = build(root, 'ja', True, edition)
+        english = build(root, 'en', True, edition)
         english_sections = re.findall(r'<section class="slide\b.*?</section>', english, re.S)
         def annotate(section, locale):
             identifier = re.search(r'\bid="([^"]+)"', section)[1]
@@ -201,12 +236,14 @@ def build(root=ROOT, language='ja', _single=False):
         if len(matches) != 1:
             raise ValueError(f'Lab{number:02d}: expected exactly one Markdown source')
         sources.append(matches[0].relative_to(root))
+    if edition == 'instructor':
+        sources.append(FACILITATOR_SOURCE)
     all_slides = []
     chapters = []
     links = {}
     screenshot_paths = set()
     for number, source in enumerate(sources):
-        lab = 'overview' if number == 0 else f'lab{number - 1:02d}'
+        lab = 'facilitator' if source == FACILITATOR_SOURCE else ('overview' if number == 0 else f'lab{number - 1:02d}')
         text = (root / source).read_text(encoding='utf-8')
         if lab != 'overview':
             screenshot_paths.update(re.findall(r'!\[[^\]\n]*\]\(([^)\s]+)', text))
@@ -236,10 +273,18 @@ def build(root=ROOT, language='ja', _single=False):
                 slide.parent = entry.get('parent', '')
                 slide.tokens = md.parse(entry['markdown'])
                 slide.id = 'en-' + slide.id
+        lines = exclude_unconfirmed(text).splitlines()
+        for slide in slides:
+            # Filter before parsing so answers never enter rendered or indexed content.
+            if language == 'en':
+                markdown = translated['sections'][slide.id.removeprefix('en-')]['markdown']
+            else:
+                markdown = section_markdown(slide, lines)
+            slide.tokens = md.parse(edition_markdown(markdown, edition))
         if not slides:
             raise ValueError(f'No presentation sections in {source}')
-        label = 'Overview' if lab == 'overview' else f'Lab{number - 1:02d}'
-        icon = 'fabric_48_color.svg' if number == 0 else LAB_ICONS[number - 1]
+        label = ('Instructor guide' if language == 'en' else '講師ガイド') if lab == 'facilitator' else ('Overview' if lab == 'overview' else f'Lab{number - 1:02d}')
+        icon = 'fabric_48_color.svg' if lab in ('overview', 'facilitator') else LAB_ICONS[number - 1]
         chapters.append((lab, label, title, icon, slides))
         all_slides.extend(slides)
         links[(source, '')] = 'welcome' if number == 0 else slides[0].id
@@ -256,6 +301,11 @@ def build(root=ROOT, language='ja', _single=False):
             return target
         destination = local_target(source, target)
         path, fragment = destination
+        if path in (OUTPUT, INSTRUCTOR_OUTPUT):
+            own_output = INSTRUCTOR_OUTPUT if edition == 'instructor' else OUTPUT
+            if path == own_output:
+                return '#en-welcome' if language == 'en' else '#welcome'
+            return REPOSITORY + path.as_posix()
         if not (root / path).exists():
             raise ValueError(f'Missing local target: {source}: {target}')
         if not image and destination in links:
@@ -370,7 +420,8 @@ def build(root=ROOT, language='ja', _single=False):
                 )
         item_chips = f'<div class="item-chips" aria-label="{"Fabric products / items" if language == "en" else "Fabricの製品 / アイテム"}">' + ''.join(chips) + '</div>' if chips else ''
         source_link = REPOSITORY + slide.source.as_posix()
-        lab_label = 'Overview' if slide.lab == 'overview' else slide.lab.title()
+        lab_label = ('Instructor guide' if language == 'en' else '講師ガイド') if slide.lab == 'facilitator' else (
+            'Overview' if slide.lab == 'overview' else slide.lab.title())
         rendered_slides.append(
             f'<section class="slide" id="{slide.id}" data-lab="{slide.lab}" '
             f'data-title="{html.escape(slide.title, quote=True)}" aria-labelledby="{slide.id}-title">'
@@ -458,8 +509,10 @@ def build(root=ROOT, language='ja', _single=False):
         'SCREENSHOT_COUNT': str(len(screenshot_paths)),
         'INDEX': '\n'.join(index_entries),
         'IMAGE_PAYLOADS': json.dumps(image_payloads, separators=(',', ':')),
+        'EDITION': '講師用' if edition == 'instructor' else '参加者用',
     }
     template = (root / UI_ROOT / 'shell.html').read_text(encoding='utf-8')
+    template = template.replace('@@EDITION@@', replacements['EDITION'])
     if language == 'en':
         template = translate_shell(template, json.loads(
             (root / UI_ROOT / 'locales/ui-en.json').read_text(encoding='utf-8')))
@@ -484,16 +537,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.encode_images:
         encode_pack(ROOT)
-    generated = build()
-    destination = ROOT / OUTPUT
-    if args.check:
-        if not destination.exists() or destination.read_text(encoding='utf-8') != generated:
-            print('FAIL: regenerate with python -X utf8 tools/build_presentation.py')
-            return 1
-        print('PASS: offline presentation matches canonical Markdown and local UI assets.')
-    else:
-        destination.write_text(generated, encoding='utf-8', newline='\n')
-        print(f'Generated {OUTPUT.as_posix()}')
+    for edition, output in [('participant', OUTPUT), ('instructor', INSTRUCTOR_OUTPUT)]:
+        generated = build(edition=edition)
+        destination = ROOT / output
+        if args.check:
+            if not destination.exists() or destination.read_text(encoding='utf-8') != generated:
+                print(f'FAIL: regenerate {output.as_posix()} with python -X utf8 tools/build_presentation.py')
+                return 1
+            print(f'PASS: {edition} offline presentation matches its sources.')
+        else:
+            destination.write_text(generated, encoding='utf-8', newline='\n')
+            print(f'Generated {output.as_posix()}')
     return 0
 
 

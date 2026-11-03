@@ -44,7 +44,7 @@
   const sidebar = $("sidebar");
   const normalize = value => value.normalize("NFKC").toLocaleLowerCase("ja");
   const termsFor = value => [...new Set(normalize(value).trim().split(/\s+/).filter(Boolean))];
-  const labName = lab => lab === "overview" ? ui("概要") : lab.replace("lab", "Lab");
+  const labName = lab => lab === "overview" ? ui("概要") : lab === "facilitator" ? ui("講師ガイド") : lab.replace("lab", "Lab");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let index = 0;
   let searchTerms = [];
@@ -260,7 +260,8 @@
     $("next").disabled = index === slides.length - 1;
     $("previous-title").textContent = slides[index - 1]?.dataset.title || ui("最初の記事です");
     $("next-title").textContent = slides[index + 1]?.dataset.title || ui("最後の記事です");
-    document.title = `${active.dataset.title} — Microsoft Fabric Plan Workshop`;
+    document.title = active.dataset.article === "welcome" ? active.dataset.title :
+      `${active.dataset.title} — Microsoft Fabric Plan Workshop / ${document.querySelector(".edition-label").textContent}`;
     updateBreadcrumbs(active);
     updateOutline();
     applyArticleMarks();

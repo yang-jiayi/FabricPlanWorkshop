@@ -32,7 +32,7 @@ jobs:
         run: python tools/validate_docs.py
       - name: Check public hygiene
         run: python tools/check_public_hygiene.py
-      - name: Check generated presentation is current
+      - name: Check participant and instructor presentations are current
         run: python tools/build_presentation.py --check
       - name: Verify broken links fail validation
         shell: python

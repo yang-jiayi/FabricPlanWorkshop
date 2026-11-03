@@ -4,7 +4,11 @@
 
 ## 投影 / 配布用HTML
 
-[HTML操作ガイド](workshop-presentation.html)でREADMEの概要とLab00〜09を章 / 手順ごとに表示できます。リポジトリをフォルダー全体で取得し, `docs/workshop-presentation.html`をEdge / Chromeで開いてください。目次から当日の範囲へ移動し, 矢印で手順を進め, 画像を選択すると拡大できます。配布前に再生成と同期チェックを行います。[操作 / 更新ガイド](PRESENTATION-GUIDE-JA.md)
+**参加者へ配布するのは[参加者用HTML](workshop-presentation.html)だけです。** Lab00〜09の操作, 確認問題と安全上の注意を収録し, 解答と講師用の進行資料は含みません。
+
+講師は[講師用HTML](workshop-instructor.html)を使います。同じ演習に加えて, 解答とこの進行ガイドの準備 / 時間割 / 問いかけ / 復帰 / 費用確認を収録します。講師用HTMLは参加者へ配布しません。これは配布内容の分離であり, リポジトリのMarkdownに対するアクセス制御ではありません。
+
+どちらも日本語 / Englishの切り替えに対応する単独のHTMLです。必要な1ファイルをダウンロードしてEdge / Chromeで開きます。目次から当日の範囲へ移動し, 矢印で手順を進め, 画像を選択すると拡大できます。配布前に両ファイルを再生成し, 同期チェックを行います。[操作 / 更新ガイド](PRESENTATION-GUIDE-JA.md)
 
 HTMLの進捗は閲覧位置であり, 参加者の実機操作の完了を示しません。オフライン表示は認証 / 容量 / 課金条件を代替しません。Lab07 / Lab09を含む全教材を収録していますが, 下記の180分案へ自動的に追加するものではありません。
 
@@ -83,7 +87,15 @@ HTMLの進捗は閲覧位置であり, 参加者の実機操作の完了を示�
 
 ## 発展編：モジュール09（追加45〜60分）
 
-モジュール09は**既存の180分本編に含めない別枠**です。モジュール04で使ったProduct × 月のGross RevenueとForecastを同一Scenario / Plan versionで照合し、UTF-8 CSVをLakehouse Filesへ一時配置します。Warehouseは明示型Stageと独立した数値検算に使い、Ontology / GraphはLakehouseの管理Deltaテーブルにバインドします。件数 / キー / 値を検査してからOntology Previewと読み取り専用Fabric Data Agentを設定します。データ準備時間は45〜60分の目安に含みません。**実機で確認したのは合成CSVを使うPart 3〜5です。実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。** AgentのQ1 / Q3 / Q4cは合成値で検算済みですが、Q4 / Q4aは`SQLCandidatesFailedFilterError`となり原因未特定です。実機確認と未確認事項の一覧は[Lab09](../labs/09-variance-analyst.md)を参照してください。
+モジュール09は**既存の180分本編に含めない別枠**です。HTMLの実施範囲は, 合成CSVから始めるPart 3〜5です。Warehouseは明示型Stageと独立した数値検算に使い, Ontology / GraphはLakehouseの管理Deltaテーブルにバインドします。件数 / キー / 値を検査してからOntology Previewと読み取り専用Fabric Data Agentを設定します。データ準備時間は45〜60分の目安に含みません。AgentのQ1 / Q3 / Q4cは合成値で検算済みですが, Q4 / Q4aは`SQLCandidatesFailedFilterError`となりました。実機での確認範囲は[Lab09](../labs/09-variance-analyst.md)を参照してください。
+
+<!-- presentation-exclude-start: FACILITATOR-LAB09-EXTRACTION -->
+モジュール04で使ったProduct × 月のGross RevenueとForecastを同一Scenario / Plan versionで照合し、UTF-8 CSVをLakehouse Filesへ一時配置します。実機で確認したのは合成CSVを使うPart 3〜5です。実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。
+<!-- presentation-exclude-end: FACILITATOR-LAB09-EXTRACTION -->
+
+<!-- presentation-exclude-start: FACILITATOR-LAB09-ERROR-CAUSE -->
+AgentのQ4 / Q4aは`SQLCandidatesFailedFilterError`となり原因未特定です。
+<!-- presentation-exclude-end: FACILITATOR-LAB09-ERROR-CAUSE -->
 
 開始条件は、有料F2以上またはFabric有効化済みP1以上、管理者が承認したTenant AI / クロスジオ設定、Ontology Previewの利用可否、専用Warehouse / Lakehouse Filesの課金承認、実行者の承認済み読取経路とPlan / モデルへの必要な読取権限です。Workspace Identityは必須とせず、実証済みのCREDENTIAL句なしEntraパススルーも組織ポリシーと権限が許す場合に限ります。Long with Changesの完全な現行状態を証明できない場合は開始せず、承認済みの全件Snapshotを用意します。NorthwindのOpen period値を確定実績と呼ばず、Agentの回答をWarehouseの全精度値と独立照合してください。AgentはPlanを変更,承認,書き戻しできません。
 
@@ -143,7 +155,7 @@ HTMLの進捗は閲覧位置であり, 参加者の実機操作の完了を示�
 | 検証する条件 | 接続、権限、RLS、書き戻し、容量、運用、対象地域での提供状況 |
 | 次の一歩 | PoCの範囲、担当者、日程、費用確認を行う責任者 |
 
-開催後は、観察した成功,未達,未検証を分けて共有します。お客様への連絡,日程調整,環境の変更は、各社の担当者が合意した範囲で行ってください。
+開催後は, 観察した成功と未達, 実施した範囲と次回の確認対象を分けて共有します。お客様への連絡,日程調整,環境の変更は、各社の担当者が合意した範囲で行ってください。
 
 ## 関連資料
 

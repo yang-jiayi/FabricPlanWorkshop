@@ -6,7 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCES = [ROOT / "README.md", *sorted((ROOT / "labs").glob("*.md"))]
+SOURCES = [ROOT / "README.md", ROOT / "docs/FACILITATOR-GUIDE.md",
+           *sorted((ROOT / "labs").glob("*.md"))]
 MARKER = re.compile(
     r"^<!-- presentation-exclude-(start|end): ([A-Z0-9]+(?:-[A-Z0-9]+)*) -->$"
 )

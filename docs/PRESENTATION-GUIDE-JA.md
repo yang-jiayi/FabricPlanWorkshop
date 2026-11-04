@@ -11,7 +11,7 @@
 
 ## 開く
 
-参加者は`docs/workshop-presentation.html`, 講師は`docs/workshop-instructor.html`をダウンロードし, Microsoft EdgeまたはGoogle Chromeで開きます。GitHubのファイル画面ではHTMLは実行されません。非公開リポジトリからの取得にはアクセス権が必要です。ファイル内のタイトル / ヘッダーに版名を表示します。
+参加者は`docs/workshop-presentation.html`, 講師は`docs/workshop-instructor.html`をダウンロードし, Microsoft EdgeまたはGoogle Chromeで開きます。GitHubのファイル画面ではHTMLは実行されません。ファイル内のタイトル / ヘッダーに版名を表示します。
 
 **各版はHTMLファイル1つだけで独立して閲覧できます。** 全操作画像, Fabric公式アイコン, CSS, JavaScript, Lab09のCSVダウンロードをそれぞれ内包しています。他方のHTML, フォルダーの配置, Python, Webサーバーは不要です。画像は元の画素数を保持したWebPです。正本PNGは変更していません。
 

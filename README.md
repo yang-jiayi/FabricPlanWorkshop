@@ -20,7 +20,7 @@
 **講師用資料:** [講師用HTMLをダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-instructor.html) (`docs/workshop-instructor.html` / 解答, 進行ガイド, 費用確認)。
 <!-- presentation-instructor-end -->
 
-これらのファイルは非公開リポジトリにあるため, ダウンロードにはGitHubへのログインとリポジトリのアクセス権が必要です。HTMLはGitHub上で実行されません。参加者用HTMLをダウンロードし, Edge / Chromeで開きます。操作画像を含む単一ファイルで, `assets`フォルダーのコピーは不要です。HTML表示はオフラインで動作しますが, Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[HTMLの使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
+HTMLはGitHub上で実行されません。参加者用HTMLをダウンロードし, Edge / Chromeで開きます。操作画像を含む単一ファイルで, `assets`フォルダーのコピーは不要です。HTML表示はオフラインで動作しますが, Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[HTMLの使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
 ## このワークショップで学べること
 

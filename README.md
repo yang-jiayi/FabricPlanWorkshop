@@ -1,33 +1,36 @@
 <div align="center">
 
-<img src="assets/brand/fabric_48_color.svg" width="80" height="80" alt="Microsoft Fabric 公式製品アイコン">
+<img src="assets/workshop-banner.svg" width="100%" alt="">
 
 # Microsoft Fabric Plan Workshop
 
-**分散したExcelの予算から, 実績とつながる計画へ。**
-
-配賦 / 見通し / 書き戻しを体験し, 自社で試すテーマを見つける。
-
-**日本語** &nbsp; | &nbsp; **10 labs** &nbsp; | &nbsp; **集合開催180分** &nbsp; | &nbsp; **MIT**
-
-[**HTML操作ガイド →**](docs/workshop-presentation.html) &nbsp; | &nbsp; [Markdownのラボ](labs/00-prerequisites.md) &nbsp; | &nbsp; [講師向けガイド](docs/FACILITATOR-GUIDE.md) &nbsp; | &nbsp; [原典 / English](https://github.com/Diaz506/fabric-planning-lab)
+| 言語 | Workshop 参加者 | ラボ | 集合開催の基本案 | ライセンス |
+|---|---:|---:|---:|---|
+| 日本語 / English | 10〜20 名 | 10 | 180 分 | MIT |
 
 </div>
 
 > [!NOTE]
-> 本教材はDiego Diaz氏の **[Fabric Planning Lab: Harborlight Provisions Co.](https://github.com/Diaz506/fabric-planning-lab)** のLab00〜08を基にした日本語版です。原典のMITライセンスと著作権表示を保持し, 日本語訳, 手順の画像, 数値の確認方法, 集合開催の進行案に加えて,日本語版独自の発展編Lab09を追加しています。[変更点](LOCALIZATION.md) / [翻訳基準コミット](https://github.com/Diaz506/fabric-planning-lab/commit/486be63004b30554ab44a0e3ae654e3e762188ad)
->
-> 独立した非公式のコミュニティ教材であり, Microsoftによる承認, 提携, 公式認定を示すものではありません。
+> 日本語の操作ガイドと画面例を含む独立したコミュニティ教材です。Microsoftの公式教材 / 承認 / 提携 / 認定を示すものではありません。
 
-## インタラクティブなHTML操作ガイド
+## 配布資料
 
-**配布用は[参加者用HTML](docs/workshop-presentation.html)です。** READMEの概要とLab00〜09の操作 / 確認問題 / 安全上の注意を収録し, 解答と講師の進行資料を含みません。[講師用HTML](docs/workshop-instructor.html)は演習の解答と準備 / 180分の進行 / 復帰 / 費用確認も収録し, 講師だけが使用します。両版とも日本語 / Englishの全文切り替え, Yu Gothic UIによる可変文字サイズ, 明 / 暗とスマートフォン表示に対応し, 作者 **[Jiayi Yang, Swarm Data SE](https://www.linkedin.com/in/yangjiayi/)** を記載しています。
+| 対象 | ファイル / 内容 | 入手先 |
+|---|---|---|
+| Workshop 参加者 | `docs/workshop-presentation.html` / 日本語・English, 全画像内包, オフライン閲覧 | [最新版をダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-presentation.html) |
+| Workshop 参加者 | `docs/workshop-overview-ja.pptx` / 日本語の概要スライド23枚 | [PowerPointをダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-overview-ja.pptx) / [表示・更新ガイド](docs/POWERPOINT-GUIDE-JA.md) |
+| 作成者 / 配布者 | 作者: **Jiayi Yang, Swarm Data SE** / [LinkedIn](https://www.linkedin.com/in/yangjiayi/) | |
+| 確定版の参照 | [V1.0 / v1.0.0](https://github.com/yang-jiayi/FabricPlanWorkshop/releases/tag/v1.0.0) | 2026年11月公開の固定リリース。以後の更新は含みません |
 
-GitHub上ではHTMLが実行されないため, **`docs/workshop-presentation.html`をダウンロードしてEdge / Chromeで開く**と使えます。操作画像を含む単一のHTMLファイルで, `assets`フォルダーのコピーは不要です。CDNや外部フォントは使わず, 教材の表示はオフラインで動作します。Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
+<!-- presentation-instructor-start -->
+**講師用資料:** [講師用HTMLをダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-instructor.html) (`docs/workshop-instructor.html` / 解答, 進行ガイド, 費用確認)。
+<!-- presentation-instructor-end -->
+
+これらのファイルは非公開リポジトリにあるため, ダウンロードにはGitHubへのログインとリポジトリのアクセス権が必要です。HTMLはGitHub上で実行されません。参加者用HTMLをダウンロードし, Edge / Chromeで開きます。操作画像を含む単一ファイルで, `assets`フォルダーのコピーは不要です。HTML表示はオフラインで動作しますが, Fabric操作, 外部資料, 公式サンプルの取得には通信が必要です。[HTMLの使い方 / Markdownとの同期方法](docs/PRESENTATION-GUIDE-JA.md)
 
 ## このワークショップで学べること
 
-Excel中心の予算管理を見直したいFP&A / 財務 / 経営企画の担当者と, Power BI / Fabricの導入担当者に向けたハンズオンです。**日本のお客様10〜20名**での集合開催を想定しています。
+Excel中心の予算管理を見直すFP&A / 財務 / 経営企画の担当者と, Power BI / Fabricの導入担当者が参加できます。**Workshop 参加者 10〜20 名**での集合開催を想定しています。
 
 <table>
 <tr>
@@ -37,7 +40,7 @@ Excel中心の予算管理を見直したいFP&A / 財務 / 経営企画の担�
 <p>全社目標を配賦し, 現場の入力, ロック, コメント, 承認をつなぎます。</p>
 </td>
 <td width="50%">
-<img src="assets/brand/planning_48_item.svg" width="32" height="32" alt="Fabric Plan の公式アイコン">
+<img src="assets/brand/power_bi_48_color.svg" width="32" height="32" alt="Power BI の公式アイコン">
 <h3>02 / 前提を比較する</h3>
 <p>Optimizer, 統計予測, シナリオを使い, 目標を満たす数字と業務上の妥当性を分けて考えます。</p>
 </td>
@@ -56,50 +59,29 @@ Excel中心の予算管理を見直したいFP&A / 財務 / 経営企画の担�
 </tr>
 </table>
 
-**読み進める:** [目的](#workshopの目的) / [アーキテクチャ](#アーキテクチャ) / [はじめ方](#はじめ方) / [ラボ一覧](#ラボ一覧) / [配備とAIプロンプト](#配備とaiエージェント向けプロンプト) / [注意点](#開催と利用上の注意) / [原典とライセンス](#原典とライセンス) / [English summary](#english-summary)
+**開始する:** [Lab00 / はじめ方](#はじめ方) / [ラボ一覧と所要時間](#ラボ一覧) / [参加者用HTML](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-presentation.html) / [操作ガイド](docs/PRESENTATION-GUIDE-JA.md) / [用語注釈](#財務会計用語)
 
 ## Workshopの目的
 
-架空のHarborlight Provisions Co.を題材に, Excelに分散した年間計画をFabric Planningで組み立て, 前提と結果を参加者が説明できるようになることが目的です。日本のお客様10〜20名向けの導入検討ワークショップとして, 製品デモだけでなく, 自社で試す業務 / データ / 関係者 / PoCの成功条件を整理します。
+架空のHarborlight Provisions Co.を題材に, Excelに分散した年間計画をFabric Planningで組み立て, 入力の前提と保存結果を確認します。Workshopでは製品デモに加えて, 各組織で試す業務 / データ / 関係者 / PoCの成功条件を整理します。
 
-受講後は, 1) 全社目標を配賦し入力 / レビュー / 承認をつなぐ, 2) 実績 / 計画 / 見通しの違いと更新経路を説明する, 3) SQL書き戻しをログと実データで照合する, 4) 費用 / 容量 / 権限を確認し自社の検証範囲を決めることを目指します。サンプルの操作だけで, 性能, 費用削減, 会計上の正しさ, 本番適合を実証したことにはなりません。
+サンプルの操作だけで, 性能, 費用削減, 会計上の正しさ, 本番適合を実証したことにはなりません。
 
 ## アーキテクチャ
 
-<table>
-<tbody>
-<tr>
-<td>
-<img src="assets/brand/report_48_item.svg" width="36" height="36" alt="Power BI レポートの公式アイコン"><br>
-<strong>1 / ソースのインポート</strong><br>
-<code>Northwind_FMCG.pbix</code>をインポートすると, 既存レポートとセマンティックモデルの両方が作成されます。レポートは既存業績の確認用, 計画アイテムはセマンティックモデルへ接続します。
-</td>
-<td>
-<img src="assets/brand/semantic_model_48_item.svg" width="36" height="36" alt="Fabric セマンティックモデルの公式アイコン"><br>
-<strong>2 / 必須の計画ルート</strong><br>
-<img src="assets/brand/planning_48_item.svg" width="30" height="30" alt="Fabric Plan アイテムの公式アイコン"> 主Planは1つのセマンティックモデルに接続し, Lab01〜06のシート / IntelligenceとLab08の容量・ガバナンス検討を進めます。接続先は後から付け替えず, モデル名も変更しません。
-</td>
-</tr>
-<tr>
-<td>
-<img src="assets/brand/sql_database_48_item.svg" width="36" height="36" alt="Fabric SQL データベースの公式アイコン"><br>
-<strong>3 / 書き戻しと後続分析</strong><br>
-Lab04は見通しを別のFabric SQLテーブルへ書き戻します。標準のSQL書き戻しで, 元のセマンティックモデルやレポートが自動更新されるわけではありません。後続モデルで使う場合は, 公式手順に沿ったテーブル追加 / 接続 / 更新を明示的に構成します。
-</td>
-<td>
-<img src="assets/brand/planning_48_item.svg" width="30" height="30" alt="任意演習で使用する別のFabric Plan アイテムの公式アイコン">
-<img src="assets/brand/sql_database_48_item.svg" width="30" height="30" alt="PowerTable演習用Fabric SQLデータベースの公式アイコン"><br>
-<strong>4 / 任意のLab07</strong><br>
-PowerTableは主Plan内のシートではなく, 専用の別PlanとSQLデータベースを使います。Microsoft公式の資産台帳XLSXを参照データに使う独立演習です。
-</td>
-</tr>
-</tbody>
-</table>
+`Northwind_FMCG.pbix`のインポートでレポートとセマンティックモデルを作成します。主Planは1つのモデルに接続します。Lab04のForecastはFabric SQLへ書き戻しますが, 既存レポート / セマンティックモデルへ自動反映されません。
 
-<img src="assets/brand/semantic_model_48_item.svg" width="26" height="26" alt="Gross Revenue の出所となるFabric セマンティックモデル"> <img src="assets/brand/planning_48_item.svg" width="26" height="26" alt="Forecast の出所となるFabric Plan"> <img src="assets/brand/data_warehouse_48_item.svg" width="26" height="26" alt="比較Snapshotを保管するFabric Warehouse"> <img src="assets/brand/data_agent_48_item.svg" width="26" height="26" alt="Ontologyを使って読み取り専用で回答するFabric Data Agent">
-**5 / 日本語版独自の発展編Lab09:** Lab04のGross Revenue / Forecastを同じProduct × 月の粒度で照合し, 一時Lakehouse FilesからWarehouseへCOPYして数値を検算します。Ontology / GraphにはWarehouseではなくLakehouseの管理Deltaテーブルをバインドし, Fabric Data AgentがOntologyを通じて読み取り専用で回答します。Plan / 元モデルへの自動書き戻しではありません。[Lab09](labs/09-variance-analyst.md) / [合成サンプルCSV](data/lab09-variance-snapshot-sample.csv) / [構成図](assets/diagrams/lab09-variance-analyst.md)
+```mermaid
+flowchart LR
+    PBIX["Northwind_FMCG.pbix"] --> REPORT["既存レポート"]
+    PBIX --> MODEL["セマンティックモデル"]
+    MODEL --> PLAN["主Plan<br/>Lab01–06 / 08"]
+    PLAN --> SHEETS["計画シート / Intelligence"]
+    PLAN -.->|書き戻し| SQL["Fabric SQL"]
+    SQL -.->|明示的な接続後| DOWNSTREAM["後続分析"]
+```
 
-> **検証状況:** Part 3〜5は同梱の合成CSVを使ってFabricで操作し, Warehouse検算, Lakehouse Delta, Ontology / Graph, Data Agentの一部の質問を確認しました。Q4 / Q4aは`SQLCandidatesFailedFilterError`となりました。実機での確認範囲は[Lab09](labs/09-variance-analyst.md)を参照してください。
+**破線はSQL書き戻しと, SQLテーブルを明示的に接続した後続分析を示します。** Lab09は別の発展編です。合成CSVのPart 3〜5でWarehouse検算, Lakehouse Delta, Ontology / Graph, Data Agentの一部を実機確認しています。Q4 / Q4aは`SQLCandidatesFailedFilterError`となりました。WarehouseはDecimal値の検算用, OntologyのGraph sourceはLakehouseの管理Deltaテーブルです。詳細は[Lab09](labs/09-variance-analyst.md) / [データの流れ](assets/diagrams/lab-flow.md) / [Lab09構成図](assets/diagrams/lab09-variance-analyst.md)を参照してください。
 
 <!-- presentation-exclude-start: README-LAB09-END-TO-END -->
 > Part 1〜2の実Plan / writebackからの抽出を含むEnd-to-End確認ではありません。
@@ -109,30 +91,7 @@ PowerTableは主Plan内のシートではなく, 専用の別PlanとSQLデータ
 > Q4 / Q4aの`SQLCandidatesFailedFilterError`は原因未特定です。
 <!-- presentation-exclude-end: README-LAB09-ERROR-CAUSE -->
 
-**参照とコピーは異なります。** From Sheetsで参照した計画系列は参照元の変更を受け取ります。一方, Lab03の編集可能なコピーは元シートと自動同期しません。Intelligence上でも, From Sheetsの入力値とセマンティックモデル由来の実績を区別して設定します。[既存の構成図](assets/diagrams/lab-flow.md) / [データ構成ガイド](data/README.md)
-
-```mermaid
-flowchart LR
-    PBIX["Northwind_FMCG.pbix"] -->|インポート| REPORT["既存レポート"]
-    PBIX -->|インポート| MODEL["セマンティックモデル"]
-    MODEL -->|接続| PLAN["主Plan<br/>Lab01–06 / 08"]
-    PLAN --> SHEETS["計画シート / Intelligence"]
-    PLAN -.->|書き戻し| SQL["Fabric SQL"]
-    SQL -.->|利用には明示的な接続が必要| DOWNSTREAM["後続分析"]
-    MODEL -->|元のGross Revenueを同粒度で抽出| SNAP["Lab09 比較Snapshot"]
-    SQL -->|履歴 / Scenario / versionを照合| SNAP
-    SNAP -->|UTF-8 CSVをアップロード| STAGING["一時Lakehouse Files"]
-    STAGING -->|OneLake COPY INTO| WAREHOUSE["専用Warehouse<br/>Decimal検算"]
-    STAGING -->|Spark SQLでDelta作成| DELTA["Lakehouse managed Delta<br/>Product / Period / Observation"]
-    DELTA -->|バインド / Graph投影| ONTOLOGY["Ontology Preview"]
-    ONTOLOGY -->|読み取り専用| AGENT["Fabric Data Agent"]
-    WAREHOUSE -->|SQLで数値を検算| CHECK["回答と元値を独立照合"]
-    AGENT -.-> CHECK
-    XLSX["任意の資産台帳XLSX"] -.-> POWER_TABLE["別Plan / PowerTable"]
-    POWER_TABLE -.-> SEPARATE_DB["専用Fabric SQL DB"]
-```
-
-**破線はSQL書き戻し / 明示的に構成する後続分析 / 独立検算 / 任意のPowerTable経路を示します。** Warehouseは正確なDecimal値を照合するSQL層で, Ontology / Graphのバインディング先はLakehouseの管理Deltaテーブルです。PlanningのSQL書き戻しから既存レポート / セマンティックモデルへの自動接続はありません。PowerTableは別Planと別DBに分かれています。
+**参照とコピーは異なります。** From Sheetsで参照した計画系列は参照元の変更を受け取ります。一方, Lab03の編集可能なコピーは元シートと自動同期しません。Intelligence上でも, From Sheetsの入力値とセマンティックモデル由来の実績を区別して設定します。[データ構成ガイド](data/README.md)
 
 ## はじめ方
 
@@ -200,11 +159,18 @@ flowchart TD
 
 [構成とデータの流れ](assets/diagrams/lab-flow.md) / [Lab09の構成図](assets/diagrams/lab09-variance-analyst.md)も参照できます。
 
+## 財務会計用語
+
+両HTMLでは, ラボ本文で最初に出る財務会計用語に意味と出典を付けています。[参加者用HTMLの用語集](docs/workshop-presentation.html#glossary-s000)は記事内で開けます。注釈の表示 / 操作については[HTML操作ガイド](docs/PRESENTATION-GUIDE-JA.md)を参照してください。これらの定義は用語の説明であり, サンプルの計算が会計基準に適合することを示しません。
+
 ## 配備とAIエージェント向けプロンプト
 
 このリポジトリは**手順 / 画像 / サンプルデータへのリンクを含む教材**です。Fabric Gitと同期するPlan定義, PBIX本体, データベース定義, 一括デプロイ用テンプレートは格納していません。`git clone`やGit統合だけでラボ全体がFabricに作成されるわけではありません。
 
-配備作業をAIツールに補助させる場合は, GitHub Copilot / OpenAI Codex / Claude Codeのリポジトリ作業セッションへ, 下のプロンプトを貼り付けてください。最初の実行は**変更を適用しない事前調査とdry-run**に限定し, テナント / ワークスペース / 容量 / 課金 / 権限を承認してから, 人が許可した範囲だけを進めます。[配備ガイドとLab00〜08, 任意のLab09の完了条件](docs/DEPLOYMENT-GUIDE-JA.md)
+配備作業をAIツールに補助させる場合は, 最初は**変更を適用しない事前調査とdry-run**に限定し, テナント / ワークスペース / 容量 / 課金 / 権限を確認してから, 人が許可した範囲だけを進めます。次の入力例は必要な場合に展開してください。[配備ガイド](docs/DEPLOYMENT-GUIDE-JA.md)
+
+<details>
+<summary>AI向け配備プロンプト</summary>
 
 ```text
 あなたはMicrosoft Fabricワークショップの配備を補助するAIです。下の入力欄を利用者が埋めたうえで、最初にこのリポジトリのREADME.md、docs/DEPLOYMENT-GUIDE-JA.md、assets/diagrams/lab-flow.md、data/README.mdと各Labを読み、リポジトリに存在する定義と存在しない定義を区別してください。この教材リポジトリ自体をFabric Gitに接続すればLabが自動作成されると仮定してはいけません。
@@ -242,6 +208,8 @@ flowchart TD
 
 > [!WARNING]
 > Fabric Planningの操作は課金セッションを開始する場合があります。アイテム作成, 書き戻し, ロール付与, 承認割り当ては, 対象と費用範囲を明示し, 事前承認を得てから行ってください。失敗時に無関係なアイテムやWorkspaceを自動削除しないでください。
+
+</details>
 
 ## シナリオ
 
@@ -297,7 +265,7 @@ F2という最小容量から, 同時操作の性能や料金を推定しませ�
 
 - **原典由来のLab00〜08を日本語化。** UIの英語識別子を保持し, 日本語の説明から画面の操作へ迷わず進める構成にしました。
 - **手順を追うスクリーンショットと数値確認。** 原典の翻訳基準版には操作画像がありません。日本語版では操作の画像と, 計算 / 保存結果を確かめる方法を追加しました。
-- **10〜20名向けの講師ガイド。** 180分の進行, 操作の役割分担, 費用確認, PoCにつなげる問いを追加しました。
+- **集合開催向けの講師ガイド。** 180分の進行, 操作の役割分担, 費用確認, PoCにつなげる問いを追加しました。
 - **仕様差とサンプルの補足。** Microsoft Learnとの照合に基づく接続 / 権限 / UIの注意点や, 所要時間の合計, 集計粒度の説明を改訂しました。
 - **日本語版独自の発展編Lab09。** Lab04のGross Revenue / ForecastをProduct × 月で照合し, Ontology Previewと読み取り専用Fabric Data Agentを扱います。これは原典の翻訳内容ではありません。
 
@@ -317,6 +285,6 @@ Microsoft Fabric and the Microsoft logo are trademarks of Microsoft Corporation.
 
 ## English summary
 
-A Japanese community adaptation of [Diego Diaz's Fabric Planning Lab](https://github.com/Diaz506/fabric-planning-lab), preserving the original MIT license. The original-derived Labs00–08 are translated and extended with the Japan-specific, optional Lab09 advanced module. The ten labs follow Harborlight Provisions Co. from planning and allocation to forecasting, SQL writeback, analysis, and governance.
+A Japanese community adaptation of [Diego Diaz's Fabric Planning Lab](https://github.com/Diaz506/fabric-planning-lab), preserving the original MIT license. The original-derived Labs00–08 are translated and extended with the optional Lab09 advanced module. The ten labs follow Harborlight Provisions Co. from planning and allocation to forecasting, SQL writeback, analysis, and governance.
 
-This edition adds Japanese guidance, step-by-step screenshots, numerical checks, and a 180-minute facilitator-led format for 10–20 prospective customers. The self-study estimates 165 minutes for the core path, or 195 minutes with optional PowerTable. Lab09 adds 45–60 minutes plus data preparation and requires additional paid capacity, tenant AI settings, and preview features. Its Part 3–5 workflow was tested with a synthetic CSV; extraction from a real Plan/writeback flow was not end-to-end tested. Review permissions, billing, and current feature availability before running the labs. This is an independent, unofficial adaptation, not affiliated with or endorsed by Microsoft.
+This edition adds Japanese guidance, step-by-step screenshots, numerical checks, and a 180-minute facilitator-led format for 10–20 workshop participants. The self-study estimate is 165 minutes for the core path, or 195 minutes with optional PowerTable. Lab09 adds 45–60 minutes plus data preparation and requires additional paid capacity, tenant AI settings, and preview features. Review permissions, billing, and current feature availability before running the labs. This is an independent, unofficial adaptation, not affiliated with or endorsed by Microsoft.

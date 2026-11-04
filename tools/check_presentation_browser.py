@@ -86,6 +86,35 @@ def run(output, axe, html_path=ROOT / 'docs/workshop-presentation.html'):
         capture('after-lab')
         audit('lab-light')
         check('deep_link_visible', page.locator('.slide:visible').count() == 1)
+        for locale in ('ja', 'en'):
+            page.locator('#language-select').select_option(locale)
+            page.evaluate("""locale => {
+                const trigger=document.querySelector(`.slide[data-language="${locale}"] .finance-term`);
+                if (!trigger) throw new Error(`No finance term annotation in ${locale}`);
+                location.hash=trigger.closest('.slide').id;
+            }""", locale)
+            page.wait_for_timeout(150)
+            trigger = page.locator(f'.slide[data-language="{locale}"]:visible .finance-term').first
+            trigger.click()
+            check(f'term_dialog_opens_{locale}', page.locator('#term-dialog[open]').count() == 1
+                  and page.locator('#term-definition').inner_text().strip() != ''
+                  and page.locator('#term-sources a').count() > 0)
+            capture(f'after-term-{locale}')
+            page.add_script_tag(path=str(axe))
+            violations = page.evaluate("""async () => (await axe.run(document, {
+                runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa']}
+            })).violations.map(v => ({id:v.id, impact:v.impact}))""")
+            report['accessibility'][f'term-dialog-{locale}'] = violations
+            check(f'term_dialog_axe_{locale}', not violations)
+            page.keyboard.press('Escape')
+            check(f'term_dialog_escape_focus_{locale}', page.locator('#term-dialog[open]').count() == 0
+                  and trigger.evaluate('(element) => document.activeElement === element'))
+        page.emulate_media(media='print')
+        check('term_definitions_visible_in_print', page.locator('.slide:visible .finance-term-print').count() > 0)
+        page.emulate_media(media='screen')
+        page.evaluate("""location.hash=[...document.querySelectorAll('.slide')]
+                      .find(s=>s.querySelector('.shot')).id""")
+        page.wait_for_timeout(150)
         shot = page.locator('.slide:visible .shot').first
         if shot.count():
             shot.click()
@@ -157,8 +186,37 @@ def run(output, axe, html_path=ROOT / 'docs/workshop-presentation.html'):
         page.evaluate("location.hash = document.querySelector('.slide[data-lab=\"lab09\"]').id")
         page.wait_for_timeout(150)
         audit('lab-dark')
+        page.locator('#language-select').select_option('ja')
+        page.evaluate("""location.hash=document.querySelector(
+            '.slide[data-language="ja"] .finance-term').closest('.slide').id""")
+        page.wait_for_timeout(150)
+        dark_trigger = page.locator('.slide:visible .finance-term').first
+        dark_trigger.click()
+        check('term_dialog_dark', page.locator('#term-dialog[open]').count() == 1
+              and page.locator('#term-definition').inner_text().strip() != '')
+        capture('after-term-dark')
+        audit('term-dialog-dark')
+        page.keyboard.press('Escape')
+        check('term_dialog_dark_escape_focus', page.locator('#term-dialog[open]').count() == 0
+              and dark_trigger.evaluate('(element) => document.activeElement === element'))
         check('csv_download_embedded', page.locator('a[download][href^="data:text/csv"]').count() > 0)
         page.set_viewport_size({'width': 390, 'height': 844})
+        page.evaluate("location.hash='welcome'")
+        page.wait_for_timeout(150)
+        page.evaluate("""location.hash=document.querySelector(
+            '.slide[data-language="ja"] .finance-term').closest('.slide').id""")
+        page.wait_for_timeout(150)
+        mobile_trigger = page.locator('.slide:visible .finance-term').first
+        mobile_trigger.click()
+        check('term_dialog_mobile', page.locator('#term-dialog[open]').count() == 1
+              and page.locator('#term-definition').inner_text().strip() != ''
+              and page.locator('#term-dialog').evaluate(
+                  '(dialog) => dialog.getBoundingClientRect().right <= innerWidth'))
+        capture('after-term-mobile')
+        audit('term-dialog-mobile')
+        page.keyboard.press('Escape')
+        check('term_dialog_mobile_escape_focus', page.locator('#term-dialog[open]').count() == 0
+              and mobile_trigger.evaluate('(element) => document.activeElement === element'))
         page.evaluate("location.hash='welcome'")
         page.wait_for_timeout(150)
         page.locator('#nav-toggle').click()

@@ -1,11 +1,11 @@
 {
-  "source_sha256": "13e1af29c852d07eaa25d342c884b57e813468a8417b02bb1b714b1c4e0cf875",
+  "source_sha256": "e2b1509564d788e288ae1c806df2a079f3d409191ddd20381e3e99e321f030e1",
   "title": "Facilitator Guide: 180-Minute Workshop for Adoption Evaluation",
   "sections": {
     "facilitator-s000": {
       "title": "Before You Begin",
       "parent": "",
-      "markdown": "This guide proposes a workshop format for 10–20 customers in Japan to evaluate the value of Fabric Planning and the conditions for adoption through hands-on experience. The focus is not on introducing every feature, but on **deciding which planning process to try first in your organization**. The schedule and staffing are recommendations for this workshop, not Microsoft product requirements."
+      "markdown": "This guide proposes a workshop format for 10–20 workshop participants to evaluate the value of Fabric Planning and the conditions for adoption through hands-on experience. The focus is not on introducing every feature, but on **deciding which planning process to try first in your organization**. The schedule and staffing are recommendations for this workshop, not Microsoft product requirements."
     },
     "facilitator-s001": {
       "title": "HTML for Projection / Distribution",

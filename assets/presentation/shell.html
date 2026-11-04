@@ -124,9 +124,17 @@
     <p>本文 / 画像 / UIはオフラインで表示します。Microsoft Learn等の外部リンクと, Microsoft配布のPBIX / XLSX取得には通信が必要です。Fabricの操作には別途オンライン環境が必要です。</p>
     <p><a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/docs/PRESENTATION-GUIDE-JA.md" target="_blank" rel="noopener noreferrer">更新 / 利用ガイド</a> / <a href="https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/LOCALIZATION.md" target="_blank" rel="noopener noreferrer">翻訳と用語の方針</a></p>
   </dialog>
+  <dialog id="term-dialog" aria-labelledby="term-dialog-title" aria-describedby="term-definition">
+    <div class="dialog-heading"><h2 id="term-dialog-title"></h2><button type="button" class="close-button" data-close-dialog aria-label="用語の説明を閉じる">×</button></div>
+    <p id="term-definition"></p>
+    <div id="term-context"></div>
+    <p id="term-source-label">出典</p>
+    <ul id="term-sources"></ul>
+  </dialog>
   <noscript><p class="noscript-note">JavaScriptが無効なため, 全手順を縦に表示しています。ブラウザーのページ内検索または章リンクを使ってください。</p></noscript>
   <span class="build-info" hidden>Source fingerprint: @@DIGEST@@</span>
   <script type="application/json" id="image-payloads">@@IMAGE_PAYLOADS@@</script>
+  <script type="application/json" id="finance-terms">@@FINANCE_TERMS@@</script>
   <script>@@SCRIPT@@</script>
 </body>
 </html>

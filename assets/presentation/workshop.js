@@ -7,6 +7,7 @@
   if (location.hash) language = location.hash.startsWith("#en-") ? "en" : "ja";
   let slides = allSlides.filter(slide => slide.dataset.language === language);
   const translations = JSON.parse($("ui-translations").textContent);
+  const financeTerms = JSON.parse($("finance-terms").textContent);
   const english = () => language === "en";
   const ui = text => english() ? translations[text] || text : text;
   const chapterMarkup = {ja: document.querySelector(".chapter-list").innerHTML,
@@ -41,10 +42,11 @@
   const searchDialog = $("search-dialog");
   const searchInput = $("global-search-input");
   const imageDialog = $("image-dialog");
+  const termDialog = $("term-dialog");
   const sidebar = $("sidebar");
   const normalize = value => value.normalize("NFKC").toLocaleLowerCase("ja");
   const termsFor = value => [...new Set(normalize(value).trim().split(/\s+/).filter(Boolean))];
-  const labName = lab => lab === "overview" ? ui("概要") : lab === "facilitator" ? ui("講師ガイド") : lab.replace("lab", "Lab");
+  const labName = lab => lab === "overview" ? ui("概要") : lab === "facilitator" ? ui("講師ガイド") : lab === "glossary" ? ui("用語集") : lab.replace("lab", "Lab");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let index = 0;
   let searchTerms = [];
@@ -60,6 +62,7 @@
   let outlineLinks = [];
   let scrollPending = false;
   let searchTimer;
+  let termTrigger = null;
 
   function reportImageError(image, message) {
     if (!image.dataset.loadError) {
@@ -137,6 +140,34 @@
     closeDialogs();
     setNav(false);
     dialog.showModal();
+  }
+
+  function openTermDefinition(trigger) {
+    const term = financeTerms[trigger.dataset.financeTerm];
+    if (!term || !term.definition?.[language] || !term.term?.[language]) {
+      throw new Error(`Missing ${language} finance glossary entry: ${trigger.dataset.financeTerm}`);
+    }
+    termTrigger = trigger;
+    $("term-dialog-title").textContent = term.term[language];
+    $("term-definition").textContent = term.definition[language];
+    const lab = slides[index].dataset.lab;
+    const contextual = term.contextual_definitions?.[lab]?.[language] || "";
+    $("term-context").textContent = contextual;
+    $("term-context").hidden = !contextual;
+    $("term-source-label").textContent = ui("出典");
+    const sources = $("term-sources");
+    sources.replaceChildren();
+    term.sources.forEach(source => {
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = source.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = source[language] || source.url;
+      item.append(link);
+      sources.append(item);
+    });
+    openDialog(termDialog);
   }
 
   function buildChapterNavigation() {
@@ -616,7 +647,8 @@
       let id;
       try { id = decodeURIComponent(target.getAttribute("href").slice(1)); } catch { return; }
       if (id !== "main" && navigate(id)) event.preventDefault();
-    } else if (target.matches("[data-close-dialog]")) target.closest("dialog").close();
+    } else if (target.matches(".finance-term")) openTermDefinition(target);
+    else if (target.matches("[data-close-dialog]")) target.closest("dialog").close();
     else if (target.matches(".shot")) {
       images = [...slides[index].querySelectorAll(".step-image")];
       const selected = target.querySelector(".step-image");
@@ -631,6 +663,11 @@
       const bounds = dialog.getBoundingClientRect();
       if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
     });
+  });
+  termDialog.addEventListener("close", () => {
+    const trigger = termTrigger;
+    termTrigger = null;
+    if (trigger?.isConnected) trigger.focus({preventScroll: true});
   });
   $("previous").addEventListener("click", () => navigate(slides[index - 1]?.id));
   $("next").addEventListener("click", () => navigate(slides[index + 1]?.id));

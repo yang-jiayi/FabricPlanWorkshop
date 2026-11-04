@@ -1,6 +1,6 @@
 # Copilot contributor guide
 
-This repository contains a Japanese-language Microsoft Fabric Planning workshop for Japanese customers considering an introduction.
+This repository contains a Japanese-language Microsoft Fabric Planning workshop for participants evaluating adoption.
 
 - Keep changes focused on the workshop's learner-facing content and preserve the meaning of procedures, expected values, UI labels, and product statements.
 - Write clear Japanese. Use ASCII `,` and ` / ` as separators, and follow [LOCALIZATION.md](../LOCALIZATION.md) for product terminology and attribution.

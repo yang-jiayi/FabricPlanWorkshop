@@ -24,6 +24,7 @@ class PresentationTree(HTMLParser):
         self.slides = []
         self.images = []
         self.scripts = []
+        self.financial_terms = {'ja': set(), 'en': set()}
         self.language = None
 
     def handle_starttag(self, tag, attrs):
@@ -43,6 +44,8 @@ class PresentationTree(HTMLParser):
             self.images.append(attrs)
         if tag == 'script':
             self.scripts.append(attrs)
+        if tag == 'button' and attrs.get('data-finance-term') and self.language:
+            self.financial_terms[self.language].add(attrs['data-finance-term'])
         if tag == 'section' and 'slide' in attrs.get('class', '').split():
             self.slides.append(attrs)
 
@@ -63,7 +66,7 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertEqual(len(self.tree.ids), len(set(self.tree.ids)))
         self.assertEqual(
             {slide['data-lab'] for slide in self.tree.slides},
-            {'overview'} | {f'lab{number:02d}' for number in range(10)},
+            {'overview', 'glossary'} | {f'lab{number:02d}' for number in range(10)},
         )
         for href in self.tree.links:
             if href.startswith('#'):
@@ -150,6 +153,61 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertIn('class="index-entry"', self.generated)
         self.assertIn('data-group="五十音"', self.generated)
 
+    def test_finance_terms_match_standard_names_aliases_and_fiscal_years(self):
+        entries = json.loads((presentation.ROOT / presentation.UI_ROOT /
+                              'finance-glossary.json').read_text(encoding='utf-8'))['entries']
+        rendered, used = presentation.annotate_financial_terms(
+            '<p>Gross Profit and COGS; allocation, Variances, Actuals, Forecasts, '
+            'Budgets, and FY26.</p><p><a href="#">Revenue</a> <code>Budget</code></p>',
+            entries, 'en', 'lab03',
+        )
+        self.assertIn('<button type="button" class="finance-term"', rendered)
+        self.assertTrue({
+            'gross-profit', 'cogs', 'allocation', 'variance', 'actuals',
+            'forecast', 'budget', 'fiscal-year',
+        }.issubset(used))
+        self.assertNotIn('finance-term', rendered.split('<a href="#">', 1)[1])
+        self.assertNotIn('finance-term', rendered.split('<code>', 1)[1])
+
+    def test_finance_glossary_is_bilingual_complete_indexed_and_safe(self):
+        glossary = json.loads((presentation.ROOT / presentation.UI_ROOT /
+                               'finance-glossary.json').read_text(encoding='utf-8'))
+        registry_ids = {entry['id'] for entry in glossary['entries']}
+        payload = json.loads(re.search(
+            r'<script type="application/json" id="finance-terms">(.*?)</script>',
+            self.generated, re.S,
+        )[1])
+        self.assertTrue(payload)
+        self.assertTrue(set(payload).issubset(registry_ids))
+        for term_id, entry in payload.items():
+            with self.subTest(term=term_id):
+                self.assertEqual(set(entry['term']), {'ja', 'en'})
+                self.assertEqual(set(entry['definition']), {'ja', 'en'})
+                self.assertTrue(entry['sources'])
+                self.assertTrue(all(source.get('url', '').startswith('https://')
+                                    and source.get('ja') and source.get('en')
+                                    for source in entry['sources']))
+                annotated = any(
+                    entry['id'] == term_id and not entry.get('code_only')
+                    for entry in glossary['entries']
+                )
+                self.assertEqual(f'data-finance-term="{term_id}"' in self.generated, annotated)
+                self.assertIn(f'class="index-entry finance-index-entry"', self.generated)
+        self.assertTrue(registry_ids.issuperset(self.tree.financial_terms['ja']))
+        self.assertTrue(registry_ids.issuperset(self.tree.financial_terms['en']))
+        self.assertIn('gross-profit', self.tree.financial_terms['en'])
+        self.assertIn('allocation', self.tree.financial_terms['en'])
+        english = '\n'.join(re.findall(r'<section lang="en".*?</section>', self.generated, re.S))
+        for entry in glossary['entries']:
+            if entry['id'] in payload:
+                self.assertIn(html_escape(entry['term']['en']), english)
+        self.assertIn('id="term-dialog"', self.generated)
+        self.assertIn('aria-haspopup="dialog" aria-controls="term-dialog"', self.generated)
+        self.assertIn('termDialog.addEventListener("close"', self.generated)
+        self.assertIn('event.key === "Escape"', self.generated)
+        self.assertIn('.finance-term-print { display: inline; }', self.generated)
+        self.assertNotIn('<section class="glossary-entry">', self.generated)
+
     def test_existing_bookmarks_keep_their_article_titles(self):
         registry = json.loads((presentation.ROOT / presentation.UI_ROOT / 'section-ids.json').read_text(encoding='utf-8'))
         original = {entry['id']: entry['title'] for entry in registry}
@@ -164,8 +222,8 @@ class PresentationBuildTests(unittest.TestCase):
 
     def test_audited_architecture_routes_and_graph_reference(self):
         for caption in (
-            '破線はSQL書き戻し / 明示的に構成する後続分析 / 独立検算 / 任意のPowerTable経路を示します。',
-            'Dashed lines show SQL writeback / explicitly configured downstream analysis / independent verification / the optional PowerTable path.',
+            '破線はSQL書き戻しと, SQLテーブルを明示的に接続した後続分析を示します。',
+            'Dashed lines indicate SQL writeback and downstream analysis after SQL tables are explicitly connected.',
         ):
             self.assertTrue(caption in self.generated, 'Corrected architecture legend is missing')
         titles = {slide['id']: slide['data-title'] for slide in self.tree.slides}
@@ -322,6 +380,30 @@ class PresentationEditionTests(unittest.TestCase):
             self.assertIn('href="https://www.linkedin.com/in/yangjiayi/" target="_blank" '
                           'rel="noopener noreferrer">LinkedIn</a>', content)
 
+    def test_instructor_finance_terms_extend_participant_terms_without_orphans(self):
+        registry = json.loads((presentation.ROOT / presentation.UI_ROOT /
+                               'finance-glossary.json').read_text(encoding='utf-8'))
+        registered = {entry['id'] for entry in registry['entries']}
+        payloads = []
+        for document, tree in ((self.participant, self.participant_tree),
+                               (self.instructor, self.instructor_tree)):
+            payload = json.loads(re.search(
+                r'<script type="application/json" id="finance-terms">(.*?)</script>',
+                document, re.S,
+            )[1])
+            payloads.append(set(payload))
+            self.assertTrue(all(entry['sources'] for entry in payload.values()))
+            self.assertTrue(all('ja' in entry['definition'] and 'en' in entry['definition']
+                                for entry in payload.values()))
+            self.assertTrue(tree.financial_terms['ja'])
+            self.assertTrue(tree.financial_terms['en'])
+        self.assertTrue(payloads[0].issubset(payloads[1]))
+        self.assertEqual(payloads[1], registered)
+        code_only = {entry['id'] for entry in registry['entries'] if entry.get('code_only')}
+        self.assertEqual(self.instructor_tree.financial_terms['ja'] | self.instructor_tree.financial_terms['en'],
+                         registered - code_only)
+        self.assertIn('rebate', payloads[1])
+
     def test_answers_are_absent_from_serialized_participant_html(self):
         for lab in range(9):
             document = json.loads((presentation.ROOT / presentation.UI_ROOT /
@@ -333,8 +415,14 @@ class PresentationEditionTests(unittest.TestCase):
             first_answer = re.search(r'^1\. (.+)$', answer, re.M)[1]
             # Inspect rendered text, including hidden articles, not just visible UI.
             from html import unescape
-            participant_text = unescape(re.sub(r'<[^>]*>', '', self.participant))
-            instructor_text = unescape(re.sub(r'<[^>]*>', '', self.instructor))
+            participant_clean = re.sub(
+                r'<span class="finance-term-print"[^>]*>.*?</span>', '', self.participant, flags=re.S,
+            )
+            instructor_clean = re.sub(
+                r'<span class="finance-term-print"[^>]*>.*?</span>', '', self.instructor, flags=re.S,
+            )
+            participant_text = unescape(re.sub(r'<[^>]*>', '', participant_clean))
+            instructor_text = unescape(re.sub(r'<[^>]*>', '', instructor_clean))
             plain_answer = unescape(re.sub(r'<[^>]*>', '', MarkdownIt('default').renderInline(first_answer)))
             self.assertNotIn(plain_answer, participant_text)
             self.assertIn(plain_answer, instructor_text)

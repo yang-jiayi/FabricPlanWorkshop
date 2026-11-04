@@ -1,0 +1,435 @@
+{
+  "entries": [
+    {
+      "id": "fp-and-a",
+      "term": {"ja": "FP&A", "en": "FP&A"},
+      "aliases": {"ja": [], "en": []},
+      "definition": {
+        "ja": "財務計画・分析の機能です。AFPは, 企業の予算 / 見通しの管理と財務実績の分析を通じて意思決定を支援する役割として説明しています。",
+        "en": "The financial planning and analysis function. AFP describes FP&A as managing a company's budgeting and forecasting processes and analyzing financial performance to support decisions."
+      },
+      "sources": [
+        {
+          "url": "https://fpacert.financialprofessionals.org/certification/what-is-fp-a",
+          "ja": "Association for Financial Professionals (AFP) / FP&A",
+          "en": "Association for Financial Professionals (AFP) / FP&A"
+        }
+      ],
+      "group": "組織 / Finance"
+    },
+    {
+      "id": "fiscal-year",
+      "term": {"ja": "Fiscal Year / 会計年度", "en": "Fiscal year / FY"},
+      "aliases": {"ja": ["Fiscal Year", "Fiscal Years", "FY", "会計年度"], "en": ["Fiscal Years", "会計年度"]},
+      "definition": {
+        "ja": "会計期間として用いる年度です。米国IRSの税務上の定義では, 12か月連続で12月以外の月末に終わる期間です。ここでのFY25 / FY26は演習シナリオの年度ラベルで, 実際の開始日 / 終了日は組織ごとに確認します。",
+        "en": "An accounting period used as a year. For US tax purposes, the IRS defines a fiscal year as 12 consecutive months ending on the last day of a month other than December. FY25 / FY26 are scenario labels here; verify each organization's actual dates."
+      },
+      "sources": [
+        {
+          "url": "https://www.irs.gov/publications/p538",
+          "ja": "米国IRS / Publication 538",
+          "en": "US Internal Revenue Service / Publication 538"
+        }
+      ],
+      "group": "期間 / Period"
+    },
+    {
+      "id": "revenue",
+      "term": {"ja": "Revenue / 売上高", "en": "Revenue"},
+      "aliases": {"ja": ["Revenue", "Revenues", "売上高"], "en": ["Revenues", "売上高"]},
+      "exclude_prefixes": ["Gross ", "Net "],
+      "definition": {
+        "ja": "企業の通常の事業活動から得る収入です。IFRS 15では, 顧客との契約から認識する金額と時期は契約条件に基づきます。",
+        "en": "Income earned from an entity's ordinary activities. Under IFRS 15, the amount and timing recognized from customer contracts depend on the contract terms."
+      },
+      "sources": [
+        {
+          "url": "https://www.ifrs.org/content/dam/ifrs/publications/html-standards/english/2026/issued/ifrs15.html",
+          "ja": "IFRS 15 / Appendix A, Revenue",
+          "en": "IFRS 15 / Appendix A, Revenue"
+        }
+      ],
+      "group": "収益 / Revenue"
+    },
+    {
+      "id": "gross-revenue",
+      "term": {"ja": "Gross Revenue", "en": "Gross Revenue"},
+      "aliases": {"ja": [], "en": []},
+      "definition": {
+        "ja": "値引き / 返品などを差し引く前の売上の総額を指す呼び方です。Lab05では販売数量 × 数量加重平均単価で計算するメジャー名です。会計基準共通の定義ではありません。",
+        "en": "A term for total sales before discounts, returns, and similar deductions. In Lab05 it is the name of a measure calculated as sales volume × weighted average selling price; it is not a standardized accounting definition."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-4-measure-model",
+          "ja": "Microsoft Learn / Measure Model tutorial",
+          "en": "Microsoft Learn / Measure Model tutorial"
+        }
+      ],
+      "labs": ["lab05"],
+      "group": "収益 / Revenue"
+    },
+    {
+      "id": "net-revenue",
+      "term": {"ja": "Net Revenue", "en": "Net Revenue"},
+      "aliases": {"ja": [], "en": []},
+      "definition": {
+        "ja": "総売上から値引き / 返品などを差し引いた後の売上を指す呼び方です。Lab05ではGross Revenue − Discounts and Returnsで計算するメジャー名です。会計基準共通の定義ではありません。",
+        "en": "A term for sales after discounts, returns, and similar deductions are subtracted from gross sales. In Lab05 it is a measure calculated as Gross Revenue − Discounts and Returns; it is not a standardized accounting definition."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-4-measure-model",
+          "ja": "Microsoft Learn / Measure Model tutorial",
+          "en": "Microsoft Learn / Measure Model tutorial"
+        }
+      ],
+      "labs": ["lab05"],
+      "group": "収益 / Revenue"
+    },
+    {
+      "id": "cogs",
+      "term": {"ja": "COGS / 売上原価", "en": "Cost of goods sold (COGS)"},
+      "aliases": {"ja": ["COGS", "Cost of goods sold", "売上原価"], "en": ["COGS", "Cost of goods sold", "Costs of goods sold", "売上原価"]},
+      "definition": {
+        "ja": "販売した商品に直接関係する原価です。米国IRSのSchedule Cでは在庫などを用いて計算します。Lab05では原材料費 / 労務費 / その他の直接費を合計する簡略モデルの項目です。税務上の計算とWorkshopモデルがすべての会計処理に適用されるわけではありません。",
+        "en": "The direct cost of goods sold. The US IRS Schedule C calculates it using inventory and related amounts. In Lab05, COGS is a simplified model line that sums raw material, labor, and other direct costs; neither the tax calculation nor the workshop model applies to every accounting treatment."
+      },
+      "sources": [
+        {
+          "url": "https://www.irs.gov/instructions/i1040sc",
+          "ja": "米国IRS / Schedule C instructions",
+          "en": "US Internal Revenue Service / Schedule C instructions"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "費用 / Costs"
+    },
+    {
+      "id": "gross-profit",
+      "term": {"ja": "Gross Profit / 売上総利益", "en": "Gross profit"},
+      "aliases": {"ja": ["Gross Profit", "売上総利益", "粗利"], "en": ["Gross Profits", "売上総利益", "粗利"]},
+      "definition": {
+        "ja": "売上から売上原価を差し引いた利益です。Lab05の簡略モデルではNet Revenue − COGSとして計算します。この説明は, すべての組織に共通する表示方法や会計基準への準拠を示しません。",
+        "en": "Revenue remaining after subtracting the cost of goods sold. The simplified Lab05 model calculates it as Net Revenue − COGS; this does not establish a presentation convention common to every organization or accounting-standard compliance."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-4-measure-model",
+          "ja": "Microsoft Learn / Measure Model tutorial",
+          "en": "Microsoft Learn / Measure Model tutorial"
+        }
+      ],
+      "group": "損益 / Profit and loss"
+    },
+    {
+      "id": "p-and-l",
+      "term": {"ja": "P&L / 損益計算書", "en": "P&L / profit and loss statement"},
+      "aliases": {"ja": ["P&L", "損益計算書"], "en": ["P&L", "profit and loss statement", "損益計算書"]},
+      "definition": {
+        "ja": "一定期間の収益と費用を示し, 利益または損失を表す財務諸表です。IAS 1は損益及びその他の包括利益計算書を財務諸表の一つとして示します。Lab05のP&Lモデルは演習用の簡略モデルです。",
+        "en": "A financial statement that presents income and expenses for a period and shows profit or loss. IAS 1 includes a statement of profit or loss and other comprehensive income among the financial statements. The Lab05 P&L model is a simplified exercise."
+      },
+      "sources": [
+        {
+          "url": "https://www.ifrs.org/issued-standards/list-of-standards/ias-1-presentation-of-financial-statements/",
+          "ja": "IFRS / IAS 1",
+          "en": "IFRS / IAS 1"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "損益 / Profit and loss"
+    },
+    {
+      "id": "discount",
+      "term": {"ja": "Discount / 割引", "en": "Discount"},
+      "aliases": {"ja": ["Discount", "Discounts", "割引"], "en": ["Discounts", "割引"]},
+      "definition": {
+        "ja": "商品 / サービスの表示価格から差し引かれる値引きです。IFRS 15では, 割引は取引価格が変動する要因の一つです。Lab05ではDiscounts and ReturnsをNet Revenueの式に含めます。",
+        "en": "A reduction from the stated price of a good or service. IFRS 15 identifies discounts as one factor that can make transaction price variable. Lab05 includes Discounts and Returns in its Net Revenue formula."
+      },
+      "sources": [
+        {
+          "url": "https://www.ifrs.org/content/dam/ifrs/publications/html-standards/english/2026/issued/ifrs15.html",
+          "ja": "IFRS 15 / paragraph 51",
+          "en": "IFRS 15 / paragraph 51"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "収益 / Revenue"
+    },
+    {
+      "id": "rebate",
+      "term": {"ja": "Rebate / リベート", "en": "Rebate"},
+      "code_only": true,
+      "aliases": {"ja": ["Rebate", "Rebates", "リベート"], "en": ["Rebates", "リベート"]},
+      "definition": {
+        "ja": "契約条件を満たした場合などに, 販売後に顧客へ返金 / 払戻しする金額です。IFRS 15では, リベートを取引価格が変動する要因の一つとして扱います。",
+        "en": "An amount refunded or paid back to a customer after a sale, often when contract conditions are met. IFRS 15 treats rebates as one factor that can make transaction price variable."
+      },
+      "sources": [
+        {
+          "url": "https://www.ifrs.org/content/dam/ifrs/publications/html-standards/english/2026/issued/ifrs15.html",
+          "ja": "IFRS 15 / paragraph 51",
+          "en": "IFRS 15 / paragraph 51"
+        }
+      ],
+      "group": "収益 / Revenue"
+    },
+    {
+      "id": "weighted-average",
+      "term": {"ja": "数量加重平均", "en": "Weighted average"},
+      "aliases": {
+        "ja": ["Weighted Average", "加重平均", "数量加重単価", "数量加重平均単価"],
+        "en": ["Weighted Avg", "Weighted Avg Selling Price", "weighted average unit price", "数量加重平均", "加重平均", "数量加重単価", "数量加重平均単価"]
+      },
+      "definition": {
+        "ja": "各値に重みを付けて平均する方法です。Lab05では数量を重みにし, 同じ範囲の売上合計を数量合計で割って単価を求めます。そのため請求書単価の単純平均とは異なります。",
+        "en": "An average that weights each value by its associated quantity or importance. In Lab05, total sales for a scope are divided by total volume, so the result differs from a simple average of invoice prices."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "損益 / Profit and loss"
+    },
+    {
+      "id": "operating-expenses",
+      "term": {"ja": "Operating Expenses", "en": "Operating expenses"},
+      "aliases": {"ja": ["Operating Expenses"], "en": ["Operating Expenses"]},
+      "definition": {
+        "ja": "事業運営にかかる費用です。Lab05の簡略モデルではAdmin / Employee / R&D / Selling and Marketing Expensesの合計ですが, この範囲がすべての組織に共通するわけではありません。",
+        "en": "Costs incurred to run a business. In the simplified Lab05 model, this is the sum of Admin, Employee, R&D, and Selling and Marketing Expenses, but this scope is not common to every organization."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "費用 / Costs"
+    },
+    {
+      "id": "net-profit",
+      "term": {"ja": "Net Profit", "en": "Net profit"},
+      "aliases": {"ja": ["Net Profit", "Net Profits", "純利益"], "en": ["Net Profits", "純利益"]},
+      "definition": {
+        "ja": "費用を差し引いた後に残る利益を表す用語です。Lab05では6式による簡略指標としてGross Profit − Operating Expensesで計算します。税引後の純利益と同じとは限らず, 会計基準への準拠を示しません。",
+        "en": "A term for profit remaining after expenses are deducted. In Lab05 it is a simplified measure calculated as Gross Profit − Operating Expenses. It is not necessarily after-tax net income and does not claim accounting-standard compliance."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "損益 / Profit and loss"
+    },
+    {
+      "id": "allocation",
+      "term": {"ja": "配賦 / Allocation", "en": "Allocation"},
+      "aliases": {"ja": ["Allocation", "Allocations", "配賦"], "en": ["Allocations", "配賦"]},
+      "definition": {
+        "ja": "合計額を複数の対象へ, 定めた基準に沿って割り振ることです。Lab02では, 上位レベルの計画値を地域 / 製品などの入力単位へ展開します。",
+        "en": "The distribution of a total amount among multiple targets according to a chosen basis. In Lab02, a higher-level plan value is distributed to input levels such as regions or products."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/02-allocation-and-collaboration.md",
+          "ja": "このWorkshop / Lab02",
+          "en": "This workshop / Lab02"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-1-allocation-collaboration",
+          "ja": "Microsoft Learn / Allocation and collaboration tutorial",
+          "en": "Microsoft Learn / Allocation and collaboration tutorial"
+        }
+      ],
+      "group": "計画 / Planning"
+    },
+    {
+      "id": "driver",
+      "term": {"ja": "ドライバー", "en": "Driver"},
+      "aliases": {"ja": ["driver", "drivers", "ドライバー"], "en": ["drivers", "ドライバー"]},
+      "definition": {
+        "ja": "計画モデルの計算結果に影響する入力値や前提です。Lab05の損益モデルでは数量 / 単価 / 費用などを指します。ここではモデル固有の使い方を示します。",
+        "en": "An input value or assumption that affects a planning model's calculations. In the Lab05 P&L model, examples include volume, price, and expenses; this usage is specific to that model."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "計画 / Planning"
+    },
+    {
+      "id": "variance",
+      "term": {"ja": "差異 / Variance", "en": "Variance"},
+      "aliases": {"ja": ["Variance", "Variances", "差異"], "en": ["Variances", "差異"]},
+      "definition": {
+        "ja": "計画 / 予算 / 実績など, 比較する2つの値の差です。Lab06では, 同じ地域 / 製品 / 期間でFY26計画とFY25実績を比較します。差異の向きや基準は指標ごとに確認してください。",
+        "en": "The difference between two values being compared, such as plan, budget, or actual results. Lab06 compares FY26 plan values with FY25 actuals for the same region, product, and period; check the direction and basis for each measure."
+      },
+      "sources": [
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/06-intelligence-canvas.md",
+          "ja": "このWorkshop / Lab06",
+          "en": "This workshop / Lab06"
+        }
+      ],
+      "group": "比較 / Comparison"
+    },
+    {
+      "id": "actuals",
+      "term": {"ja": "Actual / Actuals / 実績", "en": "Actual / Actuals"},
+      "aliases": {"ja": ["Actual", "Actuals", "実績"], "en": ["実績"]},
+      "definition": {
+        "ja": "すでに発生し, 記録された業績の値です。比較では, 過去の実績を計画 / 予算 / 見通しと区別します。",
+        "en": "Financial results that have occurred and been recorded. Comparisons distinguish past actuals from plan, budget, or forecast values."
+      },
+      "contextual_definitions": {
+        "lab06": {
+          "ja": "Lab06のActual(s)はIntelligenceシートのUI上の割り当て先名です。この手順ではFY26 Sales Planを割り当てるため, 過去の実績値を意味しません。",
+          "en": "In Lab06, Actual(s) is the UI name of an Intelligence-sheet assignment field. The procedure assigns FY26 Sales Plan to it, so it does not represent historical actuals."
+        }
+      },
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-4-measure-model",
+          "ja": "Microsoft Learn / Measure Model tutorial",
+          "en": "Microsoft Learn / Measure Model tutorial"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/06-intelligence-canvas.md",
+          "ja": "このWorkshop / Lab06",
+          "en": "This workshop / Lab06"
+        }
+      ],
+      "group": "比較 / Comparison"
+    },
+    {
+      "id": "forecast",
+      "term": {"ja": "Forecast / 見通し", "en": "Forecast"},
+      "aliases": {"ja": ["Forecast", "Forecasts", "見通し"], "en": ["Forecasts", "見通し"]},
+      "definition": {
+        "ja": "過去の実績や現在の前提を基に見積もる将来の値です。Workshopでは予測メジャーやPlanのUI名として使われる場合があり, その役割と入力元を確認します。",
+        "en": "An estimate of future values based on past results and current assumptions. In the workshop, Forecast may also appear as a measure or a Plan UI label; check its role and source."
+      },
+      "contextual_definitions": {
+        "lab06": {
+          "ja": "Lab06のForecastはIntelligenceシートのUI上の割り当て先名で, この手順ではFY26 Sales Planを割り当てます。Lab04のForecastメジャーとは別です。",
+          "en": "In Lab06, Forecast is the UI name of an Intelligence-sheet assignment field, and this procedure assigns FY26 Sales Plan to it. It is separate from the Forecast measure in Lab04."
+        }
+      },
+      "sources": [
+        {
+          "url": "https://fpacert.financialprofessionals.org/certification/what-is-fp-a",
+          "ja": "Association for Financial Professionals (AFP) / FP&A",
+          "en": "Association for Financial Professionals (AFP) / FP&A"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/fabric/iq/plan/planning-tutorial/planning/tutorial-4-measure-model",
+          "ja": "Microsoft Learn / Measure Model tutorial",
+          "en": "Microsoft Learn / Measure Model tutorial"
+        }
+      ],
+      "group": "計画 / Planning"
+    },
+    {
+      "id": "budget",
+      "term": {"ja": "Budget / 予算", "en": "Budget"},
+      "aliases": {"ja": ["Budget", "Budgets", "Budgeting", "予算"], "en": ["Budgets", "Budgeting", "予算"]},
+      "definition": {
+        "ja": "一定期間の計画として定める収入 / 支出や業績の目標値です。FP&Aでは予算の作成 / 管理と見通し, 実績の分析を通じて意思決定を支援します。",
+        "en": "Planned income, spending, or performance targets for a defined period. In FP&A, budgeting and analysis of forecasts and actual performance support decision-making."
+      },
+      "sources": [
+        {
+          "url": "https://fpacert.financialprofessionals.org/certification/what-is-fp-a",
+          "ja": "Association for Financial Professionals (AFP) / FP&A",
+          "en": "Association for Financial Professionals (AFP) / FP&A"
+        }
+      ],
+      "group": "計画 / Planning"
+    },
+    {
+      "id": "quarter",
+      "term": {"ja": "Quarter / 四半期", "en": "Quarter"},
+      "aliases": {"ja": ["Quarter", "Quarters", "四半期", "Q1", "Q2", "Q3", "Q4"], "en": ["Quarters", "四半期", "Q1", "Q2", "Q3", "Q4"]},
+      "definition": {
+        "ja": "1年を4つに分けた各期間です。Workshopの四半期列は計画値を集計 / 表示する期間単位で, 実際の会計年度の区切りは組織のカレンダーに従います。",
+        "en": "One of four periods into which a year is divided. Workshop quarter columns are period groupings for displaying and aggregating plan values; actual fiscal-year boundaries follow the organization's calendar."
+      },
+      "sources": [
+        {
+          "url": "https://www.irs.gov/publications/p538",
+          "ja": "米国IRS / Publication 538",
+          "en": "US Internal Revenue Service / Publication 538"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/02-allocation-and-collaboration.md",
+          "ja": "このWorkshop / Lab02",
+          "en": "This workshop / Lab02"
+        }
+      ],
+      "group": "期間 / Period"
+    },
+    {
+      "id": "deduction",
+      "term": {"ja": "控除 / Deduction", "en": "Deduction"},
+      "aliases": {"ja": ["Deduction", "Deductions", "控除"], "en": ["Deductions", "控除"]},
+      "definition": {
+        "ja": "合計額から差し引く金額です。売上の計算で使う控除と, 税務上の控除は目的 / 取扱いが異なるため区別します。",
+        "en": "An amount subtracted from a total. A deduction used in a sales calculation is different in purpose and treatment from a tax deduction."
+      },
+      "sources": [
+        {
+          "url": "https://www.ifrs.org/content/dam/ifrs/publications/html-standards/english/2026/issued/ifrs15.html",
+          "ja": "IFRS 15 / 取引価格の変動要因",
+          "en": "IFRS 15 / factors affecting transaction price"
+        },
+        {
+          "url": "https://github.com/yang-jiayi/FabricPlanWorkshop/blob/main/labs/05-pl-models-and-scenarios.md",
+          "ja": "このWorkshop / Lab05",
+          "en": "This workshop / Lab05"
+        }
+      ],
+      "group": "収益 / Revenue"
+    }
+  ]
+}

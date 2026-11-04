@@ -8,6 +8,7 @@ import re
 import sys
 import unicodedata
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -23,7 +24,7 @@ FACILITATOR_SOURCE = Path('docs/FACILITATOR-GUIDE.md')
 UI_ROOT = Path('assets/presentation')
 OVERVIEW_SECTIONS = {
     'このワークショップで学べること', 'Workshopの目的', 'アーキテクチャ',
-    'ラボ一覧', '開催と利用上の注意', '原典とライセンス',
+    'ラボ一覧', '財務会計用語', '開催と利用上の注意', '原典とライセンス',
 }
 LAB_ICONS = [
     'fabric_48_color.svg', 'semantic_model_48_item.svg', 'planning_48_item.svg',
@@ -84,7 +85,92 @@ def english_term(term):
     return {
         'SQLデータベース': 'SQL database', 'シナリオ': 'Scenario',
         'セマンティックモデル': 'Semantic model', '書き戻し': 'Writeback', '配賦': 'Allocation',
-    }.get(term['term'], term['term'])
+    }.get(term['term'], term.get('en', term['term']))
+
+
+def annotate_financial_terms(rendered, entries, language, lab):
+    class Annotator(HTMLParser):
+        blocked = {'a', 'button', 'code', 'h1', 'h2', 'h3', 'h4', 'kbd',
+                   'pre', 'script', 'style', 'summary'}
+        void = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+                'link', 'meta', 'param', 'source', 'track', 'wbr'}
+
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.output = []
+            self.blocked_depth = 0
+            self.used = set()
+
+        def handle_starttag(self, tag, attrs):
+            if tag in self.blocked:
+                self.blocked_depth += 1
+            self.output.append(self.get_starttag_text())
+
+        def handle_startendtag(self, tag, attrs):
+            self.output.append(self.get_starttag_text())
+
+        def handle_endtag(self, tag):
+            self.output.append(f'</{tag}>')
+            if tag in self.blocked:
+                self.blocked_depth = max(0, self.blocked_depth - 1)
+
+        def handle_data(self, data):
+            if self.blocked_depth:
+                self.output.append(html.escape(data))
+                return
+            candidates = []
+            for entry in entries:
+                if entry['id'] in self.used or entry.get('labs') and lab not in entry['labs']:
+                    continue
+                aliases = list(dict.fromkeys(
+                    [part.strip() for part in entry['term'][language].split(' / ')]
+                    + entry['aliases'].get(language, [])
+                    + entry['aliases'].get('ja' if language == 'en' else 'en', [])
+                ))
+                for alias in aliases:
+                    if entry['id'] == 'fiscal-year' and alias.casefold() == 'fy':
+                        pattern = re.compile(r'(?<![A-Za-z0-9])FY(?:\s|-)?\d{2,4}(?![A-Za-z0-9])', re.I)
+                    elif re.search(r'[A-Za-z0-9]', alias):
+                        pattern = re.compile(
+                            r'(?<![A-Za-z0-9])' + re.escape(alias) + r'(?![A-Za-z0-9])',
+                            re.I,
+                        )
+                    else:
+                        pattern = re.compile(re.escape(alias), re.I)
+                    for match in pattern.finditer(data):
+                        if any(re.search(re.escape(prefix) + r'\s*$', data[:match.start()], re.I)
+                               for prefix in entry.get('exclude_prefixes', [])):
+                            continue
+                        candidates.append((match.start(), -len(match[0]), entry, match))
+            candidates.sort(key=lambda item: (item[0], item[1]))
+            output = []
+            cursor = 0
+            for start, _, entry, match in candidates:
+                if start < cursor or entry['id'] in self.used:
+                    continue
+                output.append(html.escape(data[cursor:start]))
+                description = '用語の説明' if language == 'ja' else 'Term definition'
+                contextual = entry.get('contextual_definitions', {}).get(lab, {}).get(language, '')
+                full_definition = entry['definition'][language]
+                if contextual:
+                    full_definition += ' ' + contextual
+                output.append(
+                    f'<button type="button" class="finance-term" '
+                    f'data-finance-term="{html.escape(entry["id"], quote=True)}" '
+                    f'aria-haspopup="dialog" aria-controls="term-dialog" '
+                    f'aria-label="{html.escape(match[0] + ": " + description, quote=True)}">'
+                    f'{html.escape(match[0])}</button>'
+                    f'<span class="finance-term-print" aria-hidden="true">'
+                    f' ({html.escape(full_definition)})</span>'
+                )
+                self.used.add(entry['id'])
+                cursor = match.end()
+            output.append(html.escape(data[cursor:]))
+            self.output.append(''.join(output))
+
+    annotator = Annotator()
+    annotator.feed(rendered)
+    return ''.join(annotator.output), annotator.used
 
 
 @dataclass
@@ -216,6 +302,61 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         japanese = japanese.replace('      </div>\n      <nav class="article-navigation"',
                                     extra + '\n      </div>\n      <nav class="article-navigation"', 1)
         chapters = re.search(r'<nav class="chapter-list"[^>]*>(.*?)</nav>', english, re.S)[1]
+        def financial_payload(document):
+            payload = re.search(
+                r'<script type="application/json" id="finance-terms">(.*?)</script>',
+                document, re.S,
+            )
+            if not payload:
+                raise ValueError('Financial glossary payload is missing')
+            return json.loads(payload[1])
+        japanese_terms = financial_payload(japanese)
+        english_terms = financial_payload(english)
+        finance_terms = {}
+        for term_id in sorted(set(japanese_terms) | set(english_terms)):
+            ja = japanese_terms.get(term_id, {})
+            en = english_terms.get(term_id, {})
+            source_labels = {}
+            source_urls = {}
+            for source in [*ja.get('sources', []), *en.get('sources', [])]:
+                source_urls[source['url']] = source
+                source_labels.setdefault(source['url'], {})
+                source_labels[source['url']].update(
+                    {'ja': source.get('label', '')} if source in ja.get('sources', []) else {}
+                )
+                source_labels[source['url']].update(
+                    {'en': source.get('label', '')} if source in en.get('sources', []) else {}
+                )
+            finance_terms[term_id] = {
+                'term': {'ja': ja.get('term', en.get('term', '')),
+                         'en': en.get('term', ja.get('term', ''))},
+                'definition': {'ja': ja.get('definition', en.get('definition', '')),
+                               'en': en.get('definition', ja.get('definition', ''))},
+                'contextual_definitions': ja.get(
+                    'contextual_definitions', en.get('contextual_definitions', {}),
+                ),
+                'sources': [
+                    {'url': url, **source_labels[url]}
+                    for url in source_urls
+                ],
+            }
+        registered_finance_terms = {
+            entry['id'] for entry in json.loads(
+                (root / UI_ROOT / 'finance-glossary.json').read_text(encoding='utf-8'),
+            )['entries']
+        }
+        if not set(finance_terms).issubset(registered_finance_terms):
+            raise ValueError('Rendered finance term is missing from the glossary registry')
+        if edition == 'instructor' and set(finance_terms) != registered_finance_terms:
+            missing = sorted(registered_finance_terms - set(finance_terms))
+            raise ValueError(f'Financial glossary terms do not occur in either language: {missing}')
+        japanese = re.sub(
+            r'(<script type="application/json" id="finance-terms">).*?(</script>)',
+            lambda match: match[1] + json.dumps(
+                finance_terms, ensure_ascii=False, separators=(',', ':'),
+            ).replace('<', '\\u003c') + match[2],
+            japanese, count=1, flags=re.S,
+        )
         ui = json.loads((root / UI_ROOT / 'locales/ui-en.json').read_text(encoding='utf-8'))
         screenshot_count = re.search(r'<span>(\d+)枚の操作画像</span>', japanese)[1]
         def ui_placeholders(value):
@@ -228,6 +369,13 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         return japanese.replace('<script>(() =>', extras + '<script>(() =>', 1)
     image_manifest, image_payloads = read_pack(root)
     terms = json.loads((root / UI_ROOT / 'index-terms.json').read_text(encoding='utf-8'))
+    glossary_source = UI_ROOT / 'finance-glossary.json'
+    glossary_entries = json.loads((root / glossary_source).read_text(encoding='utf-8'))['entries']
+    if len({entry['id'] for entry in glossary_entries}) != len(glossary_entries):
+        raise ValueError('Financial glossary term IDs must be unique')
+    for entry in glossary_entries:
+        if not entry.get('sources') or not entry.get('definition', {}).get('ja') or not entry.get('definition', {}).get('en'):
+            raise ValueError(f'Financial glossary entry lacks a definition or source: {entry["id"]}')
     stable_sections = json.loads((root / UI_ROOT / 'section-ids.json').read_text(encoding='utf-8'))
     md = MarkdownIt('default', {'html': True}).enable(['table', 'strikethrough'])
     sources = [Path('README.md')]
@@ -304,7 +452,10 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         if path in (OUTPUT, INSTRUCTOR_OUTPUT):
             own_output = INSTRUCTOR_OUTPUT if edition == 'instructor' else OUTPUT
             if path == own_output:
-                return '#en-welcome' if language == 'en' else '#welcome'
+                anchor = fragment or 'welcome'
+                if anchor.startswith('en-'):
+                    anchor = anchor.removeprefix('en-')
+                return '#' + ('en-' if language == 'en' else '') + anchor
             return REPOSITORY + path.as_posix()
         if not (root / path).exists():
             raise ValueError(f'Missing local target: {source}: {target}')
@@ -400,9 +551,29 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         'html_inline': html_rule, 'fence': fence_rule, 'code_inline': code_inline_rule,
     })
     rendered_slides = []
+    term_locations = {}
     for slide in all_slides:
         apply_alerts(slide.tokens, language)
         body = md.renderer.render(slide.tokens, md.options, {'source': slide.source})
+        body, found_financial_terms = annotate_financial_terms(
+            body, glossary_entries, language, slide.lab,
+        )
+        for term_id in found_financial_terms:
+            term_locations.setdefault(term_id, []).append(slide)
+        code_text = ' '.join(
+            child.content
+            for token in slide.tokens
+            if token.type == 'inline'
+            for child in token.children or []
+            if child.type == 'code_inline'
+        ) + ' ' + ' '.join(token.content for token in slide.tokens if token.type == 'fence')
+        for entry in glossary_entries:
+            if entry['id'] in found_financial_terms or not entry.get('code_only'):
+                continue
+            names = [entry['term'][language], *entry['aliases'].get(language, []),
+                     *entry['aliases'].get('ja' if language == 'en' else 'en', [])]
+            if any(name.casefold() in code_text.casefold() for name in names):
+                term_locations.setdefault(entry['id'], []).append(slide)
         content = unicodedata.normalize('NFKC', slide.title + ' ' + ' '.join(
             token.content for token in slide.tokens if token.type == 'inline')).casefold()
         chips = []
@@ -431,6 +602,61 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
             f'<a class="source-link" href="{source_link}" target="_blank" rel="noopener">{"Canonical Markdown (Japanese)" if language == "en" else "正本Markdown"} ↗</a>'
             '</header>' + item_chips + '<div class="prose">' + body + '</div></section>'
         )
+
+    active_glossary = [entry for entry in glossary_entries if entry['id'] in term_locations]
+    if not active_glossary:
+        raise ValueError('No verified financial glossary terms occur in the rendered articles')
+    glossary_id = 'en-glossary-s000' if language == 'en' else 'glossary-s000'
+    glossary_slide = Slide(
+        glossary_id, 'glossary',
+        'Financial glossary' if language == 'en' else '財務会計用語集',
+        '', glossary_source, [],
+    )
+    glossary_sections = []
+    for entry in active_glossary:
+        term_id = html.escape(entry['id'], quote=True)
+        first_use = term_locations[entry['id']][0]
+        contextual = ' / '.join(
+            value[language] for value in entry.get('contextual_definitions', {}).values()
+            if value.get(language)
+        )
+        source_links = ' / '.join(
+            f'<a href="{html.escape(source["url"], quote=True)}" target="_blank" rel="noopener noreferrer">'
+            f'{html.escape(source[language])}</a>'
+            for source in entry['sources']
+        )
+        first_label = '本文の初出' if language == 'ja' else 'First use in the articles'
+        context_markup = (
+            f'<p class="glossary-context">{html.escape(contextual)}</p>' if contextual else ''
+        )
+        glossary_sections.append(''.join([
+            f'<div class="glossary-entry"><h2 id="glossary-term-{term_id}">'
+            f'{html.escape(entry["term"][language])}</h2>',
+            f'<p>{html.escape(entry["definition"][language])}</p>',
+            context_markup,
+            f'<p class="glossary-source">{"出典" if language == "ja" else "Sources"}: {source_links}</p>',
+            f'<p><a href="#{first_use.id}">{first_label}: {html.escape(first_use.title)}</a></p>',
+            '</div>',
+        ]))
+    glossary_link = REPOSITORY + glossary_source.as_posix()
+    rendered_slides.append(
+        f'<section class="slide" id="{glossary_id}" data-lab="glossary" '
+        f'data-title="{html.escape(glossary_slide.title, quote=True)}" '
+        f'aria-labelledby="{glossary_id}-title">'
+        '<header class="slide-heading"><div class="breadcrumb">'
+        + ('Glossary' if language == 'en' else '用語集')
+        + ' <span> / Microsoft Fabric Plan Workshop</span></div>'
+        + f'<h1 id="{glossary_id}-title" tabindex="-1">{html.escape(glossary_slide.title)}</h1>'
+        + f'<a class="source-link" href="{glossary_link}" target="_blank" rel="noopener">'
+        + ('Glossary source' if language == 'en' else '用語データ') + ' ↗</a>'
+        + '</header><div class="prose">' + ''.join(glossary_sections) + '</div></section>'
+    )
+    all_slides.append(glossary_slide)
+    chapters.append((
+        'glossary', 'Glossary' if language == 'en' else '用語集',
+        'Financial glossary' if language == 'en' else '財務会計用語集',
+        'fabric_48_color.svg', [glossary_slide],
+    ))
 
     chapter_buttons = []
     toc_cards = []
@@ -467,6 +693,8 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         needles = [unicodedata.normalize('NFKC', word).casefold() for word in [term_title, term['term'], *aliases]]
         occurrences = []
         for slide in all_slides:
+            if slide.lab == 'glossary':
+                continue
             content = ' '.join(t.content for t in slide.tokens if t.type in ('inline', 'fence'))
             haystack = unicodedata.normalize('NFKC', slide.title + ' ' + content).casefold()
             if any(needle in haystack for needle in needles):
@@ -484,9 +712,48 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
             f'<span class="index-count">{len(occurrences)}</span></summary>'
             f'<p class="index-aliases">{html.escape(" / ".join(aliases))}</p><ul>{entries}</ul></details>'
         )
+    for entry in active_glossary:
+        display = entry['term'][language]
+        group = entry['group']
+        if language == 'en':
+            group = group.split(' / ')[-1]
+        if group != current_group:
+            current_group = group
+            index_entries.append(f'<h2>{html.escape(current_group)}</h2>')
+        aliases = list(dict.fromkeys(
+            entry['aliases'].get(language, [])
+            + entry['aliases'].get('ja' if language == 'en' else 'en', [])
+        ))
+        if language == 'en':
+            aliases = [alias for alias in aliases if not re.search(r'[\u3040-\u9fff]', alias)]
+        locations = term_locations[entry['id']]
+        links = ''.join(
+            f'<li><a href="#{slide.id}">{slide.lab.title()} / {html.escape(slide.title)}</a></li>'
+            for slide in locations
+        )
+        index_entries.append(
+            f'<details class="index-entry finance-index-entry" data-group="{html.escape(group)}">'
+            f'<summary><span>{html.escape(display)}</span>'
+            f'<span class="index-count">{len(locations)}</span></summary>'
+            f'<p class="index-aliases">{html.escape(" / ".join(aliases))}</p>'
+            f'<p class="index-definition">{html.escape(entry["definition"][language])}</p>'
+            f'<ul>{links}</ul></details>'
+        )
+    finance_payload = {
+        entry['id']: {
+            'term': entry['term'][language],
+            'definition': entry['definition'][language],
+            'contextual_definitions': entry.get('contextual_definitions', {}),
+            'sources': [
+                {'label': source[language], 'url': source['url']}
+                for source in entry['sources']
+            ],
+        }
+        for entry in active_glossary
+    }
     assets = [
         UI_ROOT / 'shell.html', UI_ROOT / 'workshop.css', UI_ROOT / 'workshop.js',
-        UI_ROOT / 'index-terms.json',
+        UI_ROOT / 'index-terms.json', glossary_source,
         UI_ROOT / 'section-ids.json',
         Path('tools/build_presentation.py'), Path('requirements-docs.txt'),
         Path('tools/presentation_assets.py'),
@@ -509,6 +776,7 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
         'SCREENSHOT_COUNT': str(len(screenshot_paths)),
         'INDEX': '\n'.join(index_entries),
         'IMAGE_PAYLOADS': json.dumps(image_payloads, separators=(',', ':')),
+        'FINANCE_TERMS': json.dumps(finance_payload, ensure_ascii=False, separators=(',', ':')).replace('<', '\\u003c'),
         'EDITION': '講師用' if edition == 'instructor' else '参加者用',
     }
     template = (root / UI_ROOT / 'shell.html').read_text(encoding='utf-8')

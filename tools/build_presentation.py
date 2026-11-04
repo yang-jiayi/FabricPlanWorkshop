@@ -24,7 +24,8 @@ FACILITATOR_SOURCE = Path('docs/FACILITATOR-GUIDE.md')
 UI_ROOT = Path('assets/presentation')
 OVERVIEW_SECTIONS = {
     'このワークショップで学べること', 'Workshopの目的', 'アーキテクチャ',
-    'ラボ一覧', '財務会計用語', '開催と利用上の注意', '原典とライセンス',
+    'ラボ一覧', '財務会計用語', 'GitHub Copilotによる配備例',
+    '開催と利用上の注意', '原典とライセンス',
 }
 LAB_ICONS = [
     'fabric_48_color.svg', 'semantic_model_48_item.svg', 'planning_48_item.svg',
@@ -234,6 +235,12 @@ def split_document(md, source, text, lab):
         if token.type == 'heading_open' and token.level == 0 and token.tag in ('h1', 'h2', 'h3'):
             inline = tokens[index + 1]
             text_title = inline.content
+            if token.tag == 'h1' and inline.children:
+                images = [child.content for child in inline.children if child.type == 'image']
+                text_nodes = [child.content for child in inline.children
+                              if child.type == 'text' and child.content.strip()]
+                if len(images) == 1 and not text_nodes:
+                    text_title = images[0]
             slug = heading_slug(text_title)
             suffix = seen.get(slug, 0)
             seen[slug] = suffix + 1

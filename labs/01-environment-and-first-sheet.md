@@ -200,7 +200,7 @@ Harborlightの実績データは、管理されたセマンティックモデル
 > ここでは*2025 Gross Revenue*を選んでください。年度を限定しないメジャーを選んでもエラーにはなりませんが、複数年度のシートとなり、モジュール02の数字と一致しなくなります。
 
 > [!TIP]
-> **Data**ペインでは、ディメンションとメジャーが所属するテーブルごとにまとめられています。**Semantic Model**を展開すると、*Measures Table*、*Date*、*Fact Transactions*、*Geography*、*P&L Measures*、*P&L Rows*、*Product*の7つのテーブルが表示されます。*Region*が見つからない場合は、ファクトテーブルではなく**Geography**を展開してください。各テーブルの内容は、[`data/README.md`](../data/README.md)を参照してください。
+> **Data**ペインでは、ディメンションとメジャーが所属するテーブルごとにまとめられています。**Semantic Model**を展開すると、*Measures Table*、*Date*、*Fact Transactions*、*Geography*、*P&L Measures*、*P&L Rows*、*Product*の7つのテーブルが表示されます。*Region*は**Geography**テーブルにあります。各テーブルの内容は、[`data/README.md`](../data/README.md)を参照してください。
 
 このシートが、以降の演習の土台になります。四半期,月への展開や共同作業用の設定は、後続の手順で行います。
 
@@ -277,7 +277,7 @@ Harborlightの実績データは、管理されたセマンティックモデル
 
 ### NotesとCommentsの場所を確認する
 
-**Notes** は、Planningリボンの **Actions** グループにあります。**Comments** は、同じリボン内ではなく、タブ名と同じ行の右上にあります。Notesは固定の注記、Commentsは会話やコメント一覧の管理に使う別の機能です。
+**Notes** は、Planningリボンの **Actions** グループにあります。**Comments** は、タブ名と同じ行の右上にあります。Notesは固定の注記、Commentsは会話やコメント一覧の管理に使います。
 
 ヘッダーの **Comments** のドロップダウンを開きます。次の項目が表示される場合があります。
 

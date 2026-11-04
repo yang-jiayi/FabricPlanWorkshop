@@ -58,7 +58,7 @@
 > [!IMPORTANT]
 > **From Sheetsが空の場合：** `No Other Sheets Available` と表示された場合は,モジュール02で入力列を作成した `Plan Intro` が保存されているか,同じPlanアイテム内のシートを埋め込んだかを確認してください。モデルの実績メジャーだけでもビジュアルの基本操作を試せますが,計画との比較には入力メジャーが必要です。
 >
-> **From Sheets** のデータとモデルのデータは,表示名だけでなく参照元のツリーで見分けてください。[メジャーのブレンド](https://learn.microsoft.com/fabric/iq/plan/infobridge-how-to-blend-measures) でも,別シートのメジャーはFrom Sheetsから選択します。
+> **From Sheets** のデータとモデルのデータは,表示名と参照元のツリーの両方を確認して見分けてください。[メジャーのブレンド](https://learn.microsoft.com/fabric/iq/plan/infobridge-how-to-blend-measures) でも,別シートのメジャーはFrom Sheetsから選択します。
 
 変更が反映されるのは,その入力メジャーを参照しているビジュアルです。モデルの基準値だけを参照するグラフが変わらないのは正常な動作です。
 
@@ -129,7 +129,7 @@ Grouped/Clustered Lineで計画の線が表示されない場合は、別のビ�
 ## 手順5：シート内の入力値と連動するKPIを作成する
 
 1. **Visualizations** ペインで **KPIs** を選択します。Card形式のKPIが追加されます。
-2. 次のように,**参照元を確認して** フィールドを割り当てます。必須の **Actual(s)** には,モデルの同名メジャーではなく,From Sheetsの入力メジャーを選びます。
+2. 次のように,**参照元を確認して** フィールドを割り当てます。必須の **Actual(s)** には,From Sheetsの入力メジャーを選びます。モデルにある同名メジャーは選びません。
 
    | フィールドの割り当て先 | フィールド | 参照元 |
    |---|---|---|

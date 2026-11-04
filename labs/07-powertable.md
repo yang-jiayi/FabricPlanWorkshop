@@ -16,7 +16,7 @@ Harborlightの計画は完成しました。このモジュールでは,計画�
 > [!NOTE]
 > このモジュールは独立しており,別のPlanアイテムとデータセットを使用します。計画機能だけを体験したい場合は,スキップして [モジュール08](08-sizing-and-governance.md) へ進んでください。
 >
-> **費用について：** PowerTableシートの作成,編集は,PlannerではなくStakeholderに該当する操作です。Microsoftのロールに関するドキュメントでは,これらの操作でPlannerセッションへ昇格しなくなったこと,また **PowerTableシートのみ** を含むPlanアイテムではStakeholderとViewerのロールのみを利用できることが明記されています。そのため,このモジュールではPlannerセッションではなくStakeholderセッション（168 CU時間）が発生します。同じ容量ですでにPlannerセッションが有効であれば,追加のセッション料金は発生しません。
+> **費用について：** PowerTableシートの作成,編集はStakeholderに該当する操作です。Microsoftのロールに関するドキュメントでは,これらの操作でPlannerセッションへ昇格しないこと,また **PowerTableシートのみ** を含むPlanアイテムではStakeholderとViewerのロールのみを利用できることが明記されています。そのため,このモジュールではStakeholderセッション（168 CU時間）が発生します。同じ容量ですでにPlannerセッションが有効であれば,追加のセッション料金は発生しません。
 
 **必要なファイル：** [fabric-samples](https://github.com/microsoft/fabric-samples/tree/main/docs-samples/iq/plan) の `Northwind-FMCG-assets-powertable-tutorial.xlsx` を使用します。ワークブックには **Assets,Employees,Locations,Importの4シート** があります。この演習では **Locations → Employees → Assets** の順に新しいテーブルへ取り込みます。`Import` は追加取込み用データを含むため,初期データには使用しません。
 
@@ -562,7 +562,7 @@ Lookupは,表示名と保存するキーを分けて扱うための設定です�
 <summary>解答</summary>
 
 1. 列への参照は入力時に関連付けられるためです。貼り付けた文字列では実際の列への参照が解決されず,エラーが明示されないまま動作しなくなります。
-2. データベーストリガーによる書き戻しは,トリガータイプごとに10レコードまでです。上限を超えると,自動化は部分的に処理されるのではなく,全体がスキップされます。
+2. データベーストリガーによる書き戻しは,トリガータイプごとに10レコードまでです。上限を超えると,自動化全体がスキップされます。
 3. いいえ。Legacyの更新権限と閲覧範囲は別です。閲覧する行も制限する場合はRoles & Policies SecurityのRead,RLS,Item Baseline,未設定テーブル,Bypassの有無を確認し,別ユーザーで閲覧と変更を個別に検証します。
 
 </details>

@@ -106,6 +106,66 @@ Content-Type: application/json
 - 容量停止 / 一時停止, Plan / DB /アイテムの削除でセッション課金が消えると想定しません。計画 / SQL / OneLakeの費用を分け, 実テナントのBilling / Capacity Metricsと管理者の条件で確認します。
 - Lab09の一時Lakehouse / Files / Warehouse Stageは新しい演習資産です。保管したCSVは組織承認済みのアクセス範囲に限定し, 検証後に削除する場合も対象ファイル / アイテムを個別に確認し, 事前承認なしにWorkspace Identityや権限を変更しません。
 
+## GitHub Copilotを使う場合の試算例
+
+ここでは, 一人の担当者が演習専用の空Workspaceを準備し, 変更ごとに内容を確認して承認する進め方を想定します。下記は予算と日程を考えるための**計画用サンプル**です。Fabric環境やCopilotで計測したベンチマークではありません。モデルの推薦はこの作業内容への適合判断であり, Fabric配備性能の比較結果ではありません。内容は2026-11-04にGitHub公式資料で確認しました。
+
+### 実行面とモデル
+
+- **リポジトリだけを読むdry-run:** Copilot cloud agentでREADME / Lab / 構成図を読み取り専用で調べ, 作成予定, 不足情報, 手作業, 受入条件を整理します。Fabricテナントへ接続せず, テナント資格情報 / トークンも渡しません。Copilot cloud agentの計算資源費用はAI Creditsのトークン試算と別に管理します。
+- **Fabricテナントを扱う作業:** Copilot CLIまたはVS Code Agent modeを担当者のローカル環境で使い, 担当者本人がMicrosoft Entraの公式サインインを行います。各操作の対象と影響を確認してから一つずつ承認します。ロール, 課金, データ変更の判断や受入確認にはGPT-6.1 Sol (Powerful)を, 承認済みの定型的な手順案内にはGPT-6.1 Terra (Versatile)を使う例です。いずれもモデル比較資料に記載された用途区分を参考にした選択です。
+- **モデルの提供状況:** 利用できるモデルはプラン, Copilotの実行面, 組織 / Enterpriseの管理ポリシーによって異なり, 更新されます。実行時に管理画面と公式のモデル一覧で確認してください。
+
+### 時間の配分例
+
+| 段階 | AIの作業時間 | 人の確認 / 作業時間 | 前提 |
+|---|---:|---:|---|
+| リポジトリ調査とdry-run | 15〜30分 | 15〜30分 | 10 Labと主要ガイドを読み, 読み取り専用の計画を作る |
+| 承認済みの個別作業 | 20〜40分 | 30〜90分 | GPT-6.1 Terraでの手順案内。操作ごとの承認, 本人のサインイン, PBIX import, PlanのUI設定を含む |
+| 権限 / 課金 / 安全性の確認 | 5〜10分 | 5〜10分 | GPT-6.1 Solを使った個別レビュー |
+| 受入確認 | 15〜25分 | 15〜30分 | 代表値, 権限, SQL保存値と結果を照合し, 人が受入判断 |
+| **合計** | **55〜105分** | **65〜160分** | 非同期Fabric処理の待ち時間は別枠 |
+
+これらの時間は日程検討用の仮置きです。Copilotを使った実測時間ではありません。環境準備, import, Fabric UIの画面数 / 応答, 承認者の応答速度で変わるため, 実施前に対象環境で確認して予定を調整してください。
+
+### AI Creditsの計算例
+
+GitHub Copilotのusage-based billingでは, モデルとトークン量に応じて消費を計算します。2026-06-01以降に適用された方式で, **1 AI Credit = $0.01 USD**です。既存の年額Copilot Pro / Pro+契約で旧premium request-based billingを継続している利用者には例外があります。
+
+下表のトークン量は各段階のすべてのプロンプト / エージェント反復を合計した**課金区分ごとの仮定**です。各リクエストの入力は272K tokens以下のDefault tierを想定し, 表の累積量は複数リクエストの合計です。`Input`は非キャッシュ入力, `Cached input`と`Cache write`は別々の課金区分, `Output`は生成量として扱います。単価はすべて100万トークンあたりです。Auto / Fusionによる割引は含めていません。
+
+| モデル / 段階 | Input | Cached input | Cache write | Output | Default tier単価: input / cached / write / output | 段階費用の例 |
+|---|---:|---:|---:|---:|---|---:|
+| GPT-6.1 Sol / Powerful / dry-run | 100,000〜200,000 | 200,000〜400,000 | 100,000〜200,000 | 20,000〜40,000 | $2.00 / $0.10 / $2.50 / $10.00 | $0.67〜$1.34 |
+| GPT-6.1 Terra / Versatile / 承認済み個別作業 | 200,000〜400,000 | 400,000〜800,000 | 200,000〜400,000 | 40,000〜80,000 | $1.00 / $0.05 / $1.25 / $5.00 | $0.67〜$1.34 |
+| GPT-6.1 Sol / Powerful / 権限・課金・安全性レビュー | 20,000〜40,000 | 40,000〜80,000 | 20,000〜40,000 | 4,000〜8,000 | $2.00 / $0.10 / $2.50 / $10.00 | $0.134〜$0.268 |
+| GPT-6.1 Sol / Powerful / 受入確認 | 100,000〜200,000 | 200,000〜400,000 | 100,000〜200,000 | 20,000〜40,000 | $2.00 / $0.10 / $2.50 / $10.00 | $0.67〜$1.34 |
+
+計算式は次のとおりです。
+
+```text
+費用 (USD) =
+  (Input × input単価
+   + Cached input × cached単価
+   + Cache write × write単価
+   + Output × output単価) ÷ 1,000,000
+AI Credits相当 = 費用 (USD) ÷ 0.01
+```
+
+4段階の合計は**約$2.14〜$4.29 / 214〜429 AI Credits相当**です。計算では費用をセント単位に丸めています。これは想定トークン量を単価に掛けた換算例です。実際の請求額や上限を保証する値ではありません。プラン内の月間AI Credits枠が先に使われ, 枠を超える追加利用の扱いはアカウント / 組織の予算設定に従います。追加請求を防ぐには [Bundled AI credits budgetを$0 USDにし, Stop usage when budget limit is reachedを有効化](https://docs.github.com/en/billing/how-tos/set-up-budgets#managing-budgets-for-your-personal-account)します。Copilotのサブスクリプション料金, Fabric容量 / SQL / OneLake料金はこの換算に含みません。
+
+### 公式資料
+
+- [Models and pricing for GitHub Copilot](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing)
+- [Supported AI models in GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/supported-models)
+- [AI model comparison](https://docs.github.com/en/copilot/reference/ai-models/model-comparison)
+- [Using agent mode in your IDE](https://docs.github.com/en/copilot/how-tos/copilot-in-your-ide/use-copilot-agents/use-agent-mode)
+- [Installing GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli)
+- [GitHub Copilot on GitHub.com and GitHub Mobile](https://docs.github.com/en/copilot/concepts/copilot-surfaces/copilot-on-github)
+- [Usage-based billing for individuals](https://docs.github.com/en/copilot/concepts/billing-and-usage/individuals/billing)
+- [Legacy request-based billing exception](https://docs.github.com/en/copilot/reference/copilot-billing/request-based-billing-legacy/copilot-requests)
+- [Set up budgets to control spending](https://docs.github.com/en/billing/how-tos/set-up-budgets#managing-budgets-for-your-personal-account)
+
 ## 公式資料
 
 - [Fabric PlanningのGit統合とCI/CD](https://learn.microsoft.com/en-us/fabric/iq/plan/resources/cicd-planning)

@@ -448,7 +448,7 @@ class Deck:
                   '同じPlan内のシートを参照\n参照元の変更を受け取る\n例: Plan Intro → Intelligence', 'Plan', size=23)
         self.card(6.8, 2.35, 5.98, 2.93, 'Copy = 独立した入力',
                   'コピー後は編集可能な系列\n元シートとは自動同期しない\n例: Optimizer用のSales Plan', 'Plan', BLUE, 23)
-        self.callout('重要', '実績 / 計画 / Forecastは, 表示名だけでなく参照元・期間・粒度まで確認します。',
+        self.callout('重要', '実績 / 計画 / Forecastは, 表示名に加え参照元・期間・粒度も確認します。',
                      kind='important')
 
         self.new('学習経路', 'Lab00–09 の進め方')
@@ -487,7 +487,7 @@ class Deck:
                   'Fabric SQL / OneLake / XMLAの消費は別に考慮します。',
                   0.65, 3.35, 11.9, 1.95, 25, WHITE)
         self.slide.notes_slide.notes_text_frame.text += (
-            '\n課金単位: クリック1回の料金ではなく, 操作で開始するPlannerセッションの総消費量。'
+            '\n課金単位: 操作で開始するPlannerセッション全体の消費量。'
             '\n公式資料は30日間（730時間）と表記し試算に730時間を使用。暦の30日間は720時間。'
             '\n実際の期限と請求は対象環境の課金情報で確認する。'
         )
@@ -538,7 +538,7 @@ class Deck:
             '画像は予測生成前です。予測値や行数はデータ・期間・設定に依存する出力例です。',
             'note')
 
-        self.new('Lab04 / 保存', 'ログの成功だけでなく, SQLの値を照合',
+        self.new('Lab04 / 保存', 'ログとSQLの保存値を照合',
                  f'labs/{LABS[4]}')
         self.flow_node(0.55, 2.5, 3.65, 'Forecast', '保存する系列 / 期間\nScenarioを確認', 'Plan')
         self.arrow(4.3, 3.19)
@@ -579,7 +579,7 @@ class Deck:
         self.callout('注意', '容量上限に達した場合は管理者へ相談します。既存PlanやDBを削除して空きを作りません。',
                      kind='warning')
 
-        self.new('Lab08 / 15分', '人数だけでなく, 実際の操作と負荷で考える',
+        self.new('Lab08 / 15分', '利用人数と実操作 / 負荷を踏まえて考える',
                  f'labs/{LABS[8]}')
         self.card(0.55, 2.3, 3.9, 2.95, '課金と容量',
                   'Planner / Stakeholder / Viewer\n操作とセッションの重なり\n他ワークロードの消費', 'Fabric', size=20)

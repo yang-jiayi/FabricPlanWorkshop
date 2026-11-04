@@ -130,6 +130,22 @@ class PresentationBuildTests(unittest.TestCase):
         for term in ('未確認', '未検証', '未実施', '原因未特定', '未実証', '実機未'):
             self.assertNotIn(term, self.generated)
 
+    def test_copilot_deployment_example_is_in_both_languages_and_editions(self):
+        instructor = presentation.build(edition='instructor')
+        for output in (self.generated, instructor):
+            with self.subTest(edition='instructor' if output is instructor else 'participant'):
+                self.assertIn('id="overview-s007"', output)
+                self.assertIn('id="en-overview-s007"', output)
+                self.assertIn('GPT-6.1 Sol', output)
+                self.assertIn('GPT-6.1 Terra', output)
+                self.assertIn('214〜429', output)
+                self.assertIn('214–429', output)
+                self.assertIn('$2.14〜$4.29', output)
+                self.assertIn('$2.14–$4.29', output)
+
+    def test_japanese_articles_avoid_repetitive_contrast_constructions(self):
+        self.assertNotRegex(self.generated, r'ではなく|だけではなく|だけでなく')
+
     def test_exclusion_markers_match_agent_list(self):
         marked = []
         for path in [presentation.ROOT / 'README.md', presentation.ROOT / presentation.FACILITATOR_SOURCE,
@@ -219,6 +235,8 @@ class PresentationBuildTests(unittest.TestCase):
                              and entry['title'].startswith('6. Part 3'))
         self.assertEqual(retained[post_part_two['id']], post_part_two['title'])
         self.assertEqual(retained['lab09-s002'], '確認済みの範囲')
+        self.assertIn('id="lab00-s007"', self.generated)
+        self.assertIn('data-title="Session-based billing"', self.generated)
 
     def test_audited_architecture_routes_and_graph_reference(self):
         for caption in (
@@ -373,12 +391,13 @@ class PresentationEditionTests(unittest.TestCase):
                 if href.startswith('#'):
                     self.assertIn(unquote(href[1:]), tree.ids)
 
-    def test_author_credit_and_linkedin_are_in_both_editions(self):
+    def test_author_credit_links_to_linkedin_in_both_editions(self):
         for content in (self.participant, self.instructor):
             self.assertIn('<meta name="author" content="Jiayi Yang, Swarm Data SE">', content)
-            self.assertIn('<strong>Jiayi Yang, Swarm Data SE</strong>', content)
-            self.assertIn('href="https://www.linkedin.com/in/yangjiayi/" target="_blank" '
-                          'rel="noopener noreferrer">LinkedIn</a>', content)
+            self.assertIn('<a href="https://www.linkedin.com/in/yangjiayi/" target="_blank" '
+                          'rel="noopener noreferrer"><strong>Jiayi Yang, Swarm Data SE</strong></a>',
+                          content)
+            self.assertNotIn('>LinkedIn</a>', content)
 
     def test_instructor_finance_terms_extend_participant_terms_without_orphans(self):
         registry = json.loads((presentation.ROOT / presentation.UI_ROOT /
@@ -475,6 +494,15 @@ class PresentationEditionTests(unittest.TestCase):
         self.assertIn('Read this.', combined)
         self.assertIn('SELECT 1;', combined)
         self.assertIn('Check the result.', combined)
+
+    def test_image_h1_uses_alt_text_as_document_title(self):
+        md = MarkdownIt('default')
+        title, _, _ = presentation.split_document(
+            md, Path('README.md'),
+            '# ![Microsoft Fabric Plan Workshop](assets/workshop-banner.svg "Microsoft Fabric Plan Workshop")\n\n',
+            'overview',
+        )
+        self.assertEqual(title, 'Microsoft Fabric Plan Workshop')
 
     def test_local_target_keeps_relative_routes_inside_repository(self):
         source = Path('labs/01-start.md')

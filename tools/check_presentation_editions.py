@@ -47,8 +47,8 @@ def run(output, axe):
                     '.edition-label').inner_text() == label
                 report['scope_checks'][prefix + 'author_credit'] = page.locator(
                     '.guide-footer strong').inner_text() == 'Jiayi Yang, Swarm Data SE'
-                report['scope_checks'][prefix + 'linkedin'] = page.locator(
-                    '.guide-footer a', has_text='LinkedIn').get_attribute('href') == (
+                report['scope_checks'][prefix + 'linkedin_author_link'] = page.locator(
+                    '.guide-footer a', has_text='Jiayi Yang, Swarm Data SE').get_attribute('href') == (
                         'https://www.linkedin.com/in/yangjiayi/')
                 report['scope_checks'][prefix + 'instructor_scope'] = (
                     page.locator(f'.slide[data-language="{locale}"][data-lab="facilitator"]').count()

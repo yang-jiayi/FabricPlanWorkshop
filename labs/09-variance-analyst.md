@@ -102,7 +102,7 @@ Q4 / Q4aの失敗の原因は特定されていません。
 2. 選択した期間の全件をサマリー済みCSVへ出力します。列の欠落、エクスポート上限、異なる月 / 製品があれば停止し、基になる別メジャーを推測しません。
 3. Forecast宛先から確認済みの列だけで同じScenario / Measure / Year / Month / Productの全行を抽出します。計画とモデルで製品キー / 月キーの対応を確定し、`ProductKey`と`PeriodKey`を文字列として作ります。
 4. 両方の全件エクスポートで`ProductKey + PeriodKey`ごとに重複がないことを確認し、Full Outer結合でキー集合を比較します。片側だけのキーが1件でもある、行数が一致しない、通貨 / Measure / PeriodStatusが不明なら停止します。欠損行を補完したり0で埋めたりしません。
-5. 合成サンプルルートではなく実Planルートを実施する場合、選択したSnapshot / Scenario / PlanVersionについて、各ソースの全行数と一意キー件数、結合後の正の期待件数を組織承認済みの非公開記録に残します。期待件数を0または未記入のままロードしません。
+5. 実Planルートを選んで実施する場合、選択したSnapshot / Scenario / PlanVersionについて、各ソースの全行数と一意キー件数、結合後の正の期待件数を組織承認済みの非公開記録に残します。期待件数を0または未記入のままロードしません。
 6. 列契約に合わせて15列のUTF-8 CSVを作り、独立して確認した正の`ExpectedRows`はCSVに追加せず非公開の検算記録へ保存します。金額の精度を保ち、PeriodStartがPeriodKeyの月初日であることを確認します。
 
 <!-- presentation-exclude-end: LAB09-PART2-PROCEDURE -->
@@ -114,41 +114,35 @@ Q4 / Q4aの失敗の原因は特定されていません。
 ### 6.1 Lakehouseを作成してCSVをアップロード
 
 1. 承認済みの演習Workspaceで **+ New item → Lakehouse** を選びます。`Lakehouse schemas`が有効であることを確認して作成します。実証時のアイテム名は`HPC_Lab09_Staging`でした。名前は自分の新規Workspace内で一意なものにし、同名があれば止めます。
+
+   ![Lab09の新規アイテムの名前入力画面（キャプチャ 002）](../assets/screenshots/lab09/02-new-lakehouse-dialog.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 003）](../assets/screenshots/lab09/003-lakehouse-created.png)
+
 2. Lakehouseの **Files** に`Lab09`、その下に新規の`run-sample001`フォルダーを作成します。再実行する場合は既存フォルダーを再利用せず、新しい承認済みrun名を使い、SQLパスも合わせます。
+
+   ![Lab09のフォルダー / CSV配置操作画面（キャプチャ 004）](../assets/screenshots/lab09/004-files-context-menu.png)
+   ![Lab09のフォルダー / CSV配置操作画面（キャプチャ 005）](../assets/screenshots/lab09/005-new-subfolder-lab09.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 006）](../assets/screenshots/lab09/006-lab09-folder-created.png)
+   ![Lab09のフォルダー / CSV配置操作画面（キャプチャ 007）](../assets/screenshots/lab09/007-new-subfolder-run-sample001.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 008）](../assets/screenshots/lab09/008-folders-created.png)
+
 3. `run-sample001`を開き、**Get data → Upload files**から`data/lab09-variance-snapshot-sample.csv`を選択します。Upload完了後、対象フォルダーにCSVが1つあり、ファイル名とサイズが表示されることを確認します。ローカルファイル選択ダイアログや個人端末のパスはキャプチャ / 公開しません。
 
-<details><summary>Lakehouse作成とCSVアップロード（12枚）</summary>
 
-![Lab09の新規アイテムの名前入力画面（キャプチャ 002）](../assets/screenshots/lab09/02-new-lakehouse-dialog.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 003）](../assets/screenshots/lab09/003-lakehouse-created.png)
-
-![Lab09のフォルダー / CSV配置操作画面（キャプチャ 004）](../assets/screenshots/lab09/004-files-context-menu.png)
-
-![Lab09のフォルダー / CSV配置操作画面（キャプチャ 005）](../assets/screenshots/lab09/005-new-subfolder-lab09.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 006）](../assets/screenshots/lab09/006-lab09-folder-created.png)
-
-![Lab09のフォルダー / CSV配置操作画面（キャプチャ 007）](../assets/screenshots/lab09/007-new-subfolder-run-sample001.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 008）](../assets/screenshots/lab09/008-folders-created.png)
-
-![Lab09の未設定の画面（キャプチャ 009）](../assets/screenshots/lab09/009-run-sample001-empty-folder.png)
-
-![Lab09のフォルダー / CSV配置操作画面（キャプチャ 010）](../assets/screenshots/lab09/010-folder-get-data-menu.png)
-
-![Lab09のアップロード対象の選択画面（キャプチャ 011）](../assets/screenshots/lab09/011-upload-files-panel.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 013）](../assets/screenshots/lab09/013-csv-uploaded.png)
-
-![Lab09のフォルダー / CSV配置操作画面（キャプチャ 014）](../assets/screenshots/lab09/014-folder-with-file.png)
-
-</details>
+   ![Lab09の未設定の画面（キャプチャ 009）](../assets/screenshots/lab09/009-run-sample001-empty-folder.png)
+   ![Lab09のフォルダー / CSV配置操作画面（キャプチャ 010）](../assets/screenshots/lab09/010-folder-get-data-menu.png)
+   ![Lab09のアップロード対象の選択画面（キャプチャ 011）](../assets/screenshots/lab09/011-upload-files-panel.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 013）](../assets/screenshots/lab09/013-csv-uploaded.png)
+   ![Lab09のフォルダー / CSV配置操作画面（キャプチャ 014）](../assets/screenshots/lab09/014-folder-with-file.png)
 
 ### 6.2 WarehouseのStageに型を明示してロード
 
 1. 同じ演習用Workspaceで新しい**Warehouse**（実証時の表示名`HPC_Lab09_Analysis`）を作成します。Warehouseは数値の照合 / 検算用で、OntologyのGraphバインディング先にはしません。
-2. SQL query editorで新規の`dbo.Lab09Stage`を作ります。既存の同名テーブルがあれば停止します。`ModelGrossRevenue`と`PlanForecast`は`float`ではなくDecimalで受けます。
+
+   ![Lab09の新規アイテムの名前入力画面（キャプチャ 017）](../assets/screenshots/lab09/17-new-warehouse-dialog.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 018）](../assets/screenshots/lab09/018-warehouse-created-welcome.png)
+
+2. SQL query editorで新規の`dbo.Lab09Stage`を作ります。既存の同名テーブルがあれば停止します。`ModelGrossRevenue`と`PlanForecast`はDecimal型で受けます。`float`は使いません。
 
    ```sql
    CREATE TABLE dbo.Lab09Stage
@@ -171,6 +165,11 @@ Q4 / Q4aの失敗の原因は特定されていません。
    );
    ```
 
+   ![Lab09のWarehouseの作成 / SQL編集画面（キャプチャ 019）](../assets/screenshots/lab09/019-warehouse-home.png)
+   ![Lab09のWarehouseの作成 / SQL編集画面（キャプチャ 020）](../assets/screenshots/lab09/020-warehouse-sql-editor-empty.png)
+   ![Lab09の実行するSQL入力画面（キャプチャ 021）](../assets/screenshots/lab09/021-stage-ddl-in-editor.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 022）](../assets/screenshots/lab09/022-stage-ddl-succeeded.png)
+
 3. CSVを置いたOneLake Lakehouse Filesの完全なパスをFabric UIで確認し、次の例の `<workspace>`、`<lakehouse>`、runフォルダーとファイル名を置き換えます。実証時は **CREDENTIAL句なし**のEntraパススルーで18行が読み込まれました。`CREDENTIAL = (IDENTITY = 'Workspace Identity')`を加えた実証はMsg 13840で失敗しました。Workspace Identityは必須条件とせず、組織が別途承認 / 構成したときだけ検討します。
 
    ```sql
@@ -192,59 +191,16 @@ Q4 / Q4aの失敗の原因は特定されていません。
    );
    ```
 
+   ![Lab09の実行するSQL入力画面（キャプチャ 023）](../assets/screenshots/lab09/023-copy-into-editor.png)
+   ![Lab09の失敗または制限メッセージ（キャプチャ 024）](../assets/screenshots/lab09/024-copy-into-workspace-identity-error.png)
+   ![Lab09の実行するSQL入力画面（キャプチャ 025）](../assets/screenshots/lab09/025-copy-into-no-credential-in-editor.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 026）](../assets/screenshots/lab09/026-copy-into-succeeded.png)
+
 4. COPYの実行結果と`SELECT COUNT_BIG(*) FROM dbo.Lab09Stage`を確認します。合成サンプルの独立期待件数は18です。実Planルートでは、Part 2で非公開に記録した正のExpectedRowsを使い、元の両エクスポートの全行数 / 一意キー件数 / Full Outer欠損0件とも照合します。0件、ヘッダーのみ、予期しない件数、失敗 / rejectがあれば次へ進まず停止します。
 
-<details><summary>WarehouseへのCSVロードと数値検算（24枚）</summary>
 
-![Lab09の新規アイテムの名前入力画面（キャプチャ 017）](../assets/screenshots/lab09/17-new-warehouse-dialog.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 018）](../assets/screenshots/lab09/018-warehouse-created-welcome.png)
-
-![Lab09のWarehouseの作成 / SQL編集画面（キャプチャ 019）](../assets/screenshots/lab09/019-warehouse-home.png)
-
-![Lab09のWarehouseの作成 / SQL編集画面（キャプチャ 020）](../assets/screenshots/lab09/020-warehouse-sql-editor-empty.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 021）](../assets/screenshots/lab09/021-stage-ddl-in-editor.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 022）](../assets/screenshots/lab09/022-stage-ddl-succeeded.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 023）](../assets/screenshots/lab09/023-copy-into-editor.png)
-
-![Lab09の失敗または制限メッセージ（キャプチャ 024）](../assets/screenshots/lab09/024-copy-into-workspace-identity-error.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 025）](../assets/screenshots/lab09/025-copy-into-no-credential-in-editor.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 026）](../assets/screenshots/lab09/026-copy-into-succeeded.png)
-
-![Lab09の実行後の成功結果画面（キャプチャ 027）](../assets/screenshots/lab09/027-stage-count-18.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 028）](../assets/screenshots/lab09/028-validation-q1q2-in-editor.png)
-
-![Lab09の検算結果の画面（キャプチャ 029）](../assets/screenshots/lab09/029-validation-q1-result.png)
-
-![Lab09の実行後の成功結果画面（キャプチャ 031）](../assets/screenshots/lab09/031-validation-q1q2-messages.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 032）](../assets/screenshots/lab09/032-validation-q3-in-editor.png)
-
-![Lab09の検算結果の画面（キャプチャ 033）](../assets/screenshots/lab09/033-validation-q3-result.png)
-
-![Lab09の実行後の成功結果画面（キャプチャ 036）](../assets/screenshots/lab09/036-validation-q4q5-messages.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 037）](../assets/screenshots/lab09/037-ctas-in-editor.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 038）](../assets/screenshots/lab09/038-ctas-succeeded-messages.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 040）](../assets/screenshots/lab09/040-step9-checks-in-editor.png)
-
-![Lab09の検算結果の画面（キャプチャ 041）](../assets/screenshots/lab09/041-step9-checks-result.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 042）](../assets/screenshots/lab09/042-aggregates-in-editor.png)
-
-![Lab09の検算結果の画面（キャプチャ 043）](../assets/screenshots/lab09/043-aggregates-result.png)
-
-![Lab09の検算結果の画面（キャプチャ 044）](../assets/screenshots/lab09/044-march-rows-nuts-null.png)
-
-</details>
+   **18行を読み込んだ結果を確認します。**
+   ![Lab09の実行後の成功結果画面（キャプチャ 027）](../assets/screenshots/lab09/027-stage-count-18.png)
 
 ### 6.3 Stageの選択範囲とデータ品質を検査
 
@@ -325,6 +281,14 @@ GROUP BY PeriodKey
 HAVING COUNT_BIG(*) <> 1;
 ```
 
+![Lab09の実行するSQL入力画面（キャプチャ 028）](../assets/screenshots/lab09/028-validation-q1q2-in-editor.png)
+![Lab09の検算結果の画面（キャプチャ 029）](../assets/screenshots/lab09/029-validation-q1-result.png)
+![Lab09の実行後の成功結果画面（キャプチャ 031）](../assets/screenshots/lab09/031-validation-q1q2-messages.png)
+![Lab09の実行するSQL入力画面（キャプチャ 032）](../assets/screenshots/lab09/032-validation-q3-in-editor.png)
+![Lab09の検算結果の画面（キャプチャ 033）](../assets/screenshots/lab09/033-validation-q3-result.png)
+![Lab09の実行後の成功結果画面（キャプチャ 036）](../assets/screenshots/lab09/036-validation-q4q5-messages.png)
+
+
 続行条件は、`ExpectedRows > 0`、`InvalidExpectedRows = 0`、全Stage行数 = 選択行数 = ExpectedRows、誤ったIDの行が0、重複 / 不正行 / 製品次元矛盾 / 期間次元矛盾がすべて0件です。実Planルートではこれに加え、Full Outerで照合した全元キーが一致している非公開記録を確認します。空の表は、失敗行が0件に見えるだけなので合格ではありません。
 
 次に、Warehouse内で選択Snapshotの製品 / 期間ディメンションとObservationを新しいテーブル名に作成します。既存同名テーブルがある場合は停止します。SQLは検算用で、Ontologyのバインディング先には使いません。
@@ -361,6 +325,12 @@ WHERE SnapshotId = 'LAB09-SAMPLE-001'
   AND ScenarioName = 'Base'
   AND PlanVersion = 'FY26-Workshop-v1';
 ```
+
+![Lab09の実行するSQL入力画面（キャプチャ 037）](../assets/screenshots/lab09/037-ctas-in-editor.png)
+![Lab09の作成またはロード完了画面（キャプチャ 038）](../assets/screenshots/lab09/038-ctas-succeeded-messages.png)
+![Lab09の実行するSQL入力画面（キャプチャ 040）](../assets/screenshots/lab09/040-step9-checks-in-editor.png)
+![Lab09の検算結果の画面（キャプチャ 041）](../assets/screenshots/lab09/041-step9-checks-result.png)
+
 
 次のSQLは差異式、0分母 / NULL比率、行数、重複、Stageとの欠落 / 余剰、孤立したProduct / Periodキーを検査します。`DuplicateKeys`から`OrphanPeriodKeys`まではすべて0、StageRowsとObservationRowsは同じ正のExpectedRowsでなければなりません。
 
@@ -437,6 +407,11 @@ WHERE NOT EXISTS (
 );
 ```
 
+![Lab09の実行するSQL入力画面（キャプチャ 042）](../assets/screenshots/lab09/042-aggregates-in-editor.png)
+![Lab09の検算結果の画面（キャプチャ 043）](../assets/screenshots/lab09/043-aggregates-result.png)
+![Lab09の検算結果の画面（キャプチャ 044）](../assets/screenshots/lab09/044-march-rows-nuts-null.png)
+
+
 このほか、`ExpectedRows > 0`、`AllStageRows = SelectedRows = ExpectedRows`、選択ID以外 / NULLキー / 空文字 / 不正期間 / 不正ステータス / 通貨やMeasureの違い / ProductKeyやPeriodKeyの属性不一致が0件であることを確認します。実PlanルートではFull Outerで照合した全元キーが一致している非公開記録も必要です。再計算式だけを正しさの証拠にせず、元の全件キー集合とSnapshotの数値を独立確認します。
 
 ## 7. Part 3B：LakehouseにDeltaテーブルを作る
@@ -444,6 +419,10 @@ WHERE NOT EXISTS (
 Warehouseは精度を保つ検算層です。Ontology / Graph / Data Agent用には、Lakehouseのスキーマ有効化済みLakehouseに管理Deltaテーブルを作ります。実証ではWarehouseにバインドしたOntologyがGraphで`Ineligible / Unsupported Datasource`となり、Data Agentが汎用エラーになりました。Lakehouse Deltaへ切り替えて成功しましたが、変更を同時に行ったため、どの条件が単独で必要だったかは切り分けられていません。
 
 1. `HPC_Lab09_Staging`を開き、**Analyze data with → New Spark SQL query**を選びます。クエリエディターをクリックしてから入力します。初回RunではSpark sessionの起動に時間がかかる場合があります。
+
+   ![Lab09の操作画面（キャプチャ 179）](../assets/screenshots/lab09/179-lakehouse-analyze-data-with-menu.png)
+   ![Lab09の操作画面（キャプチャ 180）](../assets/screenshots/lab09/180-lakehouse-new-spark-sql-query-editor.png)
+
 2. 次の一文だけをクエリータブへ入力してRunします。`CREATE OR REPLACE`は、今回のように新規の専用Lakehouse内でテーブルが存在しないことを確認した場合に限ります。既存テーブルがあればRunせず停止します。
 
    ```sql
@@ -451,6 +430,12 @@ Warehouseは精度を保つ検算層です。Ontology / Graph / Data Agent用に
    ```
 
 3. **RunごとにSpark SQLを1文だけ**実行します。複数文を同じRunに入れると`PARSE_SYNTAX_ERROR`になります。Temp viewはSpark sessionの一時ビューです。sessionが終了した場合は、この文を先に再実行します。
+
+   ![Lab09の実行するSQL入力画面（キャプチャ 181）](../assets/screenshots/lab09/181-lakehouse-spark-sql-script-typed.png)
+   ![Lab09の失敗または制限メッセージ（キャプチャ 183）](../assets/screenshots/lab09/183-lakehouse-spark-sql-multi-statement-parse-error.png)
+   ![Lab09の実行するSQL入力画面（キャプチャ 184）](../assets/screenshots/lab09/184-spark-tempview-typed.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 185）](../assets/screenshots/lab09/185-spark-tempview-succeeded.png)
+
 4. 次のSQLをそれぞれ別のクエリータブまたはRunで実行します。これらの固定テーブル名がすでに存在するときは上書きせず止めてください。実証時は新規専用テーブルに対し、各文を1回ずつ実行しました。
 
    ```sql
@@ -480,45 +465,23 @@ Warehouseは精度を保つ検算層です。Ontology / Graph / Data Agent用に
    FROM lab09_stage;
    ```
 
+   ![Lab09の実行するSQL入力画面（キャプチャ 187）](../assets/screenshots/lab09/187-spark-product-ctas-typed.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 188）](../assets/screenshots/lab09/188-spark-product-ctas-succeeded.png)
+   ![Lab09の実行するSQL入力画面（キャプチャ 189）](../assets/screenshots/lab09/189-spark-period-ctas-typed.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 190）](../assets/screenshots/lab09/190-spark-period-ctas-succeeded.png)
+   ![Lab09の実行するSQL入力画面（キャプチャ 191）](../assets/screenshots/lab09/191-spark-revenue-ctas-typed-tail.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 192）](../assets/screenshots/lab09/192-spark-revenue-ctas-succeeded.png)
+
 5. Lakehouse ExplorerをRefreshし、Tables / dboに3つのテーブルが見えることを確認します。Spark SQLの結果でProduct 6行、Period 3行、Revenue Observation 18行 / 15列であることを確認します。15列はObservationKey、SnapshotId、ScenarioName、PlanVersion、SourceWritebackRunIds、ProductKey、PeriodKey、PlanPeriodStatus、CurrencyCode、ModelMeasureName、ModelGrossRevenue、PlanMeasureName、PlanForecast、VarianceAmount、VarianceRateです。キーはString、期間はDate、4つの数値列はDoubleです。
 
-<details><summary>Lakehouse Spark SQLによるDeltaテーブル作成（15枚）</summary>
 
-![Lab09の操作画面（キャプチャ 179）](../assets/screenshots/lab09/179-lakehouse-analyze-data-with-menu.png)
-
-![Lab09の操作画面（キャプチャ 180）](../assets/screenshots/lab09/180-lakehouse-new-spark-sql-query-editor.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 181）](../assets/screenshots/lab09/181-lakehouse-spark-sql-script-typed.png)
-
-![Lab09の失敗または制限メッセージ（キャプチャ 183）](../assets/screenshots/lab09/183-lakehouse-spark-sql-multi-statement-parse-error.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 184）](../assets/screenshots/lab09/184-spark-tempview-typed.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 185）](../assets/screenshots/lab09/185-spark-tempview-succeeded.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 187）](../assets/screenshots/lab09/187-spark-product-ctas-typed.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 188）](../assets/screenshots/lab09/188-spark-product-ctas-succeeded.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 189）](../assets/screenshots/lab09/189-spark-period-ctas-typed.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 190）](../assets/screenshots/lab09/190-spark-period-ctas-succeeded.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 191）](../assets/screenshots/lab09/191-spark-revenue-ctas-typed-tail.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 192）](../assets/screenshots/lab09/192-spark-revenue-ctas-succeeded.png)
-
-![Lab09の操作画面（キャプチャ 194）](../assets/screenshots/lab09/194-spark-counts-result.png)
-
-![Lab09の操作画面（キャプチャ 195）](../assets/screenshots/lab09/195-lakehouse-explorer-delta-tables.png)
-
-![Lab09の操作画面（キャプチャ 196）](../assets/screenshots/lab09/196-lakehouse-explorer-revenue-columns.png)
-
-</details>
+   ![Lab09の操作画面（キャプチャ 194）](../assets/screenshots/lab09/194-spark-counts-result.png)
+   ![Lab09の操作画面（キャプチャ 195）](../assets/screenshots/lab09/195-lakehouse-explorer-delta-tables.png)
+   ![Lab09の操作画面（キャプチャ 196）](../assets/screenshots/lab09/196-lakehouse-explorer-revenue-columns.png)
 
 ## 8. Part 4：Ontologyを定義してGraphをmaterializeする
 
-Ontologyはエンティティ / 関係 / ルールとデータバインディングを持つPreviewの意味付け層です。以下ではWarehouseではなく、Part 3BのLakehouse管理Deltaテーブルをバインドします。
+Ontologyはエンティティ / 関係 / ルールとデータバインディングを持つPreviewの意味付け層です。以下ではPart 3BのLakehouse管理Deltaテーブルをバインドします。Warehouseは独立した数値検算に使います。
 
 実証では先にWarehouseのテーブルをOntologyへバインドしましたが、Manage graphで`Unsupported Datasource`となり、Data Agentも汎用エラーになりました。この初回失敗は履歴として示します。再現手順としてWarehouseをGraph sourceに設定せず、Part 3AのWarehouseは数値検算に使い、以降のOntology / GraphではLakehouse Deltaを使います。
 
@@ -528,52 +491,38 @@ Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原�
 
 
 
-<details><summary>WarehouseバインドのGraph対象外表示（3枚）</summary>
 
 ![Lab09の失敗または制限メッセージ（キャプチャ 172）](../assets/screenshots/lab09/172-chat-question1-answer-cannot-work-with-content.png)
-
 ![Lab09の操作画面（キャプチャ 176）](../assets/screenshots/lab09/176-ontology-manage-graph-all-entities-ineligible.png)
-
 ![Lab09の失敗または制限メッセージ（キャプチャ 177）](../assets/screenshots/lab09/177-ontology-manage-graph-unsupported-datasource-popup.png)
-
-</details>
 
 ### 8.1 Ontologyを作成する
 
 1. Workspaceで **+ New item → Ontology (Preview)** を選びます。実証時の名前は`HPC_Lab09_VarianceOntology_LH`です。作成できる地域 / tenant settingとPreview状態を確認します。
+
+   ![Lab09の新規アイテムの名前入力画面（キャプチャ 197）](../assets/screenshots/lab09/197-new-ontology-dialog-lh-name.png)
+   ![Lab09の操作画面（キャプチャ 199）](../assets/screenshots/lab09/199-lh-ontology-get-started.png)
+
 2. **+ Add entity type**で`Product`を作ります。entity typeの作成は名前を入力して確定します。
+
+   ![Lab09のエンティティ追加画面（キャプチャ 200）](../assets/screenshots/lab09/200-lh-add-entity-type-product.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 201）](../assets/screenshots/lab09/201-lh-product-entity-created.png)
+
 3. `Product`の **Configure → Manage property bindings → Add binding and properties** を開き、OneLake catalogでLakehouse → `dbo` → `lab09_product`を選びます。表示されたProductKey / Category / SubCategoryをそれぞれ同名のsource columnへバインドします。
+
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 203）](../assets/screenshots/lab09/203-lh-bind-data-add-source.png)
+   ![Lab09のOneLake catalogでのテーブル選択画面（キャプチャ 204）](../assets/screenshots/lab09/204-lh-onelake-catalog-filtered.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 207）](../assets/screenshots/lab09/207-lh-onelake-select-lab09-product.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 209）](../assets/screenshots/lab09/209-lh-bind-data-properties-mapping.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 210）](../assets/screenshots/lab09/210-lh-bind-data-created-success.png)
+   ![Lab09の操作画面（キャプチャ 211）](../assets/screenshots/lab09/211-lh-product-configure-bound.png)
+
 4. **Define entity type key**を開き、`ProductKey`をkeyにします。Instancesにテーブルが見えないエラーが出ても、直ちにバインディング失敗と断定しません（後述のトラブル対応）。GraphのEligibility、sourceとkeyの設定を別々に確認します。
 
-<details><summary>OntologyのProduct entityとLakehouse binding（13枚）</summary>
 
-![Lab09の新規アイテムの名前入力画面（キャプチャ 197）](../assets/screenshots/lab09/197-new-ontology-dialog-lh-name.png)
-
-![Lab09の操作画面（キャプチャ 199）](../assets/screenshots/lab09/199-lh-ontology-get-started.png)
-
-![Lab09のエンティティ追加画面（キャプチャ 200）](../assets/screenshots/lab09/200-lh-add-entity-type-product.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 201）](../assets/screenshots/lab09/201-lh-product-entity-created.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 203）](../assets/screenshots/lab09/203-lh-bind-data-add-source.png)
-
-![Lab09のOneLake catalogでのテーブル選択画面（キャプチャ 204）](../assets/screenshots/lab09/204-lh-onelake-catalog-filtered.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 207）](../assets/screenshots/lab09/207-lh-onelake-select-lab09-product.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 209）](../assets/screenshots/lab09/209-lh-bind-data-properties-mapping.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 210）](../assets/screenshots/lab09/210-lh-bind-data-created-success.png)
-
-![Lab09の操作画面（キャプチャ 211）](../assets/screenshots/lab09/211-lh-product-configure-bound.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 214）](../assets/screenshots/lab09/214-lh-key-productkey-checked.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 216）](../assets/screenshots/lab09/216-lh-product-key-defined.png)
-
-![Lab09の操作画面（キャプチャ 218）](../assets/screenshots/lab09/218-lh-ontology-home-product-bound.png)
-
-</details>
+   ![Lab09のエンティティキーの設定画面（キャプチャ 214）](../assets/screenshots/lab09/214-lh-key-productkey-checked.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 216）](../assets/screenshots/lab09/216-lh-product-key-defined.png)
+   ![Lab09の操作画面（キャプチャ 218）](../assets/screenshots/lab09/218-lh-ontology-home-product-bound.png)
 
 ### 8.2 Productだけの診断経路
 
@@ -581,29 +530,31 @@ Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原�
 
 `Manage graph`でProductがEligibleになることを確認し、Choose what to projectでProductを選択してContinue → Materializeします。ボタンがDoneになったらHomeに戻り、Explore graphを開いてProductをRunします。Product-onlyの暫定Agent `_LH` は検証経緯のために残った名前です。最終のOntologyをAgentへ追加する前に、次の手順でOntologyを完成させます。
 
-<details><summary>ProductだけのGraphと旧Agentの診断（7枚）</summary>
+
+
 
 ![Lab09のGraphの投影 / materialize画面（キャプチャ 219）](../assets/screenshots/lab09/219-lh-graph-config-product-eligible.png)
-
 ![Lab09のGraphの投影 / materialize画面（キャプチャ 220）](../assets/screenshots/lab09/220-lh-projection-summary-product-only.png)
-
 ![Lab09のGraphの投影 / materialize画面（キャプチャ 221）](../assets/screenshots/lab09/221-lh-materialize-creating-graph-product-only.png)
-
 ![Lab09のGraphの投影 / materialize画面（キャプチャ 222）](../assets/screenshots/lab09/222-lh-projection-summary-done-button-disabled.png)
-
 ![Lab09のGraphの投影 / materialize画面（キャプチャ 223）](../assets/screenshots/lab09/223-lh-ontology-home-after-materialize-explore-graph.png)
-
 ![Lab09の新規アイテムの名前入力画面（キャプチャ 230）](../assets/screenshots/lab09/230-lh-create-data-agent-dialog-name.png)
-
 ![Lab09の検算結果の画面（キャプチャ 240）](../assets/screenshots/lab09/240-lh-agent-answer-product-list-6-products.png)
-
-</details>
-
-
 
 ### 8.3 PeriodとRevenue Observationを追加する
 
 1. **+ Add entity type**で`Period`を追加します。`lab09_period`をバインドし、`PeriodKey`、`PeriodStart`、`PlanPeriodStatus`を同名列へ割り当てます。`PeriodKey`をentity type keyにします。
+
+   ![Lab09のエンティティ追加画面（キャプチャ 244）](../assets/screenshots/lab09/244-lh-add-entity-type-period.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 245）](../assets/screenshots/lab09/245-lh-period-entity-created.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 247）](../assets/screenshots/lab09/247-lh-period-bind-data-empty.png)
+   ![Lab09の操作画面（キャプチャ 248）](../assets/screenshots/lab09/248-lh-period-onelake-lakehouse-expanded-dbo.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 250）](../assets/screenshots/lab09/250-lh-period-onelake-select-lab09-period.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 252）](../assets/screenshots/lab09/252-lh-period-bind-data-properties-mapping.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 253）](../assets/screenshots/lab09/253-lh-period-bind-data-created-success.png)
+   ![Lab09の操作画面（キャプチャ 254）](../assets/screenshots/lab09/254-lh-period-configure-bound.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 259）](../assets/screenshots/lab09/259-lh-period-key-defined.png)
+
 2. **+ Add entity type**で`Revenue Observation`を追加します。`lab09_revenue_observation`をバインドし、以下15列を同名プロパティに割り当てます。`ProductKey`と`PeriodKey`も、後でrelationshipを結ぶために省かずバインドします。keyは`ObservationKey`です。
 
 | Property | Source列 | 用途 / 型 |
@@ -626,47 +577,17 @@ Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原�
 
 実証時は15プロパティのうち4つの金額 / 比率列がDouble、他11列がStringでした。WarehouseのDecimal金額はWarehouse側の正確な検算用に保持します。OntologyのBindingやEntity keyを保存した後、Product 6、Period 3、Observation 18のテーブル件数とキーをWarehouse / LakehouseのSQL結果でも照合してください。Instancesタブの一覧だけを件数の唯一の根拠にしません。
 
-<details><summary>PeriodとRevenue Observationの作成とbinding（19枚）</summary>
 
-![Lab09のエンティティ追加画面（キャプチャ 244）](../assets/screenshots/lab09/244-lh-add-entity-type-period.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 245）](../assets/screenshots/lab09/245-lh-period-entity-created.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 247）](../assets/screenshots/lab09/247-lh-period-bind-data-empty.png)
-
-![Lab09の操作画面（キャプチャ 248）](../assets/screenshots/lab09/248-lh-period-onelake-lakehouse-expanded-dbo.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 250）](../assets/screenshots/lab09/250-lh-period-onelake-select-lab09-period.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 252）](../assets/screenshots/lab09/252-lh-period-bind-data-properties-mapping.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 253）](../assets/screenshots/lab09/253-lh-period-bind-data-created-success.png)
-
-![Lab09の操作画面（キャプチャ 254）](../assets/screenshots/lab09/254-lh-period-configure-bound.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 259）](../assets/screenshots/lab09/259-lh-period-key-defined.png)
-
-![Lab09のエンティティ追加画面（キャプチャ 261）](../assets/screenshots/lab09/261-lh-add-entity-type-revenue-observation.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 262）](../assets/screenshots/lab09/262-lh-revenue-observation-entity-created.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 264）](../assets/screenshots/lab09/264-lh-revenue-observation-bind-data-empty.png)
-
-![Lab09の操作画面（キャプチャ 265）](../assets/screenshots/lab09/265-lh-revenue-observation-onelake-lakehouse-expanded-dbo.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 267）](../assets/screenshots/lab09/267-lh-revenue-observation-onelake-select-lab09-revenue-observation.png)
-
-![Lab09のプロパティバインドの設定画面（キャプチャ 269）](../assets/screenshots/lab09/269-lh-revenue-observation-bind-data-properties-mapping.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 270）](../assets/screenshots/lab09/270-lh-revenue-observation-bind-data-created-save.png)
-
-![Lab09の操作画面（キャプチャ 271）](../assets/screenshots/lab09/271-lh-revenue-observation-configure-bound.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 274）](../assets/screenshots/lab09/274-lh-revenue-observation-key-observationkey-checked.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 276）](../assets/screenshots/lab09/276-lh-revenue-observation-key-defined.png)
-
-</details>
+   ![Lab09のエンティティ追加画面（キャプチャ 261）](../assets/screenshots/lab09/261-lh-add-entity-type-revenue-observation.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 262）](../assets/screenshots/lab09/262-lh-revenue-observation-entity-created.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 264）](../assets/screenshots/lab09/264-lh-revenue-observation-bind-data-empty.png)
+   ![Lab09の操作画面（キャプチャ 265）](../assets/screenshots/lab09/265-lh-revenue-observation-onelake-lakehouse-expanded-dbo.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 267）](../assets/screenshots/lab09/267-lh-revenue-observation-onelake-select-lab09-revenue-observation.png)
+   ![Lab09のプロパティバインドの設定画面（キャプチャ 269）](../assets/screenshots/lab09/269-lh-revenue-observation-bind-data-properties-mapping.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 270）](../assets/screenshots/lab09/270-lh-revenue-observation-bind-data-created-save.png)
+   ![Lab09の操作画面（キャプチャ 271）](../assets/screenshots/lab09/271-lh-revenue-observation-configure-bound.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 274）](../assets/screenshots/lab09/274-lh-revenue-observation-key-observationkey-checked.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 276）](../assets/screenshots/lab09/276-lh-revenue-observation-key-defined.png)
 
 ### 8.4 Relationshipを作る
 
@@ -678,120 +599,110 @@ Warehouse / Lakehouseの変更を同時に行ったため、単独の根本原�
 | `Period contains Revenue Observations` | `Period.PeriodKey` | `Revenue Observation.PeriodKey` |
 
 1. **Add relationship**で名前、Origin、Targetを選んでAddします。Home canvas上のedge labelを開き、Relationship detailsで`Use mapping table`をOffにしてOrigin propertyからTargetの同名FK propertyへ直接接続、Saveします。
+
+   **Product relationshipを作成します。**
+   ![Lab09のリレーションの設定画面（キャプチャ 278）](../assets/screenshots/lab09/278-lh-add-relationship-dialog-empty.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 279）](../assets/screenshots/lab09/279-lh-add-relationship-name-origin-list.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 281）](../assets/screenshots/lab09/281-lh-add-relationship-filled-product-to-revenue-observation.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 282）](../assets/screenshots/lab09/282-lh-relationship-created-home-edge-label.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 283）](../assets/screenshots/lab09/283-lh-relationship-details-page-empty.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 285）](../assets/screenshots/lab09/285-lh-relationship-origin-productkey-selected.png)
+   ![Lab09の操作画面（キャプチャ 287）](../assets/screenshots/lab09/287-lh-relationship-connection-filled-save-enabled.png)
+   **Period relationshipを作成します。**
+   ![Lab09のリレーションの設定画面（キャプチャ 289）](../assets/screenshots/lab09/289-lh-add-relationship-filled-period-to-revenue-observation.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 290）](../assets/screenshots/lab09/290-lh-relationship2-created-home-edge-label.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 291）](../assets/screenshots/lab09/291-lh-relationship2-details-page-empty.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 293）](../assets/screenshots/lab09/293-lh-relationship2-origin-periodkey-selected.png)
+   ![Lab09の操作画面（キャプチャ 295）](../assets/screenshots/lab09/295-lh-relationship2-connection-filled-save-enabled.png)
+
 2. 実証時、この直接接続のままManage graphを開くとrelationshipは`Ineligible / No Datasource`でした。関係自体の作成は済んでいても、Graph用のrelationship datasourceがない状態です。
+
+   **直接接続のGraph状態を確認します。**
+   ![Lab09の失敗または制限メッセージ（キャプチャ 300）](../assets/screenshots/lab09/300-lh-manage-graph-relationship-ineligible-no-datasource.png)
+   ![Lab09のリレーションの設定画面（キャプチャ 301）](../assets/screenshots/lab09/301-lh-manage-graph-relationship-ineligible-details-missing-data-source.png)
+
 3. Relationship detailsで`Use mapping table = On`に変更し、mapping tableとして同じLakehouseの`dbo.lab09_revenue_observation`を選びます。Product relationshipはmapping tableの`ProductKey`をOrigin keyに、Revenue Observationの`ObservationKey`をTarget entity keyとしてそれぞれマッピングします。Period relationshipはmapping tableの`PeriodKey`をOrigin keyに、同じ`ObservationKey`をTarget keyとしてマッピングします。各relationshipでSaveし、成功バナーを確認します。
+
+   **Productのmapping tableを選択します。**
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 302）](../assets/screenshots/lab09/302-lh-relationship1-use-mapping-table-on-empty.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 303）](../assets/screenshots/lab09/303-lh-relationship1-mapping-table-menu-browse-available-sources.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 304）](../assets/screenshots/lab09/304-lh-relationship1-mapping-table-onelake-dialog-filtered.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 307）](../assets/screenshots/lab09/307-lh-relationship1-mapping-table-onelake-select-lab09-revenue-observation.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 308）](../assets/screenshots/lab09/308-lh-relationship1-mapping-table-selected-properties-empty.png)
+   **ProductKeyとObservationKeyを対応付けて保存します。**
+   ![Lab09のエンティティキーの設定画面（キャプチャ 310）](../assets/screenshots/lab09/310-lh-relationship1-mapping-table-origin-productkey-checked-match-with-column.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 312）](../assets/screenshots/lab09/312-lh-relationship1-mapping-table-match-with-productkey-selected.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 314）](../assets/screenshots/lab09/314-lh-relationship1-mapping-table-target-observationkey-checked-second-match-with.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 317）](../assets/screenshots/lab09/317-lh-relationship1-mapping-table-both-matches-selected-save-enabled.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 318）](../assets/screenshots/lab09/318-lh-relationship1-mapping-table-saved-success-banner.png)
+   **Period relationshipでPeriodKeyとObservationKeyを対応付けて保存します。**
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 320）](../assets/screenshots/lab09/320-lh-relationship2-use-mapping-table-on-empty.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 322）](../assets/screenshots/lab09/322-lh-relationship2-mapping-table-selected-properties-empty.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 324）](../assets/screenshots/lab09/324-lh-relationship2-mapping-table-origin-periodkey-checked-match-with-column.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 326）](../assets/screenshots/lab09/326-lh-relationship2-mapping-table-match-with-periodkey-selected.png)
+   ![Lab09のエンティティキーの設定画面（キャプチャ 328）](../assets/screenshots/lab09/328-lh-relationship2-mapping-table-target-observationkey-checked-second-match-with.png)
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 331）](../assets/screenshots/lab09/331-lh-relationship2-mapping-table-both-matches-selected-save-enabled.png)
+   ![Lab09の作成またはロード完了画面（キャプチャ 332）](../assets/screenshots/lab09/332-lh-relationship2-mapping-table-saved-success-banner.png)
+
 4. Manage graphで全entityと両relationshipがEligibleになることを待って確認します。Direct property接続でグラフのEdge datasourceを作れないケースを、Product / Period FKとObservationKeyのmappingで解消したのが実証の手順です。
 
-<details><summary>Relationshipとmapping tableの設定（33枚）</summary>
-
-![Lab09のリレーションの設定画面（キャプチャ 278）](../assets/screenshots/lab09/278-lh-add-relationship-dialog-empty.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 279）](../assets/screenshots/lab09/279-lh-add-relationship-name-origin-list.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 281）](../assets/screenshots/lab09/281-lh-add-relationship-filled-product-to-revenue-observation.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 282）](../assets/screenshots/lab09/282-lh-relationship-created-home-edge-label.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 283）](../assets/screenshots/lab09/283-lh-relationship-details-page-empty.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 285）](../assets/screenshots/lab09/285-lh-relationship-origin-productkey-selected.png)
-
-![Lab09の操作画面（キャプチャ 287）](../assets/screenshots/lab09/287-lh-relationship-connection-filled-save-enabled.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 289）](../assets/screenshots/lab09/289-lh-add-relationship-filled-period-to-revenue-observation.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 290）](../assets/screenshots/lab09/290-lh-relationship2-created-home-edge-label.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 291）](../assets/screenshots/lab09/291-lh-relationship2-details-page-empty.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 293）](../assets/screenshots/lab09/293-lh-relationship2-origin-periodkey-selected.png)
-
-![Lab09の操作画面（キャプチャ 295）](../assets/screenshots/lab09/295-lh-relationship2-connection-filled-save-enabled.png)
-
-![Lab09の失敗または制限メッセージ（キャプチャ 300）](../assets/screenshots/lab09/300-lh-manage-graph-relationship-ineligible-no-datasource.png)
-
-![Lab09のリレーションの設定画面（キャプチャ 301）](../assets/screenshots/lab09/301-lh-manage-graph-relationship-ineligible-details-missing-data-source.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 302）](../assets/screenshots/lab09/302-lh-relationship1-use-mapping-table-on-empty.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 303）](../assets/screenshots/lab09/303-lh-relationship1-mapping-table-menu-browse-available-sources.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 304）](../assets/screenshots/lab09/304-lh-relationship1-mapping-table-onelake-dialog-filtered.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 307）](../assets/screenshots/lab09/307-lh-relationship1-mapping-table-onelake-select-lab09-revenue-observation.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 308）](../assets/screenshots/lab09/308-lh-relationship1-mapping-table-selected-properties-empty.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 310）](../assets/screenshots/lab09/310-lh-relationship1-mapping-table-origin-productkey-checked-match-with-column.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 312）](../assets/screenshots/lab09/312-lh-relationship1-mapping-table-match-with-productkey-selected.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 314）](../assets/screenshots/lab09/314-lh-relationship1-mapping-table-target-observationkey-checked-second-match-with.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 317）](../assets/screenshots/lab09/317-lh-relationship1-mapping-table-both-matches-selected-save-enabled.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 318）](../assets/screenshots/lab09/318-lh-relationship1-mapping-table-saved-success-banner.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 320）](../assets/screenshots/lab09/320-lh-relationship2-use-mapping-table-on-empty.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 322）](../assets/screenshots/lab09/322-lh-relationship2-mapping-table-selected-properties-empty.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 324）](../assets/screenshots/lab09/324-lh-relationship2-mapping-table-origin-periodkey-checked-match-with-column.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 326）](../assets/screenshots/lab09/326-lh-relationship2-mapping-table-match-with-periodkey-selected.png)
-
-![Lab09のエンティティキーの設定画面（キャプチャ 328）](../assets/screenshots/lab09/328-lh-relationship2-mapping-table-target-observationkey-checked-second-match-with.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 331）](../assets/screenshots/lab09/331-lh-relationship2-mapping-table-both-matches-selected-save-enabled.png)
-
-![Lab09の作成またはロード完了画面（キャプチャ 332）](../assets/screenshots/lab09/332-lh-relationship2-mapping-table-saved-success-banner.png)
-
-![Lab09のマッピングテーブルの設定画面（キャプチャ 333）](../assets/screenshots/lab09/333-lh-manage-graph-all-eligible-after-mapping-table.png)
-
-![Lab09の操作画面（キャプチャ 334）](../assets/screenshots/lab09/334-lh-manage-graph-period-expanded-both-relationships-eligible.png)
-
-</details>
+   **両方のrelationshipがEligibleであることを確認します。**
+   ![Lab09のマッピングテーブルの設定画面（キャプチャ 333）](../assets/screenshots/lab09/333-lh-manage-graph-all-eligible-after-mapping-table.png)
+   ![Lab09の操作画面（キャプチャ 334）](../assets/screenshots/lab09/334-lh-manage-graph-period-expanded-both-relationships-eligible.png)
 
 ### 8.5 Business ruleを追加する
 
 1. Explorerの **Overview → Rules → Create rule** を選び、名前`Revenue variance interpretation`を入力します。
+
+
 2. Definitionに、差異額の式、USD、Product × 月の粒度、Snapshot / Scenario / PlanVersion、0分母のNULL、Open期間の扱い、履歴の非合算を自然文で記します。Linked ontology elementsでProduct / Period / Revenue Observationのentity type、およびModelGrossRevenue / PlanForecast / VarianceAmount / VarianceRateを関連付けます。
+
+
 3. このBusiness ruleは自然言語による利用者向けガイダンスであり、データへの式適用やクエリ実行をしません。Warehouse / Lakehouseの計算値と別に自動実行されるものではありません。
 
 > [!NOTE]
 > Rule作成画面の画像は最初のWarehouse-bound Ontologyで撮影しました。UI操作の例として掲載しています。最終の`_LH` Ontologyでは同じルールを作る手順として示しますが、画像自体は最終Ontologyにルールが保存された証拠ではありません。
 
-<details><summary>最初のOntologyで撮影したBusiness rule設定（11枚）</summary>
 
+**Business ruleの一覧から作成を始めます。**
 ![Lab09の未設定の画面（キャプチャ 144）](../assets/screenshots/lab09/144-rules-empty-page.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 145）](../assets/screenshots/lab09/145-rule-new-page-empty.png)
-
+**名前と定義を入力します。**
 ![Lab09のBusiness ruleの作成画面（キャプチャ 146）](../assets/screenshots/lab09/146-rule-name-definition-filled.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 147）](../assets/screenshots/lab09/147-rule-add-elements-dialog-entities.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 148）](../assets/screenshots/lab09/148-rule-add-elements-three-selected.png)
-
+**対象entityとpropertyを指定します。**
 ![Lab09のBusiness ruleの作成画面（キャプチャ 149）](../assets/screenshots/lab09/149-rule-add-elements-properties-tab.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 150）](../assets/screenshots/lab09/150-rule-add-elements-six-selected.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 151）](../assets/screenshots/lab09/151-rule-add-elements-seven-selected.png)
-
+**保存結果を確認します。**
 ![Lab09のBusiness ruleの作成画面（キャプチャ 152）](../assets/screenshots/lab09/152-rule-linked-elements-added.png)
-
 ![Lab09のBusiness ruleの作成画面（キャプチャ 153）](../assets/screenshots/lab09/153-rule-form-complete-before-create.png)
-
 ![Lab09の作成またはロード完了画面（キャプチャ 154）](../assets/screenshots/lab09/154-rule-created-in-rules-list.png)
-
-</details>
 
 ### 8.6 Graphへ投影する
 
 1. 3 entity typeと2 relationship typeの全てがEligibleであることを確認し、**Manage graph → Continue**を選びます。
+
+   **Projectionの対象として選択可能か確認します。**
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 335）](../assets/screenshots/lab09/335-lh-choose-what-to-project-product-checked.png)
+
 2. Choose what to project画面で3 entity typeを選びます。relationshipのチェックボックスは両端のentityを選択しただけでは自動で有効にならないため、2つのrelationshipも明示的に選びます。
+
+   **3種類のentity typeと2種類のrelationship typeを選択します。**
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 336）](../assets/screenshots/lab09/336-lh-choose-what-to-project-period-checked.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 337）](../assets/screenshots/lab09/337-lh-choose-what-to-project-all-three-entities-checked.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 339）](../assets/screenshots/lab09/339-lh-choose-what-to-project-all-entities-and-relationships-checked.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 340）](../assets/screenshots/lab09/340-lh-projection-summary-three-entities-two-relationships.png)
+
 3. Projection summaryを確認して**Materialize**します。ボタンがDoneになっても画面遷移しないことがあります。その場合はDoneを再実行せずHomeへ戻り、Graph statusを確認します。
+
+   **Projection summaryからMaterializeします。**
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 341）](../assets/screenshots/lab09/341-lh-projection-summary-materialize-creating-graph-model-toast.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 342）](../assets/screenshots/lab09/342-lh-projection-summary-done-button-disabled.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 343）](../assets/screenshots/lab09/343-lh-manage-graph-status-all-materialized-nodes3-edges2.png)
+   ![Lab09のGraphの投影 / materialize画面（キャプチャ 344）](../assets/screenshots/lab09/344-lh-home-after-materialization-explore-graph-in-ribbon.png)
+
 4. Graph statusに`nodes 3 / edges 2`と表示されたら、entity type 3種類 / relationship type 2種類がmaterializeされたことを確認します。この値を18 observation instanceやedge traversalの検証として説明しません。
 
 <!-- presentation-exclude-start: LAB09-EDGE-TRAVERSAL -->
@@ -799,27 +710,7 @@ Edge traversalは未検証です。
 <!-- presentation-exclude-end: LAB09-EDGE-TRAVERSAL -->
 5. Homeの**Explore graph**からGraph queryを開けます。実証時、最初のGraph queryはRun後に数分かかったため、すぐに失敗と判断せず状態を確認します。
 
-<details><summary>3 entity typeと2 relationship typeのGraph投影（9枚）</summary>
 
-![Lab09のGraphの投影 / materialize画面（キャプチャ 335）](../assets/screenshots/lab09/335-lh-choose-what-to-project-product-checked.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 336）](../assets/screenshots/lab09/336-lh-choose-what-to-project-period-checked.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 337）](../assets/screenshots/lab09/337-lh-choose-what-to-project-all-three-entities-checked.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 339）](../assets/screenshots/lab09/339-lh-choose-what-to-project-all-entities-and-relationships-checked.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 340）](../assets/screenshots/lab09/340-lh-projection-summary-three-entities-two-relationships.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 341）](../assets/screenshots/lab09/341-lh-projection-summary-materialize-creating-graph-model-toast.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 342）](../assets/screenshots/lab09/342-lh-projection-summary-done-button-disabled.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 343）](../assets/screenshots/lab09/343-lh-manage-graph-status-all-materialized-nodes3-edges2.png)
-
-![Lab09のGraphの投影 / materialize画面（キャプチャ 344）](../assets/screenshots/lab09/344-lh-home-after-materialization-explore-graph-in-ribbon.png)
-
-</details>
 
 ## 9. Part 5：Data Agentを作成して質問する
 
@@ -827,39 +718,37 @@ Edge traversalは未検証です。
 
 実証では、先にOntologyを追加した`_LH` Agentのentity listはProductのままで、Refresh後も更新されませんでした。以下はその古い一覧の画面です。完成済みOntologyをAgentへ追加し直す前にこの状態を確認し、完成後に新しいAgentを作成します。
 
-<details><summary>先行Agentに残った古いentity type一覧（2枚）</summary>
 
+**先行Agentに残ったProduct-onlyのentity type一覧です。**
 ![Lab09の操作画面（キャプチャ 345）](../assets/screenshots/lab09/345-lh-agent-reopened-explorer-product-only-after-stage-c.png)
-
 ![Lab09の操作画面（キャプチャ 346）](../assets/screenshots/lab09/346-lh-agent-after-refresh-three-lakehouse-tables-entity-types-product-only.png)
 
-</details>
-
 1. Ontologyを完成し、entity / relationshipのバインディングとGraph materializationを確認してから、**+ New item → Data agent**を作ります。実証名は`HPC_Lab09_Plan_Variance_Analyst_LH2`です。
+
+   ![Lab09の作成またはロード完了画面（キャプチャ 349）](../assets/screenshots/lab09/349-lh2-data-agent-created-empty-build-your-agent.png)
+
 2. **Add an ontology**で`HPC_Lab09_VarianceOntology_LH`を選び、Data sourceとしてOntologyを追加します。別のWarehouseやセマンティックモデルを直接Sourceに足してOntologyを迂回しません。
+
+   ![Lab09の操作画面（キャプチャ 350）](../assets/screenshots/lab09/350-lh2-add-ontology-dialog-filtered.png)
+   ![Lab09の操作画面（キャプチャ 352）](../assets/screenshots/lab09/352-lh2-adding-ontology-toast.png)
+
 3. ExplorerにProduct、Period、Revenue Observationの3 entity typeが表示されることを確認します。Ontologyを完成する前に追加された`_LH` AgentはProductだけのentity listのまま残りました。Refresh後もentity listが更新されない状態を観測したため、完成後に新しいAgent `_LH2`を作りました。`_LH` / `_LH2`はこの手順の作成順を示す名前で、別の製品版ではありません。
 
-<details><summary>完成済みOntologyを追加したData Agent（5枚）</summary>
 
-![Lab09の作成またはロード完了画面（キャプチャ 349）](../assets/screenshots/lab09/349-lh2-data-agent-created-empty-build-your-agent.png)
-
-![Lab09の操作画面（キャプチャ 350）](../assets/screenshots/lab09/350-lh2-add-ontology-dialog-filtered.png)
-
-![Lab09の操作画面（キャプチャ 352）](../assets/screenshots/lab09/352-lh2-adding-ontology-toast.png)
-
-![Lab09の操作画面（キャプチャ 353）](../assets/screenshots/lab09/353-lh2-ontology-added-three-entity-types.png)
-
-![Lab09の操作画面（キャプチャ 354）](../assets/screenshots/lab09/354-lh2-ontology-data-sources-expanded-lakehouse-tables.png)
-
-</details>
+   ![Lab09の操作画面（キャプチャ 353）](../assets/screenshots/lab09/353-lh2-ontology-added-three-entity-types.png)
+   ![Lab09の操作画面（キャプチャ 354）](../assets/screenshots/lab09/354-lh2-ontology-data-sources-expanded-lakehouse-tables.png)
 
 ### 9.2 Instructionsを設定する
 
 実証時に`_LH2`へ入力したInstructionsは17行 / 856文字です。下記と一字一句同じ内容にします。編集後はテキスト外をクリックしてプレビューに戻します。
 
+
+
 <!-- presentation-exclude-start: LAB09-INSTRUCTIONS-PERSISTENCE -->
 今回の`_LH2`では再読込後の永続確認は未実施です。
 <!-- presentation-exclude-end: LAB09-INSTRUCTIONS-PERSISTENCE -->
+
+
 
 ```text
 このAgentはHPC_Lab09_VarianceOntology_LHだけを使う読み取り専用の分析Agentです。
@@ -881,17 +770,15 @@ Closed period, Open periodを明示し, 結果に使ったSnapshotIdと条件を
 Support group by in GQL
 ```
 
-`Support group by in GQL`は実証時のInstructionsに含まれていた文字列です。OntologyのBusiness ruleは実行されるルールではなく、Data Agentに追加した指示も正しい結果を保証するものではありません。Agentが参照したSource、条件、返却値をWarehouseで検算します。
-
-<details><summary>Data Agent Instructionsの編集（3枚）</summary>
-
+**Instructionsの入力例です。**
 ![Lab09の実行するSQL入力画面（キャプチャ 357）](../assets/screenshots/lab09/357-lh2-agent-instructions-typed-17-lines.png)
-
 ![Lab09のAgent Instructionsの入力 / 確定画面（キャプチャ 358）](../assets/screenshots/lab09/358-lh2-agent-instructions-committed-preview.png)
-
+**Instructionsの保存結果です。**
 ![Lab09のAgent Instructionsの入力 / 確定画面（キャプチャ 359）](../assets/screenshots/lab09/359-lh2-test-pane-reopened-instructions-committed-three-pane.png)
 
-</details>
+
+`Support group by in GQL`は実証時のInstructionsに含まれていた文字列です。OntologyのBusiness ruleはルールを実行しません。Data Agentに追加した指示も正しい結果を保証しません。Agentが参照したSource、条件、返却値をWarehouseで検算します。
+
 
 ### 9.3 質問して結果を検算する
 
@@ -905,6 +792,16 @@ ModelGrossRevenue合計, PlanForecast合計, VarianceAmount合計を比較して
 PeriodStatusと、この値が実績かサンプルの比較値かも示してください。
 ```
 
+**Q1を同じData Agentへ入力します。**
+![Lab09のData Agentの質問 / 回答画面（キャプチャ 361）](../assets/screenshots/lab09/361-lh2-chat-question1-sent-analyzing-lakehouse.png)
+**Q1の回答と合計を確認します。**
+![Lab09の検算結果の画面（キャプチャ 362）](../assets/screenshots/lab09/362-lh2-chat-question1-answer-2026-03-totals-bottom.png)
+![Lab09のData Agentの質問 / 回答画面（キャプチャ 367）](../assets/screenshots/lab09/367-lh2-chat-question1-execution-and-output-table-open-sample-reference.png)
+**Sourceと生成されたSQLを確認します。**
+![Lab09のData Agentの質問 / 回答画面（キャプチャ 368）](../assets/screenshots/lab09/368-lh2-chat-question1-show-input-generated-sql-top.png)
+![Lab09のData Agentの質問 / 回答画面（キャプチャ 369）](../assets/screenshots/lab09/369-lh2-chat-question1-show-input-generated-sql-bottom-group-by.png)
+
+
 <!-- presentation-exclude-start: LAB09-Q3-STANDALONE-PROMPT -->
 単独で再試行するときは下記のようにQ3にも条件をすべて明記してください。この完全なQ3文面自体は個別の新規実行で検証していません。
 
@@ -913,7 +810,14 @@ Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, PeriodKe
 Product SNK-NUTSのModelGrossRevenue, PlanForecast, VarianceAmount, VarianceRateを示し、
 PlanForecast - ModelGrossRevenueを検算してください。
 ```
+
+
 <!-- presentation-exclude-end: LAB09-Q3-STANDALONE-PROMPT -->
+
+**Q1の条件を引き継いだ同一チャットで確認したQ3の入力例です。**
+![Lab09の実行するSQL入力画面（キャプチャ 370）](../assets/screenshots/lab09/370-lh2-chat-question3-typed-snk-nuts-row-check.png)
+![Lab09の検算結果の画面（キャプチャ 372）](../assets/screenshots/lab09/372-lh2-chat-question3-answer-snk-nuts-variancerate-null-bottom.png)
+
 
 Q4 / Q4aは複数期間に対してStatus別集計や行数を含めた質問で失敗しました。次のような条件を含む質問では成功を期待せず、失敗時は`SQLCandidatesFailedFilterError`として記録します。
 
@@ -926,6 +830,15 @@ Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, Currency
 PeriodKey 2026-01, 2026-02, 2026-03をPlanPeriodStatus別に比較し、行数と合計比率を示してください。
 ```
 
+**Q4の質問を入力します。**
+![Lab09の実行するSQL入力画面（キャプチャ 374）](../assets/screenshots/lab09/374-lh2-chat-question4-typed-three-periods-closed-open-total-ratio.png)
+
+**Q4 / Q4aの失敗結果を確認します。**
+![Lab09の失敗または制限メッセージ（キャプチャ 377）](../assets/screenshots/lab09/377-lh2-chat-question4-answer-top-sqlcandidatesfailedfiltererror.png)
+![Lab09の失敗または制限メッセージ（キャプチャ 380）](../assets/screenshots/lab09/380-lh2-chat-question4-step1-output-unable-to-generate-code-sqlcandidatesfailedfiltererror.png)
+![Lab09の失敗状態の画面（キャプチャ 381）](../assets/screenshots/lab09/381-lh2-chat-question4-step2-retry-in-clause-nl-query-output-same-error.png)
+
+
 ```text
 Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, Currency USDで、
 PeriodKey 2026-01, 2026-02, 2026-03について、PeriodKeyとPlanPeriodStatusごとに
@@ -934,11 +847,17 @@ PeriodKey 2026-01, 2026-02, 2026-03について、PeriodKeyとPlanPeriodStatus�
 
 Q4cはPeriodKey別の3つの合計だけを尋ねて成功しました。
 
+
+
 ```text
 Snapshot LAB09-SAMPLE-001, Scenario Base, PlanVersion FY26-Workshop-v1, Currency USDで、
 2026-01, 2026-02, 2026-03について、PeriodKeyごとのModelGrossRevenue合計,
 PlanForecast合計, VarianceAmount合計を示してください。
 ```
+
+**Q4cの回答結果です。**
+![Lab09の検算結果の画面（キャプチャ 388）](../assets/screenshots/lab09/388-lh2-chat-question4c-answer-bottom-1-step-completed-response-time-19-sec.png)
+
 
 | 質問 | 期待値 / 実機結果 | 状態 |
 |---|---|---|
@@ -968,33 +887,6 @@ Q4 / Q4aの失敗を成功例として記載しません。3期間をまとめ�
 
 Agentの回答を公開 / 共有する前に、Warehouseで同じSnapshot / Scenario / PlanVersion / PeriodKey / ProductKeyの読み取り専用SQLを実行し、元行、合計、VarianceAmount、0分母のNULLを独立に照合します。AgentにWarehouseの直接アクセスがあるとは扱わず、回答とSource表示だけを正解の根拠にしません。Data Agentの質問結果は読み取り専用の回答で、Planの更新 / 承認 / 書き戻しではありません。
 
-<details><summary>Data Agentの質問と合成データの結果（12枚）</summary>
-
-![Lab09のData Agentの質問 / 回答画面（キャプチャ 361）](../assets/screenshots/lab09/361-lh2-chat-question1-sent-analyzing-lakehouse.png)
-
-![Lab09の検算結果の画面（キャプチャ 362）](../assets/screenshots/lab09/362-lh2-chat-question1-answer-2026-03-totals-bottom.png)
-
-![Lab09のData Agentの質問 / 回答画面（キャプチャ 367）](../assets/screenshots/lab09/367-lh2-chat-question1-execution-and-output-table-open-sample-reference.png)
-
-![Lab09のData Agentの質問 / 回答画面（キャプチャ 368）](../assets/screenshots/lab09/368-lh2-chat-question1-show-input-generated-sql-top.png)
-
-![Lab09のData Agentの質問 / 回答画面（キャプチャ 369）](../assets/screenshots/lab09/369-lh2-chat-question1-show-input-generated-sql-bottom-group-by.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 370）](../assets/screenshots/lab09/370-lh2-chat-question3-typed-snk-nuts-row-check.png)
-
-![Lab09の検算結果の画面（キャプチャ 372）](../assets/screenshots/lab09/372-lh2-chat-question3-answer-snk-nuts-variancerate-null-bottom.png)
-
-![Lab09の実行するSQL入力画面（キャプチャ 374）](../assets/screenshots/lab09/374-lh2-chat-question4-typed-three-periods-closed-open-total-ratio.png)
-
-![Lab09の失敗または制限メッセージ（キャプチャ 377）](../assets/screenshots/lab09/377-lh2-chat-question4-answer-top-sqlcandidatesfailedfiltererror.png)
-
-![Lab09の失敗または制限メッセージ（キャプチャ 380）](../assets/screenshots/lab09/380-lh2-chat-question4-step1-output-unable-to-generate-code-sqlcandidatesfailedfiltererror.png)
-
-![Lab09の失敗状態の画面（キャプチャ 381）](../assets/screenshots/lab09/381-lh2-chat-question4-step2-retry-in-clause-nl-query-output-same-error.png)
-
-![Lab09の検算結果の画面（キャプチャ 388）](../assets/screenshots/lab09/388-lh2-chat-question4c-answer-bottom-1-step-completed-response-time-19-sec.png)
-
-</details>
 
 ## 10. よくある問題と対応
 

@@ -39,6 +39,11 @@
     "title": "財務会計用語"
   },
   {
+    "id": "overview-s007",
+    "lab": "overview",
+    "title": "GitHub Copilotによる配備例"
+  },
+  {
     "id": "overview-s004",
     "lab": "overview",
     "title": "開催と利用上の注意"
@@ -86,7 +91,7 @@
   {
     "id": "lab00-s007",
     "lab": "lab00",
-    "title": "月単位ではなくセッション単位"
+    "title": "セッション期間と課金"
   },
   {
     "id": "lab00-s008",

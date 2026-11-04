@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="210" viewBox="0 0 1200 210">
+  <title>Microsoft Fabric Plan Workshop</title>
+  <desc>Microsoft Fabric Plan Workshop title with the official Fabric icon on a green gradient background.</desc>
   <defs>
     <linearGradient id="fabric-band" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0" stop-color="#063D3B"/>
@@ -16,6 +18,7 @@
   <path d="M790 210 1010 0h190v210z" fill="#6AD6F9" opacity=".1"/>
   <path d="M0 164c192-50 330-42 508 4s388 29 692-81" fill="none" stroke="#ABE88E" stroke-opacity=".23" stroke-width="2"/>
   <path d="M0 184c210-49 355-34 520 8s413 16 680-78" fill="none" stroke="#25FFD4" stroke-opacity=".18" stroke-width="1"/>
+  <text x="178" y="126" fill="#FFFFFF" font-family="'Yu Gothic UI', 'Segoe UI', sans-serif" font-size="54" font-weight="600">Microsoft Fabric Plan Workshop</text>
   <svg x="48" y="58" width="94" height="94" viewBox="0 0 48 48" fill="currentColor">
     <path fill="url(#i7fa1c1-a)" fill-rule="evenodd" d="m5.64 31.6-.586 2.144c-.218.685-.524 1.693-.689 2.59a5.63 5.63 0 0 0 4.638 7.588c.792.114 1.688.108 2.692-.04l4.613-.636a2.92 2.92 0 0 0 2.421-2.127l3.175-11.662L5.64 31.599Z" clip-rule="evenodd"/>
     <path fill="url(#i7fa1c1-b)" d="M10.14 32.152c-4.863.753-5.861 4.423-5.861 4.423l4.656-17.11 24.333-3.292-3.318 12.052a1.71 1.71 0 0 1-1.388 1.244l-.136.022-18.423 2.684z"/>

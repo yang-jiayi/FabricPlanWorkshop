@@ -13,7 +13,7 @@
 
 ## 修正版：数量加重単価を使うメジャーモデル
 
-1. **Home** → **New Planning Sheet** で `Weighted Finance Model` を作成します。Dataでは **P&L Measures** を使用し、Rowsに *Region Hierarchy*（Region / Cities）、その下の最下位に同じテーブルの **Invoice ID** を配置します。Invoice IDはValuesではなくRowsへ追加するフィールドです。Columnsには *Date Hierarchy*（Year / Quarter / Month）を配置します。Valuesには *Sales Volume*, *Avg Selling Price*, *Discounts and Returns*, *Raw Material Cost*, *Labor Cost*, *Other Direct Exp*, *Admin Expenses*, *Employee Expenses*, *R&D*, *Selling and Marketing Expenses* を追加します。年を **2025**、シナリオを **Base** にし、前モジュールの **Fact Transactions** と混ぜないでください。Invoice IDとMonthまで展開し,各請求書の数量と単価が別々の末端セルとして表示されることを確認します。同じ範囲の元売上を照合するため、別の参照用表示にも同じ行,列,フィルターを設定し、**P&L Measures → Gross revenue** の請求書別値と2025年合計を記録します。この既存系列は新しい `Gross Revenue` 数式の参照先ではないため、今回の入力モデルには追加しません。
+1. **Home** → **New Planning Sheet** で `Weighted Finance Model` を作成します。Dataでは **P&L Measures** を使用し、Rowsに *Region Hierarchy*（Region / Cities）、その下の最下位に同じテーブルの **Invoice ID** を配置します。Invoice IDはRowsへ追加します。Valuesには配置しません。Columnsには *Date Hierarchy*（Year / Quarter / Month）を配置します。Valuesには *Sales Volume*, *Avg Selling Price*, *Discounts and Returns*, *Raw Material Cost*, *Labor Cost*, *Other Direct Exp*, *Admin Expenses*, *Employee Expenses*, *R&D*, *Selling and Marketing Expenses* を追加します。年を **2025**、シナリオを **Base** にし、前モジュールの **Fact Transactions** と混ぜないでください。Invoice IDとMonthまで展開し,各請求書の数量と単価が別々の末端セルとして表示されることを確認します。同じ範囲の元売上を照合するため、別の参照用表示にも同じ行,列,フィルターを設定し、**P&L Measures → Gross revenue** の請求書別値と2025年合計を記録します。この既存系列は新しい `Gross Revenue` 数式の参照先ではないため、今回の入力モデルには追加しません。
 2. 元の *Sales Volume* と *Avg Selling Price* を残したまま、Invoice IDを最下位行に置いた状態で **Planning** → **Number** → **Copy from another series** から、それぞれ編集可能なNumber入力系列を作成します。コピー元は同じP&L Measuresの系列とし、数量コピーは `Scenario Sales Volume`、単価コピーは `Weighted Avg Selling Price` と命名して元系列と区別します。各Invoice ID / Monthのコピー値を元系列と照合し,請求書別の数量と単価が保持されていることを確認します。都市 / 年の集計済み単価だけをコピーしてからInvoice IDを追加しても,請求書別単価を復元できたとは扱いません。コピー機能が非表示の請求書粒度まで自動保持するとは仮定せず,末端値を照合できない場合はこのモデルを完成扱いにしません。元データや別の系列を直接上書きしないでください。
 3. **Model** → **Measure Model** で、数量コピーを **Number / Row aggregation：Sum / Column aggregation：Sum** にします。単価コピーも **Number** にし、行,列の集計を **Weighted Average**、**Apply Weights from：Scenario Sales Volume** に設定します。重みとして選ぶのは、同じシナリオの編集可能な数量コピーです。この集計は各単価に対応する数量を重みとして使い、合計レベルでは数量加重平均を求めます。元の単価列で **Average** を選ぶ操作とは異なります。設定欄と重みの系列名を確認してから適用します。
 
@@ -72,7 +72,7 @@
 1. `Finance Zero Control` を作成し、対象系列に数値を入力せずに **Year 2025 / Base** と同じ範囲の数量,単価,売上,利益を比較します。シナリオを作成しただけで表示が変わった場合は、差を記録し、正常な不変条件として扱わず原因を調べます。
 2. **Base** から `Finance Best Case` を作成し、含める系列に数量,単価,控除,費用の各入力を選びます。Yearを2025にしてAsia Pacific → Sydneyを開き、**Percentage** で `Scenario Sales Volume：+5%`、`Weighted Avg Selling Price：+2%`、`Discounts and Returns：−5%` を設定します。入力前後の同じ範囲,精度の値を記録し、保存,通常の再読み込み後に入力と結果を確認します。
 3. **Base** から `Finance Cost Restructuring` を作成します。Year 2025 / Europe → Londonで **Value** を選び、`Raw Material Cost：400000`、`Labor Cost：150000`、`Employee Expenses：120000`、`Selling and Marketing Expenses：160000` を設定します。これらは表示倍率を伴わない年次の絶対額の例です。元値と比較し、費用が増えた場合を「コスト削減」と呼ばないでください。保存,再読み込み後も対象と値を確認します。
-4. 最後に **Base** を選び、数量,単価,売上,利益が修正版モデル作成時の値に戻っているか確認します。Baseの値が変わっている場合は、シナリオの値だけでなく基準表示との違いも記録し、変化がないものとして説明しないでください。元データや入力値を丸めた表示値で復元しないでください。
+4. 最後に **Base** を選び、数量,単価,売上,利益が修正版モデル作成時の値に戻っているか確認します。Baseの値が変わっている場合は、シナリオの値と基準表示の違いを記録し、変化がないものとして説明しないでください。元データや入力値を丸めた表示値で復元しないでください。
 
 ここまでが、数量加重単価を用いる本編です。次の診断演習は、原文に沿う単純平均の経路がなぜ過大な売上を生むかを理解するためのもので、正しい財務結果を作る手順ではありません。
 
@@ -103,7 +103,7 @@
    | **Columns** | *Date Hierarchy*：Year、Quarter、Month | **P&L Measures** |
    | **Values** | 以下に示す10個のドライバー メジャー | **P&L Measures** |
 
-   **Data → P&L Measures** を展開します。**Region Hierarchy** 全体を **Rowsのフィールド配置枠**へドラッグし、**Region / Cities** の両方が入ったことを確認します。同様に **Date Hierarchy** 全体を **Columnsのフィールド配置枠**へドラッグし、**Year / Quarter / Month** が入ったことを確認します。**Add Rows / Add Columnsの文字やボタンではなく、フィールドを置く枠**を使います。
+   **Data → P&L Measures** を展開します。**Region Hierarchy** 全体を **Rowsのフィールド配置枠**へドラッグし、**Region / Cities** の両方が入ったことを確認します。同様に **Date Hierarchy** 全体を **Columnsのフィールド配置枠**へドラッグし、**Year / Quarter / Month** が入ったことを確認します。フィールドは **Add Rows / Add Columnsの文字やボタンを押さず、フィールド配置枠**へドラッグします。
 
    続いて下記の10ドライバーを同じ **P&L Measures** からチェックします。FieldsでRowsにRegion / Cities、ColumnsにYear / Quarter / Month、Valuesに10系列が入ったことを確認します。期間や都市で値が変わるか、単価が同じ対象範囲の売上と数量に整合するかを確かめます。
 
@@ -117,14 +117,14 @@
 > Rows には**両方**のレベルを追加してください。Cities だけを選ぶと、地域でグループ化されず、All の下に10都市が並ぶフラットな一覧になります。パート2では *Asia Pacific* を展開して *Sydney* のカードを操作するため、Cities の上位に Region が必要です。
 
 > [!IMPORTANT]
-> **Geography テーブルや Date テーブルではなく、P&L Measures 内の階層を使用してください。**
+> **P&L Measures 内の階層を使用してください。** Geography テーブルや Date テーブルはここでは使いません。
 >
 > P&L Measures には独自の *Region Hierarchy* と *Date Hierarchy* があります。チュートリアル原文は、前のモジュールで使った Geography、Date テーブルではこのテーブルのドライバーが正しく絞り込まれない例を示しています。テーブル間のリレーションシップやフィルター伝播は環境ごとに確認し、ここでは仮定しません。
 >
 > チュートリアル原文では、RowsにGeography、ColumnsにDateを指定すると、都市ごと,年ごとに同じ総計が繰り返される例が示されています。すべて同じ値になる場合は、使用する階層、モデルの関連付け、フィルターの作用を開催環境で確認してください。
 
 > [!NOTE]
-> **Measures Table ではなく、P&L Measures を展開してください。** この2つは別のテーブルです。*Measures Table* にはモジュール01〜04で使用した4つの主要メジャーがあり、*P&L Measures* にはこのモジュールで使用するドライバーと階層があります。
+> **P&L Measures を展開してください。** *Measures Table* は別のテーブルで、モジュール01〜04で使用した4つの主要メジャーがあります。*P&L Measures* にはこのモジュールで使用するドライバーと階層があります。
 >
 > Microsoft のチュートリアルには「P&L Measures テーブルのすべてのメジャー」を選択するよう記載されていますが、このテーブルにはメジャー以外も含まれます。次の10個にチェックを入れます。
 >
@@ -136,7 +136,7 @@
 >
 > | テーブルに含まれるその他の項目 | 選択しない理由 |
 > |---|---|
-> | *Invoice ID* | Σ アイコンがないため、集計メジャーではなくフィールドです。 |
+> | *Invoice ID* | Σ アイコンがないフィールドです。集計メジャーではありません。 |
 > | *COGS*、*Gross revenue*、*net revenue* | これから作成する6つの数式メジャーのうち3つと名前が重複する、既存のメジャーです。COGS が2つあると、数式の参照先が曖昧になります。 |
 >
 > *Date Hierarchy* と *Region Hierarchy* はメジャーではありませんが、上の表のとおり Rows と Columns に配置するために使用します。
@@ -186,7 +186,7 @@ Gross Profit - Operating Expenses         = Net Profit
 
 それぞれ、売上総額、純売上高、売上原価、売上総利益、営業費用、純利益に対応します。
 
-テーブルには既存の *Gross revenue*、*net revenue*、*COGS* メジャーがあるため、先ほどはそれらを選択しませんでした。ここでは、各項目の成り立ちをモデルに持たせるため、ドライバーから3つの項目を再構成します。既存メジャーで値を表示するだけでなく、数式メジャーによって、その値の計算根拠も表現します。
+テーブルには既存の *Gross revenue*、*net revenue*、*COGS* メジャーがあります。このシートには追加しません。ここではドライバーから3つの項目を再構成し、数式メジャーで値と計算根拠を表現します。
 
 ドライバーベースのモデルの利点は、この後の操作にあります。Sales Volume を5%変更すると、他を直接編集しなくても、関連する数式を通して純利益まで連動して変わります。これがパート2のシナリオ分析を可能にします。
 
@@ -198,7 +198,7 @@ Gross Profit - Operating Expenses         = Net Profit
 
    ![ValuesのAdmin Expensesを入力欄で編集している途中の画面](../assets/screenshots/lab05/04-rename-driver-input.png)
 
-   10個すべてを変更した後、シート上部の系列一覧とValuesのラベルから **Sum ofが外れたこと**を確認します。元のP&L Measuresの列名ではなく、このシートの表示名を変更します。
+   10個すべてを変更した後、シート上部の系列一覧とValuesのラベルから **Sum ofが外れたこと**を確認します。このシートの表示名を変更し、元のP&L Measuresの列名は維持します。
 
    ![10個のドライバーからSum ofを除いた表示名を確認した画面](../assets/screenshots/lab05/05-ten-drivers-renamed.png)
 
@@ -224,7 +224,7 @@ Gross Profit - Operating Expenses         = Net Profit
 
 **モデルを作成する前に、シートを確認しましょう。** 次の2点を確認します。
 
-- **都市や年によって値が異なること。** すべて同じ値なら、Rows または Columns に P&L Measures 内の階層ではなく、Geography または Date テーブルを指定している可能性があります。
+- **都市や年によって値が異なること。** すべて同じ値なら、Rows または Columns に Geography または Date テーブルを指定し、P&L Measures 内の階層を使っていない可能性があります。
 - **単価を、同じ期間,同じ対象の売上合計÷販売数量合計と照合すること。** チュートリアル原文の観察例では10都市の値が136〜225、All行が **194.84**、都市の値の和が1,849とされています。付属PBIXの2024年の数量加重平均単価は **16.399540082…** であり、194.84は月ごとの単純平均単価の和194.842928…で再現できます。都市の値の和になっていないことだけを判定基準にしないでください。
 
 チュートリアル原文では、合計可能な金額の例として、Admin Expenses の総計 **178.95** と都市別の値の和178.96を挙げています。比較時は年,対象範囲,表示倍率をそろえてください。
@@ -315,7 +315,7 @@ Gross Profit - Operating Expenses         = Net Profit
    ![Gross Revenueの下にSales VolumeとAvg Selling Priceが同じ深さの子として配置された画面](../assets/screenshots/lab05/18-gross-revenue-two-children.png)
 
 
-   結果は、3階層ではなく次の2階層になります。
+   結果は次の2階層になります。
 
    ```
    Gross Revenue          Formula    [Sales Volume]*[Avg Selling Price]
@@ -324,7 +324,7 @@ Gross Profit - Operating Expenses         = Net Profit
    ```
 
 > [!IMPORTANT]
-> **Sales Volume と Avg Selling Price は、どちらも Gross Revenue を親とする同じ階層の要素です。** 一方をもう一方にドラッグすると、2つ目が孫要素になります。その場合、インデントがさらに深くなり、Sales Volume に展開用の矢印が表示されます。単価は数量の構成要素ではなく、同じ掛け算に使う2つの入力値です。
+> **Sales Volume と Avg Selling Price は、どちらも Gross Revenue を親とする同じ階層の要素です。** 一方をもう一方にドラッグすると、2つ目が孫要素になります。その場合、インデントがさらに深くなり、Sales Volume に展開用の矢印が表示されます。単価は数量の構成要素に当たらず、数量と並ぶ掛け算の入力値です。
 >
 > ツールバーの **Add child** と **Add sibling** を使えば、ドラッグせずに構造を作れ、意図しない入れ子を防げます。先に、追加先となる行を選択してください。
 
@@ -847,7 +847,7 @@ Baseへ戻し、`Cost Restructuring` を作成して10個の元ドライバー�
 | Employee Expenses | 41010.53000 | 120000.00000 |
 | Selling and Marketing Expenses | 55638.46000 | 160000.00000 |
 
-付属サンプルでは、入力値は元の値への加算ではなく、指定した絶対額への置き換えとして表示されます。ここで指定した4額はすべてBaseより大きく、費用の合計は `541354.69000` 増えます。これはコスト削減の例ではなく費用増の例です。Raw Material Costの正の百分率は、値の増加を表します。
+付属サンプルでは、入力値は元の値に加算されず、指定した絶対額として扱われます。ここで指定した4額はすべてBaseより大きく、費用の合計は `541354.69000` 増えます。費用が増える例です。Raw Material Costの正の百分率は、値の増加を表します。
 
 | 指標 | London,4入力後 | All,4入力後 |
 |---|---:|---:|
@@ -872,7 +872,7 @@ Baseへ戻し、`Cost Restructuring` を作成して10個の元ドライバー�
 
 ![85：Londonカード内を下へスクロールし、Marketing160000を含む16指標を確認](../assets/screenshots/lab05/85-cost-case-london-cost-values.png)
 
-付属サンプルでは、LondonのCOGSは `358003.68000` 増、Operating Expensesは `183351.01000` 増、Net Profitは `541354.69000` 減ります。EuropeとAllのNet Profitにも同じ増減が反映されます。入力した費用がBaseより大きい場合、これはコスト削減の例ではなく費用増の例です。UI値の算術と業務金額の正しさは別に確認してください。
+付属サンプルでは、LondonのCOGSは `358003.68000` 増、Operating Expensesは `183351.01000` 増、Net Profitは `541354.69000` 減ります。EuropeとAllのNet Profitにも同じ増減が反映されます。入力した費用がBaseより大きいため、コストが増える例です。UI値の算術と業務金額の正しさは別に確認してください。
 
 ### 2つのシナリオを比較する
 
@@ -1008,7 +1008,7 @@ Net Profit                       Formula = Gross Profit - Operating Expenses
 
 ### 元データと再計算値を比較する
 
-次の表は付属サンプルの **P&L Rows / Actual / 2024年の全12か月**を対象にした参考計算です。Fabric UIの表示値ではなく、通貨,表示倍率を確定していない生値の計算です。
+次の表は付属サンプルの **P&L Rows / Actual / 2024年の全12か月**を対象にした参考計算です。通貨,表示倍率が未確定の生値を使った計算であり、Fabric UIの表示値は使っていません。
 
 | 比較項目 | オフラインの生値 | 照合上の意味 |
 |---|---:|---|
@@ -1049,7 +1049,7 @@ Net Profit                       Formula = Gross Profit - Operating Expenses
 <details>
 <summary>解答</summary>
 
-1. 元データの損益項目が、ドライバー メジャーではなく勘定科目の行として存在する場合です。メジャー モデルはドライバーベースの計画、行モデルは勘定科目ベースの帳票に適しています。
+1. 元データの損益項目が勘定科目の行として存在する場合です。メジャー モデルはドライバーベースの計画、行モデルは勘定科目ベースの帳票に適しています。
 2. 単価を都市や期間で単純に合計すると、売上計算に不適切な値になるためです。ただし、Averageへの変更だけでも十分ではありません。数量加重平均と単純平均は異なり、月平均の和は年次単価ではありません。対象をそろえ、明細売上合計÷数量合計を使って検算する必要があります。
 3. シナリオでは、基準計画を維持したまま別案の仮定を試します。適用前後でBaseとシナリオの同じ範囲を比較し、Baseの値が意図せず変化していないことを確認します。
 4. ActualとForecastの両方です。実績はVersionをActualに限定し、見通しはForecastとして分離して比較します。混合値を実績にしません。

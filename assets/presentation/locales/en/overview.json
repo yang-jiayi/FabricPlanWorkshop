@@ -1,5 +1,5 @@
 {
-  "source_sha256": "5a5f38cd9d377e6718b11391a20f6cf0bc5dd04134398a2c0269982883c8e8e4",
+  "source_sha256": "fd2d003b6a46c949725293bad0602ee430216a4d2f4f3fad576f4b2d1cf4fb26",
   "title": "Microsoft Fabric Plan Workshop",
   "sections": {
     "overview-s000": {
@@ -26,6 +26,11 @@
       "title": "Financial Terminology",
       "parent": "",
       "markdown": "The participant and instructor HTML editions explain financial terms at their first use in the articles and include a glossary with sources. Open the [glossary in the participant HTML](docs/workshop-presentation.html#glossary-s000). See the [HTML usage guide](docs/PRESENTATION-GUIDE-JA.md) for annotation behavior and controls. These definitions explain terminology; they do not establish that the sample calculations comply with accounting standards."
+    },
+    "overview-s007": {
+      "title": "GitHub Copilot Deployment Example",
+      "parent": "",
+      "markdown": "| Phase | Surface / model | Example AI working time | Example human time | Example AI Credits equivalent |\n|---|---|---:|---:|---:|\n| Repository review and dry-run | Read-only repository review with Copilot cloud agent / GPT-6.1 Sol (Powerful) | 15–30 min | 15–30 min | $0.67–$1.34 / 67–134 |\n| Approved individual tasks | Run Copilot CLI or VS Code Agent mode locally / GPT-6.1 Terra (Versatile) | 20–40 min | 30–90 min | $0.67–$1.34 / 67–134 |\n| Permissions / billing / safety review | Run locally / GPT-6.1 Sol (Powerful) | 5–10 min | 5–10 min | $0.13–$0.27 / 13–27 |\n| Acceptance checks | Compare results locally / GPT-6.1 Sol (Powerful) | 15–25 min | 15–30 min | $0.67–$1.34 / 67–134 |\n\nThis is a **planning example** for one person using a dedicated, empty Workspace. Time and token amounts are assumptions, not measured results; asynchronous Fabric processing waits are separate. The combined estimate is **55–105 minutes of AI work / 65–160 minutes of human work / $2.14–$4.29 (equivalent to 214–429 AI Credits)**. For local tenant work, the user signs in to Microsoft Entra and reviews each change before approving it. Use a cloud agent only for a read-only repository dry-run; do not provide tenant credentials or tokens.\n\nModel categories and prices were checked against official GitHub documentation on 2026-11-04. The sample assumes each request stays in the Default tier (input of 272K tokens or less) and excludes Auto / Fusion discounts. Model availability and monthly allowances depend on plan / surface / organization policy. To limit additional usage, [set the Bundled AI credits budget to $0 and stop usage at the limit](https://docs.github.com/en/billing/how-tos/set-up-budgets#managing-budgets-for-your-personal-account). An exception retains legacy request-based billing for some existing annual Pro / Pro+ plans after June 1, 2026. See the [deployment guide](docs/DEPLOYMENT-GUIDE-JA.md) for token assumptions and model selection. AI Credits are separate from Fabric capacity / SQL / OneLake charges. Cloud agent / GitHub Actions compute charges are not included."
     },
     "overview-s004": {
       "title": "Facilitation and Usage Notes",

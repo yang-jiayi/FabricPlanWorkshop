@@ -1,14 +1,8 @@
-<div align="center">
-
-<img src="assets/workshop-banner.svg" width="100%" alt="">
-
-# Microsoft Fabric Plan Workshop
+# ![Microsoft Fabric Plan Workshop](assets/workshop-banner.svg "Microsoft Fabric Plan Workshop")
 
 | 言語 | Workshop 参加者 | ラボ | 集合開催の基本案 | ライセンス |
 |---|---:|---:|---:|---|
 | 日本語 / English | 10〜20 名 | 10 | 180 分 | MIT |
-
-</div>
 
 > [!NOTE]
 > 日本語の操作ガイドと画面例を含む独立したコミュニティ教材です。Microsoftの公式教材 / 承認 / 提携 / 認定を示すものではありません。
@@ -19,7 +13,7 @@
 |---|---|---|
 | Workshop 参加者 | `docs/workshop-presentation.html` / 日本語・English, 全画像内包, オフライン閲覧 | [最新版をダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-presentation.html) |
 | Workshop 参加者 | `docs/workshop-overview-ja.pptx` / 日本語の概要スライド23枚 | [PowerPointをダウンロード](https://github.com/yang-jiayi/FabricPlanWorkshop/raw/refs/heads/main/docs/workshop-overview-ja.pptx) / [表示・更新ガイド](docs/POWERPOINT-GUIDE-JA.md) |
-| 作成者 / 配布者 | 作者: **Jiayi Yang, Swarm Data SE** / [LinkedIn](https://www.linkedin.com/in/yangjiayi/) | |
+| 作成者 / 配布者 | 作者: [**Jiayi Yang, Swarm Data SE**](https://www.linkedin.com/in/yangjiayi/) | |
 | 確定版の参照 | [V1.0 / v1.0.0](https://github.com/yang-jiayi/FabricPlanWorkshop/releases/tag/v1.0.0) | 2026年11月公開の固定リリース。以後の更新は含みません |
 
 <!-- presentation-instructor-start -->
@@ -49,7 +43,7 @@ Excel中心の予算管理を見直すFP&A / 財務 / 経営企画の担当者�
 <td>
 <img src="assets/brand/sql_database_48_item.svg" width="32" height="32" alt="Fabric SQL データベースの公式アイコン">
 <h3>03 / 保存結果を確かめる</h3>
-<p>Fabric SQLへの書き戻しを学び, 成功ログだけでなく保存された値も照合します。</p>
+<p>Fabric SQLへの書き戻しを学び, 成功ログと保存された値を照合します。</p>
 </td>
 <td>
 <img src="assets/brand/semantic_model_48_item.svg" width="32" height="32" alt="Fabric セマンティックモデルの公式アイコン">
@@ -163,6 +157,19 @@ flowchart TD
 
 両HTMLでは, ラボ本文で最初に出る財務会計用語に意味と出典を付けています。[参加者用HTMLの用語集](docs/workshop-presentation.html#glossary-s000)は記事内で開けます。注釈の表示 / 操作については[HTML操作ガイド](docs/PRESENTATION-GUIDE-JA.md)を参照してください。これらの定義は用語の説明であり, サンプルの計算が会計基準に適合することを示しません。
 
+## GitHub Copilotによる配備例
+
+| 段階 | 実行面 / モデル | AI作業時間の例 | 人の作業時間の例 | AI Credits相当の費用例 |
+|---|---|---:|---:|---:|
+| リポジトリ調査とdry-run | Copilot cloud agentでリポジトリ内を読み取り専用で調査 / GPT-6.1 Sol (Powerful) | 15〜30分 | 15〜30分 | $0.67〜$1.34 / 67〜134 |
+| 承認済みの個別作業 | Copilot CLIまたはVS Code Agent modeをローカル実行 / GPT-6.1 Terra (Versatile) | 20〜40分 | 30〜90分 | $0.67〜$1.34 / 67〜134 |
+| 権限 / 課金 / 安全性の確認 | ローカル実行 / GPT-6.1 Sol (Powerful) | 5〜10分 | 5〜10分 | $0.13〜$0.27 / 13〜27 |
+| 受入確認 | ローカルで結果を照合 / GPT-6.1 Sol (Powerful) | 15〜25分 | 15〜30分 | $0.67〜$1.34 / 67〜134 |
+
+上記は一人の担当者が空の専用Workspaceを使う場合の**計画用サンプル**です。時間とトークン量はサンプル前提で, 非同期のFabric処理待ちは別枠です。試算合計は **AI作業55〜105分 / 人の作業65〜160分 / $2.14〜$4.29（214〜429 AI Credits相当）**です。ローカルのテナント作業は本人がMicrosoft Entraでサインインし, 個々の変更を確認してから承認します。cloud agentにはリポジトリの読み取り専用dry-runだけを依頼し, テナント資格情報 / トークンを渡しません。
+
+単価とモデル区分は2026-11-04に確認したGitHub公式資料に基づきます。試算では各リクエストをDefault tier（入力272K tokens以下）とし, Auto / Fusionによる割引を含めません。利用可能なモデルと含まれる月間枠はプラン / 実行面 / 組織ポリシーで変わります。追加利用を抑える場合は [Bundled AI credits budgetを$0に設定し, 上限到達時に利用を停止](https://docs.github.com/en/billing/how-tos/set-up-budgets#managing-budgets-for-your-personal-account)します。2026-06-01以降のAI Credits従量課金には, 既存の年額Pro / Pro+で旧リクエスト課金を継続する例外があります。費用計算, トークン前提, モデル選定の理由は[配備ガイド](docs/DEPLOYMENT-GUIDE-JA.md#github-copilotを使う場合の試算例)を参照してください。CopilotのAI CreditsはFabric容量 / SQL / OneLakeの料金と別です。cloud agent / GitHub Actionsの計算資源費用もこの例に含みません。
+
 ## 配備とAIエージェント向けプロンプト
 
 このリポジトリは**手順 / 画像 / サンプルデータへのリンクを含む教材**です。Fabric Gitと同期するPlan定義, PBIX本体, データベース定義, 一括デプロイ用テンプレートは格納していません。`git clone`やGit統合だけでラボ全体がFabricに作成されるわけではありません。
@@ -215,7 +222,7 @@ flowchart TD
 
 架空の消費財企業 **Harborlight Provisions Co. / HPC** は, 北米, 欧州, アジア太平洋で事業を展開しています。FY25売上高は約**2,590万米ドル**。計画は40枚のExcelシートに分散し, 前回の見通しは取締役会に届くまでに11日かかりました。
 
-あなたはFP&Aシステム担当責任者です。既存のセマンティックモデルを使い, FY26の **売上高3,000万米ドル / 売上総利益1,250万米ドル** に向けた計画を組み立てます。目標の達成だけでなく, 入力の前提と保存結果を説明することがゴールです。
+あなたはFP&Aシステム担当責任者です。既存のセマンティックモデルを使い, FY26の **売上高3,000万米ドル / 売上総利益1,250万米ドル** に向けた計画を組み立てます。目標を達成し, 入力の前提と保存結果も説明することがゴールです。
 
 会社名, 年度, 金額は演習の設定です。自社の効果測定や費用削減の実績を示すものではありません。
 
@@ -279,7 +286,7 @@ F2という最小容量から, 同時操作の性能や料金を推定しませ�
 
 教材のライセンスは[MIT](LICENSE)です。原典の **Copyright (c) 2026 Diego Diaz** とライセンス通知を保持しています。
 
-Microsoft Fabricの製品ロゴとPlan / SQLデータベース / Warehouse / Data Agent / セマンティックモデル / レポートのアイコンは, Microsoft公式配布のファイルを無改変で使用しています。これらのブランド資産は教材のMITライセンスの対象ではなく, Microsoftの利用条件に従います。[出典 / 取得日 / 利用条件](assets/brand/README.md)
+Microsoft Fabricの製品ロゴとPlan / SQLデータベース / Warehouse / Data Agent / セマンティックモデル / レポートのアイコンは, Microsoft公式配布のファイルを無改変で使用しています。Microsoftのブランド資産には教材のMITライセンスと別に, Microsoftの利用条件が適用されます。[出典 / 取得日 / 利用条件](assets/brand/README.md)
 
 Microsoft Fabric and the Microsoft logo are trademarks of Microsoft Corporation. 本教材はMicrosoftと提携しておらず, Microsoftによる承認を受けた公式教材ではありません。
 

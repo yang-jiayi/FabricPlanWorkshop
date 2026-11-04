@@ -80,7 +80,7 @@ flowchart TB
 > [!NOTE]
 > 最新の公式資料では、SQLへの書き戻し後に **Add table to semantic model** を使って、書き戻したテーブルをセマンティックモデルに追加する手順も説明されています。これは本演習では実施しない追加操作です。使用する場合は、[公式手順](https://learn.microsoft.com/fabric/iq/plan/planning-writeback/planning-how-to-write-back-semantic-model)で対象モデル、リレーションシップ、権限、制約を確認してください。
 
-**PowerTableは別のPlan アイテムに作成します。** モジュール07は、計画数値ではなく参照データの管理を扱います。そのため、専用のPlan アイテムとSQLデータベースを使う独立した演習としています。
+**PowerTableは別のPlan アイテムに作成します。** モジュール07は参照データを管理する演習です。専用のPlan アイテムとSQLデータベースを使います。
 
 ## モジュール間の関係
 

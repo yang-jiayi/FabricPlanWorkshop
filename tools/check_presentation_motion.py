@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check finite shuffle/highlight motion and unmodified icons in local Edge."""
+"""Check entrance, ambient and highlight motion and unmodified icons in local Edge."""
 import argparse
 import json
 from pathlib import Path
@@ -8,6 +8,9 @@ from playwright.sync_api import sync_playwright
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Entrances and answers run on the document timeline and end; ambient loops never end; scroll-driven motion follows the page.
+TIMED = "a.timeline instanceof DocumentTimeline && a.effect.getTiming().iterations !== Infinity"
+DECORATION = '.title-edition, .primary-button span[aria-hidden], .hero-fabric, .product-grid > div'
 
 
 def run(output, html_path):
@@ -46,14 +49,22 @@ def run(output, html_path):
             page.locator('#language-select').select_option(locale)
             page.evaluate("locale=>location.hash=(locale==='en'?'en-':'')+'welcome'", locale)
             page.wait_for_timeout(80)
-            animations = page.evaluate("""() => document.getAnimations().map(a=>({
-                name:a.animationName,iterations:a.effect.getTiming().iterations,
-                duration:a.effect.getTiming().duration}))""")
+            animations = page.evaluate("""decoration => document.getAnimations().map(a => {
+                const target=a.effect.target, loop=a.effect.getTiming().iterations===Infinity;
+                const timed=a.timeline instanceof DocumentTimeline;
+                return {name:a.animationName, loop, timed,
+                    end:timed && !loop ? a.effect.getComputedTiming().endTime : null,
+                    image:!!target && target.tagName==='IMG',
+                    decoration:!!a.effect.pseudoElement || (!!target && target.matches(decoration))};
+            })""", DECORATION)
             check(locale + '_gradient_motion', any(a['name'] == 'gradient-arrival' for a in animations))
             check(locale + '_shuffle_motion', any(a['name'] == 'card-shuffle' for a in animations))
-            check(locale + '_finite_durations', all(a['iterations'] == 1 and a['duration'] <= 5000
-                                                    for a in animations))
-            page.evaluate("document.getAnimations().forEach(a=>{a.pause();a.currentTime=240;})")
+            check(locale + '_entrances_end_within_5s', all(a['end'] <= 5000 for a in animations
+                                                           if a['timed'] and not a['loop']))
+            loops = [a for a in animations if a['loop']]
+            check(locale + '_ambient_motion', any(a['name'] == 'ring-turn' for a in loops))
+            check(locale + '_loops_are_decoration', all(a['decoration'] and not a['image'] for a in loops))
+            page.evaluate(f"document.getAnimations().filter(a=>{TIMED}).forEach(a=>{{a.pause();a.currentTime=240;}})")
             check(locale + '_mid_shuffle_icons_unmodified', icons_unchanged())
             page.screenshot(path=str(output / f'{locale}-shuffle-frame.png'))
             page.emulate_media(media='print')
@@ -61,19 +72,19 @@ def run(output, html_path):
                 f'.slide[data-language="{locale}"] .product-grid > div').first.evaluate(
                 "(e)=>{const s=getComputedStyle(e);return s.opacity==='1' && s.transform==='none' && s.animationName==='none'}"))
             page.emulate_media(media='screen')
-            page.evaluate("document.getAnimations().forEach(a=>a.finish())")
-            check(locale + '_all_motion_finishes', page.evaluate(
-                "document.getAnimations().every(a=>a.playState==='finished')"))
+            page.evaluate(f"document.getAnimations().filter(a=>{TIMED}).forEach(a=>a.finish())")
+            check(locale + '_entrances_finish', page.evaluate(
+                f"document.getAnimations().filter(a=>{TIMED}).every(a=>a.playState==='finished')"))
             check(locale + '_settled_icons_unmodified', icons_unchanged())
             page.screenshot(path=str(output / f'{locale}-settled-home.png'))
             page.evaluate("locale=>location.hash=(locale==='en'?'en-':'')+'workshop-index'", locale)
             page.wait_for_timeout(80)
             check(locale + '_lab_card_shuffle', page.locator('.slide:visible .toc-card').first.evaluate(
                 "(e)=>getComputedStyle(e).animationName==='card-shuffle'"))
-            page.evaluate("document.getAnimations().forEach(a=>{a.pause();a.currentTime=200;})")
+            page.evaluate(f"document.getAnimations().filter(a=>{TIMED}).forEach(a=>{{a.pause();a.currentTime=200;}})")
             check(locale + '_mid_lab_icons_unmodified', icons_unchanged())
             page.screenshot(path=str(output / f'{locale}-lab-cards-frame.png'))
-            page.evaluate("document.getAnimations().forEach(a=>a.finish())")
+            page.evaluate(f"document.getAnimations().filter(a=>{TIMED}).forEach(a=>a.finish())")
             page.keyboard.press('Control+k')
             page.locator('#global-search-input').fill('Forecast Gross')
             page.wait_for_timeout(150)

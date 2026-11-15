@@ -278,14 +278,33 @@ class PresentationBuildTests(unittest.TestCase):
         self.assertNotIn('devicePixelRatio', script)
         self.assertNotIn('screen.width', script)
 
-    def test_motion_is_finite_reduced_and_preserves_icon_geometry(self):
+    def test_motion_is_bounded_reduced_and_preserves_icon_geometry(self):
         css = (presentation.ROOT / presentation.UI_ROOT / 'workshop.css').read_text(encoding='utf-8')
         self.assertIn('@keyframes card-shuffle', css)
         self.assertIn('@keyframes hit-pulse', css)
         self.assertIn('@keyframes gradient-arrival', css)
-        self.assertIn('@media (prefers-reduced-motion: reduce)', css)
+        self.assertIn('@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after '
+                      '{ animation: none !important; transition: none !important;', css)
         self.assertIn('@media print {\n  *, *::before, *::after { animation: none !important; transition: none !important; }', css)
-        self.assertNotIn('infinite', css)
+        # Comments and embedded art are set aside so that only selectors and declarations are read.
+        rules = re.sub(r'url\("[^"]*"\)', 'url()', re.sub(r'/\*.*?\*/', '', css, flags=re.S))
+        # Ambient loops belong to decoration: generated boxes and the hero's own parts, never an image or reading text.
+        decoration = re.compile(r'(?:::before|::after|\.title-edition|\.primary-button span\[aria-hidden\]'
+                                r'|\.hero-fabric|\.product-grid > div)$')
+        looping = [part.strip() for selector, _ in re.findall(r'([^{}]+)\{([^{}]*\binfinite\b[^{}]*)\}', rules)
+                   for part in selector.split(',')]
+        for selector in looping:
+            with self.subTest(selector=selector):
+                self.assertRegex(selector, decoration)
+                self.assertNotRegex(selector, r'\bimg\b')
+        # Everything else is an entrance or an answer to the reader and ends within 4.8 seconds.
+        for declaration in re.findall(r'animation:\s*([^;}]+)', rules):
+            for part in re.split(r',(?![^()]*\))', declaration):
+                if 'infinite' in part:
+                    continue
+                with self.subTest(animation=part.strip()):
+                    self.assertTrue(all(float(seconds) <= 4.8 for seconds in
+                                        re.findall(r'(?<![\w.-])(\d*\.?\d+)s\b', part)))
         self.assertNotRegex(css, r'\b(?:rotate|skew|scaleX|scaleY)\s*\(')
         self.assertNotRegex(css, r'(?:^|[;{])\s*filter\s*:')
 

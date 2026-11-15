@@ -41,7 +41,7 @@ Microsoft Learnの[FabricアイコンのTerms](https://learn.microsoft.com/en-us
 
 2026-11-03に上記の[Fabricアイコン利用条件](https://learn.microsoft.com/en-us/fabric/fundamentals/icons#terms), [Azureアイコン利用条件](https://learn.microsoft.com/en-us/azure/architecture/icons/#icon-terms), [Microsoft Trademark and Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks)を再確認しました。Fabric公式ページはtraining materials / slide decks / documentationでの利用を案内しています。
 
-[HTML操作ガイド](../../docs/workshop-presentation.html)では, 上表の公式ファイルをデータURIとして埋め込みます。2026-11-03追加分も同じv6.1.0アーカイブの原本とバイト単位で一致します。製品の説明に使い, 近くにFabric / 各アイテムの名前を添えます。アイコンの回転 / 反転 / 歪曲 / CSSフィルター / 再配色は行いません。Microsoft企業ロゴの利用はこの教材向けに別途許諾されたとは判断できないため収録せず, Fabric製品アイコンと通常のテキスト表記を使います。Azureアイコンも使用しません。
+[HTML操作ガイド](../../docs/workshop-presentation.html)では, 上表の公式SVGから表示サイズ別に作成したWebPをデータURIとして埋め込みます。正本SVGは同じv6.1.0アーカイブの原本とバイト単位で一致します。製品の説明に使い, 近くにFabric / 各アイテムの名前を添えます。アイコンの回転 / 反転 / 歪曲 / CSSフィルター / 再配色は行いません。Microsoft企業ロゴの利用はこの教材向けに別途許諾されたとは判断できないため収録せず, Fabric製品アイコンと通常のテキスト表記を使います。Azureアイコンも使用しません。
 
 HTMLの面 / 余白 / ナビゲーション / 緑系アクセントは独自のFluent風デザインで, Microsoftの公式デザインテンプレートや公式サイトの複製ではありません。Segoe UIは利用者のシステムにある場合のみ表示し, フォントファイルを配布しません。作者名Jiayi Yangは教材の制作クレジットであり, Microsoftとの関係を示しません。
 

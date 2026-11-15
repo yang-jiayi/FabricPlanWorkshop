@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 
 
 PACK = Path('assets/presentation/screenshots.zip')
+ICON_PACK = Path('assets/presentation/aurora-icons.zip')
 SETTINGS = {'format': 'WEBP', 'quality': 68, 'method': 6}
 
 
@@ -82,3 +83,27 @@ def data_uri(path):
     raw = (path.read_text(encoding='utf-8').encode('utf-8')
            if path.suffix.lower() == '.csv' else path.read_bytes())
     return f'data:{mime};base64,' + base64.b64encode(raw).decode('ascii')
+
+
+def read_icon_pack(root):
+    icons = {}
+    sources = set()
+    with zipfile.ZipFile(root / ICON_PACK) as archive:
+        manifest = json.loads(archive.read('manifest.json'))
+        for key, entry in manifest.items():
+            source = Path(entry['source'])
+            if source.parent != Path('assets/brand') or source.suffix != '.svg':
+                raise ValueError(f'Invalid icon source: {source}')
+            raw = (root / source).read_bytes()
+            if hashlib.sha256(raw).hexdigest() != entry['source_sha256']:
+                raise ValueError(f'Icon source changed: {source}')
+            payload = archive.read(entry['file'])
+            if hashlib.sha256(payload).hexdigest() != entry['payload_sha256']:
+                raise ValueError(f'Corrupt icon payload: {source}')
+            width = entry['width']
+            if key != f'{source.name}:{width}':
+                raise ValueError(f'Invalid icon entry: {key}')
+            svg = 'data:image/svg+xml;base64,' + base64.b64encode(raw).decode('ascii')
+            icons[(svg, width)] = 'data:image/webp;base64,' + base64.b64encode(payload).decode('ascii')
+            sources.add(source)
+    return icons, sources

@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
-from presentation_assets import data_uri, encode_pack, read_pack
+from presentation_assets import ICON_PACK, data_uri, encode_pack, read_icon_pack, read_pack
 from presentation_localization import load_translation, section_markdown, translate_shell
 
 
@@ -375,6 +375,7 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
                   + json.dumps(ui, ensure_ascii=False).replace('<', '\\u003c') + '</script>')
         return japanese.replace('<script>(() =>', extras + '<script>(() =>', 1)
     image_manifest, image_payloads = read_pack(root)
+    icon_payloads, icon_sources = read_icon_pack(root)
     terms = json.loads((root / UI_ROOT / 'index-terms.json').read_text(encoding='utf-8'))
     glossary_source = UI_ROOT / 'finance-glossary.json'
     glossary_entries = json.loads((root / glossary_source).read_text(encoding='utf-8'))['entries']
@@ -760,6 +761,7 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
     }
     assets = [
         UI_ROOT / 'shell.html', UI_ROOT / 'workshop.css', UI_ROOT / 'workshop.js',
+        UI_ROOT / 'aurora-motion.js', ICON_PACK, *icon_sources,
         UI_ROOT / 'index-terms.json', glossary_source,
         UI_ROOT / 'section-ids.json',
         Path('tools/build_presentation.py'), Path('requirements-docs.txt'),
@@ -771,10 +773,12 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
     for source in sorted([*sources, *assets], key=lambda path: path.as_posix()):
         digest.update(source.as_posix().encode('utf-8'))
         digest.update(b'\0')
-        digest.update((root / source).read_text(encoding='utf-8').encode('utf-8'))
+        digest.update((root / source).read_bytes() if source == ICON_PACK
+                      else (root / source).read_text(encoding='utf-8').encode('utf-8'))
     replacements = {
         'STYLES': (root / UI_ROOT / 'workshop.css').read_text(encoding='utf-8'),
         'SCRIPT': (root / UI_ROOT / 'workshop.js').read_text(encoding='utf-8'),
+        'MOTION': (root / UI_ROOT / 'aurora-motion.js').read_text(encoding='utf-8'),
         'SLIDES': '\n'.join(rendered_slides),
         'CHAPTERS': '\n'.join(chapter_buttons),
         'TOC': '\n'.join(toc_cards),
@@ -799,6 +803,17 @@ def build(root=ROOT, language='ja', _single=False, edition='participant'):
     )
     rendered = re.sub(r'href="\.\./([^"]+)"',
                       lambda match: f'href="{REPOSITORY}{match[1]}"', rendered)
+    def raster_icon(match):
+        tag = match[0]
+        source = re.search(r'src="(data:image/svg\+xml;base64,[^"]+)"', tag)
+        if not source:
+            return tag
+        width = re.search(r'\bwidth="(\d+)"', tag)
+        key = (source[1], int(width[1])) if width else None
+        if key not in icon_payloads:
+            raise ValueError(f'No raster icon for image width {width[1] if width else "missing"}')
+        return tag.replace(source[1], icon_payloads[key], 1)
+    rendered = re.sub(r'<img\b[^>]*>', raster_icon, rendered)
     if 'id="image-payloads"' not in rendered:
         rendered = rendered.replace('</body>', '<script type="application/json" id="image-payloads">'
                                     + replacements['IMAGE_PAYLOADS'] + '</script></body>')

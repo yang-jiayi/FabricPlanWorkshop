@@ -72,7 +72,7 @@ python -X utf8 tools/check_public_hygiene.py
 git diff --check
 ```
 
-生成元は`tools/build_presentation.py`, `assets/presentation/shell.html`, `workshop.css`, `workshop.js`, `index-terms.json`, `finance-glossary.json`です。索引は用語と別名の出現箇所をビルド時に計算します。財務用語データの定義 / 出典 / 日英両語が欠けている場合や, 記事に出現しない索引語がある場合はビルド / 回帰テストで検出します。
+生成元は`tools/build_presentation.py`, `assets/presentation/shell.html`, `workshop.css`, `workshop.js`, `aurora-motion.js`, `aurora-icons.zip`, `index-terms.json`, `finance-glossary.json`です。索引は用語と別名の出現箇所をビルド時に計算します。財務用語データの定義 / 出典 / 日英両語が欠けている場合や, 記事に出現しない索引語がある場合はビルド / 回帰テストで検出します。
 
 英語本文は`assets/presentation/locales/en/overview.json`と`lab00.json`〜`lab09.json`, 講師ガイドは`facilitator.json`, 操作部の対訳は`locales/ui-en.json`で管理します。各本文は正本の除外処理後のSHA-256と既存記事IDを持ちます。正本変更時は対応する英語本文と`source_sha256`も更新してください。全記事の翻訳, 画像の参照順序とコードブロック数を検査し, 未同期 / 欠落をビルドエラーにします。翻訳ファイルも生成元ハッシュと`--check`の対象です。確認リストの除外境界は両言語で共通です。
 
@@ -84,6 +84,8 @@ git diff --check
 python -m pip install -r requirements-presentation-dev.txt
 python -X utf8 tools/build_presentation.py --encode-images
 ```
+
+公式アイコンの表示サイズ別WebPは`aurora-icons.zip`に固定します。元のSVGとWebPのSHA-256をビルド時に照合します。元SVGを変更するときは, 対応するWebPとパック内のマニフェストも更新してください。
 
 `--check`は正本とUIから再生成したHTMLをコミット対象と比較します。ビルドにネットワークやFabric認証は使いません。外部画像はエラーになります。
 

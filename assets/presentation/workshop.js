@@ -802,3 +802,57 @@
   if (initialTarget && initialTarget !== initialSlide) navigate(initialId, false);
   document.documentElement.classList.add("js");
 })();
+
+(() => {
+  "use strict";
+  // Visual effects only. The guide works the same without this script.
+  const root = document.documentElement;
+  try {
+    root.dataset.edition = document.querySelector('.slide[data-lab="facilitator"]') ? "instructor" : "participant";
+  } catch { /* The edition accent is decorative. */ }
+
+  // A soft light follows the pointer over the hero, article banners and cards.
+  const surfaces = ".home-hero, .slide-heading, .toc-card, .home-facts > div, .article-navigation button";
+  let pointer = null;
+  let pointerFrame = 0;
+  document.addEventListener("pointermove", event => {
+    if (event.pointerType === "touch") return;
+    pointer = event;
+    if (pointerFrame) return;
+    pointerFrame = requestAnimationFrame(() => {
+      pointerFrame = 0;
+      const surface = pointer.target instanceof Element ? pointer.target.closest(surfaces) : null;
+      if (!surface) return;
+      const box = surface.getBoundingClientRect();
+      surface.style.setProperty("--mx", `${Math.round(pointer.clientX - box.left)}px`);
+      surface.style.setProperty("--my", `${Math.round(pointer.clientY - box.top)}px`);
+    });
+  }, {passive: true});
+
+  // The top bar gains depth once the page has been scrolled, and the line under it shows how far down the reader is.
+  let scrollFrame = 0;
+  const markScrolled = () => {
+    scrollFrame = 0;
+    root.classList.toggle("is-scrolled", window.scrollY > 12);
+    const range = root.scrollHeight - window.innerHeight;
+    root.style.setProperty("--read", range > 0 ? Math.min(1, window.scrollY / range).toFixed(4) : "0");
+  };
+  const queueScrolled = () => {
+    if (!scrollFrame) scrollFrame = requestAnimationFrame(markScrolled);
+  };
+  window.addEventListener("scroll", queueScrolled, {passive: true});
+  window.addEventListener("resize", queueScrolled, {passive: true});
+  window.addEventListener("hashchange", queueScrolled);
+  markScrolled();
+
+  // Phones show the pressed state of links and cards only when a touch listener exists.
+  document.addEventListener("touchstart", () => {}, {passive: true});
+
+  // Keep the sticky side navigation aligned with the top bar when the bar wraps onto two rows.
+  const bar = document.querySelector(".app-bar");
+  if (bar && "ResizeObserver" in window) {
+    new ResizeObserver(() => {
+      if (bar.offsetHeight) root.style.setProperty("--header", `${bar.offsetHeight}px`);
+    }).observe(bar);
+  }
+})();
